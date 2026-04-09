@@ -1,0 +1,33 @@
+{
+  "name": "sumaq-cms-vp",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck",
+    "prepare": "vp config"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.101",
+    "@iconify-json/simple-icons": "^1.2.77",
+    "@nuxt/image": "2.0.0",
+    "@nuxt/ui": "^4.6.1",
+    "@nuxthub/core": "0.10.7",
+    "@nuxtjs/i18n": "10.2.4",
+    "nuxt": "^4.4.2",
+    "nuxt-auth-utils": "0.5.29",
+    "tailwindcss": "^4.2.2"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.15.2",
+    "eslint": "^10.2.0",
+    "typescript": "^6.0.2",
+    "vite-plus": "catalog:",
+    "vue-tsc": "^3.2.6"
+  },
+  "packageManager": "pnpm@10.33.0"
+}
