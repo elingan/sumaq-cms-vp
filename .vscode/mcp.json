@@ -1,0 +1,23 @@
+{
+  "servers": {
+    "nuxt": {
+      "type": "http",
+      "url": "https://nuxt.com/mcp"
+    },
+    "nuxt-ui": {
+      "type": "http",
+      "url": "https://ui.nuxt.com/mcp"
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "neondatabase/mcp-server-neon": {
+      "type": "http",
+      "url": "https://mcp.neon.tech/sse",
+      "gallery": "https://api.mcp.github.com",
+      "version": "1.0.0"
+    }
+  },
+  "inputs": []
+}
