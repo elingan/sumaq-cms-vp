@@ -1,9 +1,14 @@
-import { defineConfig } from "vite-plus";
+import { defineConfig } from 'vite-plus'
 
 export default defineConfig({
   staged: {
-    "*": "vp check --fix",
+    '*': 'vp check --fix',
   },
-  fmt: {},
+  fmt: {
+    singleQuote: true,
+    semi: false,
+    commaDangle: 'none',
+    braceStyle: '1tbs',
+  },
   lint: { options: { typeAware: true, typeCheck: true } },
-});
+})
