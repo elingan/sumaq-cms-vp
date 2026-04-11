@@ -1,3 +1,7 @@
 {
-  "recommendations": ["VoidZero.vite-plus-extension-pack"]
+  "recommendations": [
+    "VoidZero.vite-plus-extension-pack",
+    "dbaeumer.vscode-eslint",
+    "oxc.oxc-vscode"
+  ]
 }

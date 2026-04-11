@@ -17,6 +17,24 @@
       "url": "https://mcp.neon.tech/sse",
       "gallery": "https://api.mcp.github.com",
       "version": "1.0.0"
+    },
+    "ESLint": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@eslint/mcp@latest"]
+    },
+    "io.github.vercel/next-devtools-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["next-devtools-mcp@0.3.6"],
+      "gallery": "https://api.mcp.github.com",
+      "version": "0.3.6"
+    },
+    "com.vercel/vercel-mcp": {
+      "type": "http",
+      "url": "https://mcp.vercel.com",
+      "gallery": "https://api.mcp.github.com",
+      "version": "0.0.3"
     }
   },
   "inputs": []
