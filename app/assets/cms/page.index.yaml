@@ -1,0 +1,93 @@
+meta:
+  name: metadata
+  label: Metadata
+  description: Page metadata configuration
+  fields:
+    - id: title
+      label: Title
+      type: string
+    - id: description
+      label: Description
+      type: string
+brand:
+  id: brand
+  label: Brand
+  description: Brand information
+  fields:
+    - id: name
+      label: Name
+      type: string
+    - id: logo
+      label: Logo
+      type: image
+    - id: link
+      label: Link
+      type: url
+navigation:
+  id: navigation
+  label: Navigation
+  description: Navigation menu configuration
+  fields:
+    - id: items
+      label: Menu Items
+      type: list
+      fields:
+        - id: label
+          label: Label
+          type: string
+        - id: link
+          label: Link
+          type: url
+welcome:
+  id: welcome
+  label: Welcome Section
+  description: Hero/welcome section
+  fields:
+    - id: title
+      label: Title
+      type: string
+    - id: description
+      label: Description
+      type: text
+about:
+  id: about
+  label: About Section
+  description: About section with rich content
+  fields:
+    - id: title
+      label: Title
+      type: string
+    - id: description
+      label: Description
+      type: string
+    - id: content
+      label: Rich Content
+      type: text
+    - id: features
+      label: Features
+      type: list
+      fields:
+        - id: title
+          label: Title
+          type: string
+        - id: description
+          label: Description
+          type: string
+footer:
+  id: footer
+  label: Footer
+  description: Footer configuration
+  fields:
+    - id: copy
+      label: Copyright Text
+      type: string
+    - id: legal
+      label: Legal Links
+      type: list
+      fields:
+        - id: label
+          label: Label
+          type: string
+        - id: link
+          label: Link
+          type: url

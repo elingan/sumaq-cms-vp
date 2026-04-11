@@ -714,7 +714,7 @@ footer:
 
    ```typescript
    // Crea usuario admin por defecto:
-   // email: admin@sumaq.io
+   // email: admin@sumaq.io / Admin123!
    // password: Admin123! (hashed con bcrypt)
    // role: admin
    // name: Admin

@@ -9,22 +9,33 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
-    "prepare": "vp config"
+    "prepare": "vp config",
+    "seed": "tsx server/db/seed.ts"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.4.4",
     "@iconify-json/lucide": "^1.2.101",
     "@iconify-json/simple-icons": "^1.2.77",
+    "@neondatabase/serverless": "^1.0.2",
     "@nuxt/image": "2.0.0",
     "@nuxt/ui": "^4.6.1",
     "@nuxthub/core": "0.10.7",
     "@nuxtjs/i18n": "10.2.4",
+    "bcryptjs": "^3.0.3",
+    "drizzle-orm": "^0.45.2",
     "nuxt": "^4.4.2",
     "nuxt-auth-utils": "0.5.29",
-    "tailwindcss": "^4.2.2"
+    "octokit": "^5.0.5",
+    "tailwindcss": "^4.2.2",
+    "yaml": "^2.8.3",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.15.2",
+    "@types/bcryptjs": "^3.0.0",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^10.2.0",
+    "tsx": "^4.21.0",
     "typescript": "^6.0.2",
     "vite-plus": "catalog:",
     "vue-tsc": "^3.2.6"

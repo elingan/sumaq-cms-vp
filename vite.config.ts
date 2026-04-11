@@ -7,7 +7,7 @@ export default defineConfig({
   fmt: {
     singleQuote: true,
     semi: false,
-    commaDangle: 'none',
+    commaDangle: 'always-multiline',
     braceStyle: '1tbs',
   },
   lint: { options: { typeAware: true, typeCheck: true } },

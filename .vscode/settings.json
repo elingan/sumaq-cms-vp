@@ -1,5 +1,5 @@
 {
-  "chat.agent.maxRequests": 100,
+  "chat.agent.maxRequests": 250,
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "[typescript]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
@@ -18,5 +18,8 @@
     "source.fixAll.eslint": "explicit"
   },
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact", "vue"],
-  "i18n-ally.localesPaths": ["locales"]
+  "i18n-ally.localesPaths": ["locales"],
+  "chat.tools.terminal.autoApprove": {
+    "pnpm": true
+  }
 }

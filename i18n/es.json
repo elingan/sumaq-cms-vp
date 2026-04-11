@@ -1,0 +1,111 @@
+{
+  "nav": {
+    "dashboard": "Panel",
+    "sites": "Sitios",
+    "pages": "Páginas",
+    "settings": "Ajustes",
+    "admin": "Admin",
+    "users": "Usuarios",
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión"
+  },
+  "auth": {
+    "email": "Correo electrónico",
+    "emailPlaceholder": "tú@ejemplo.com",
+    "password": "Contraseña",
+    "passwordPlaceholder": "••••••••",
+    "welcomeBack": "Bienvenido de vuelta",
+    "loginDescription": "Ingresa tus credenciales para acceder al CMS",
+    "login": "Iniciar sesión",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "termsPrefix": "Al iniciar sesión aceptas nuestros",
+    "termsLink": "Términos de Servicio",
+    "invalidEmail": "Correo electrónico no válido",
+    "passwordMin": "La contraseña debe tener al menos 8 caracteres",
+    "invalidCredentials": "Correo o contraseña incorrectos",
+    "loginError": "Ocurrió un error. Por favor inténtalo de nuevo."
+  },
+  "actions": {
+    "save": "Guardar",
+    "publish": "Publicar",
+    "create": "Crear",
+    "createSite": "Nuevo Sitio",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "archive": "Archivar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar"
+  },
+  "status": {
+    "draft": "Borrador",
+    "published": "Publicado",
+    "active": "Activo",
+    "archived": "Archivado"
+  },
+  "dashboard": {
+    "sitesSubtitle": "Todos tus sitios en un solo lugar",
+    "noSites": "Aún no hay sitios",
+    "noSitesDescription": "Crea tu primer sitio para comenzar."
+  },
+  "sites": {
+    "name": "Nombre del sitio",
+    "slug": "Slug",
+    "description": "Descripción",
+    "language": "Idioma",
+    "template": "Plantilla",
+    "githubRepoUrl": "URL del repositorio GitHub",
+    "githubBranch": "Rama de GitHub",
+    "siteUrl": "URL del sitio",
+    "domain": "Dominio",
+    "updated": "Actualizado",
+    "noDomain": "Sin dominio",
+    "information": "Información",
+    "noPages": "Aún no hay páginas",
+    "editSite": "Editar sitio",
+    "createSite": "Crear sitio"
+  },
+  "users": {
+    "createUser": "Nuevo Usuario",
+    "confirmDelete": "¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer."
+  },
+  "editor": {
+    "saveDraft": "Guardar borrador",
+    "publish": "Publicar",
+    "sections": "Secciones",
+    "addItem": "Agregar elemento",
+    "removeItem": "Eliminar",
+    "item": "Elemento {n}",
+    "untitled": "Página sin título",
+    "lastSaved": "Guardado a las {time}",
+    "noSchema": "No se encontró un esquema para este tipo de página.",
+    "selectOption": "Selecciona una opción"
+  },
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "slugFormat": "El slug solo puede contener letras minúsculas, números y guiones",
+    "url": "Debe ser una URL válida"
+  },
+  "errors": {
+    "saveFailed": "No se pudo guardar. Inténtalo de nuevo.",
+    "loadFailed": "No se pudo cargar el contenido. Por favor recarga la página."
+  },
+  "landing": {
+    "heroTitle": "El CMS que tus clientes adorarán",
+    "heroDescription": "Sumaq CMS te ofrece un potente sistema de gestión de contenidos respaldado por Git con un editor visual hermoso — sin necesidad de código.",
+    "getStarted": "Comenzar",
+    "featuresTitle": "Todo lo que necesitas",
+    "featuresDescription": "Diseñado para agencias y sus clientes, Sumaq CMS combina simplicidad con potencia.",
+    "feature1Title": "Contenido en Git",
+    "feature1Desc": "Todos los cambios se registran en tu repositorio GitHub, dándote historial completo.",
+    "feature2Title": "Edición visual",
+    "feature2Desc": "Los formularios basados en esquemas permiten editar contenido sin tocar código.",
+    "feature3Title": "Multi-sitio",
+    "feature3Desc": "Gestiona sitios ilimitados desde un panel central con acceso por roles.",
+    "feature4Title": "i18n integrado",
+    "feature4Desc": "Internacionalización incorporada para que el CMS hable el idioma de tus clientes.",
+    "feature5Title": "Despliegues rápidos",
+    "feature5Desc": "Integrado con Vercel para previsualizaciones instantáneas y despliegues en un clic.",
+    "feature6Title": "Código abierto",
+    "feature6Desc": "Aloja en tu propia infraestructura o usa nuestra oferta cloud administrada."
+  }
+}
