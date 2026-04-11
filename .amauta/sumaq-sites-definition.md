@@ -1,26 +1,18 @@
-# Sumaq Sites - Documento Consolidado del Proyecto
+# Sumaq Sites - Descripción del Proyecto
 
-**Versión:** 1.4
+**Versión:** 1.5
 **Última actualización:** Abril 2026
 **Autor:** MiniMax Agent
 **Última actualización de código:** Estados MVP marcados como pendientes + Nuevo proyecto vibe coding
 
 ---
 
-## ⚠️ ESTADO DEL PROYECTO
-
-> **NOTA IMPORTANTE:** Este documento consolida la especificación y análisis del proyecto Sumaq Sites.
->
-> **Todos los estados del MVP están marcados como "Pendiente de implementar" (⏳)**
->
-> **Próximo paso:** Se creará un nuevo proyecto utilizando **vibe coding** (generación de código asistida por IA) para implementar el CMS.
-
 **Sumaq Sites** es un Git-based Headless CMS diseñado específicamente para landing pages y portfolios, priorizando la simplicidad para usuarios no técnicos.
 
 - **Sumaq CMS** (panel de administración): Construido con **Nuxt.js** + **Nuxt UI**
-- **Sitios de clientes**: Construidos con **Astro** (un repositorio por cliente)
+- **Sitios de clientes**: Construidos con **Astro** (un repositorio de GitHub por cliente)
 
-El contenido se edita mediante una interfaz visual en el CMS y se guarda en **Neon PostgreSQL**, mientras que la estructura del contenido (esquemas YAML en `/cms/`) y los datos JSON (en `src/data/`) se almacenan en repositorios GitHub individuales de cada cliente, permitiendo deployment automático en **Vercel**.
+El contenido se edita mediante una interfaz visual en el CMS y se guarda en **Neon PostgreSQL**, mientras que la estructura del contenido (esquemas YAML en `/cms/`) y los datos JSON (en `src/data/`) se almacenan en repositorios GitHub individuales de cada website, permitiendo deployment automático en **Vercel**.
 
 ---
 
@@ -44,12 +36,12 @@ Sumaq Sites permite a usuarios sin conocimientos técnicos editar contenido de s
 
 | Componente           | Tecnología                | Notas                        |
 | -------------------- | ------------------------- | ---------------------------- |
-| **Frontend**         | Nuxt.js 4                 | Solo Nuxt, sin SvelteKit     |
+| **Frontend**         | Nuxt.js 4                 | Solo Nuxt                    |
 | **UI Framework**     | Nuxt UI 4                 | Componentes Tailwind         |
 | **Base de datos**    | Neon PostgreSQL           | Serverless, branching        |
 | **Desarrollo local** | PGlite                    | Sin necesidad de Neon en dev |
 | **ORM**              | Drizzle ORM               | Type-safe schemas            |
-| **Autenticación**    | Email/Password + Sessions | Sin Clerk                    |
+| **Autenticación**    | Email/Password + Sessions | Sin proveedores por ahora    |
 | **Git**              | GitHub API (Octokit)      | Repos por cliente            |
 | **Deploy**           | Vercel                    | Build automático             |
 | **Storage**          | Vercel Blob               | Imágenes y archivos          |
@@ -87,9 +79,9 @@ Sumaq Sites permite a usuarios sin conocimientos técnicos editar contenido de s
 
 ### 2.2 Flujo de Trabajo Core
 
-1. **Edición**: Usuario edita contenido → se guarda en Neon via Drizzle ORM
-2. **Publicación**: Botón "Publicar" → push automático y crea archivos en `cms/*.yaml` en repositorio del cliente
-3. **Deployment**: Vercel detecta el push → inicia construcción automática
+1. **Edición**: Usuario edita contenido desde el CMS → se guarda en Neon via Drizzle ORM
+2. **Publicación**: Botón "Publicar" → ls aplicación hace un push automático al repositorio asociado al sitio web de los archivos `cms/*.yaml` y `src/data/*.json`, si se han modificado
+3. **Deployment**: Vercel detecta el push → inicia construcción automática del sitio web (que es una aplicación de Astro)
 4. **Monitoreo**: CMS consulta estado del deployment en Vercel API
 
 ### 2.3 Estructura de Archivos CMS
@@ -101,7 +93,7 @@ El sistema utiliza una **separación clara entre esquemas y datos** que residen 
 │           ARQUITECTURA DE ARCHIVOS CMS                          │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  Repositorio del Cliente (GitHub)                               │
+│  Repositorio del Website (GitHub)                               │
 │  ┌───────────────────────────────────────────────────────────┐  │
 │  │                                                           │  │
 │  │  cms/                       src/data/                     │  │
@@ -134,11 +126,11 @@ El sistema utiliza una **separación clara entre esquemas y datos** que residen 
 
 #### ⚠️ Nota Importante sobre Rutas de Archivos
 
-> **Las carpetas `cms/` y `src/data/` son parte del repositorio del cliente, NO carpetas de acceso público HTTP.**
+> **Las carpetas `cms/` y `src/data/` son parte del repositorio del website y residen en el repositorio de GitHub, NO carpetas de acceso público HTTP.**
 >
 > - Se acceden **únicamente vía GitHub API**, no directamente por HTTP
 > - Se modifican **vía la aplicación CMS** o **manualmente por el desarrollador**
-> - El usuario puede clonar su repositorio para editarlas localmente
+> - El equipo de desarollo de Sumaq Sites puede clonar y editar manualmente el website
 
 #### Convenciones de Nomenclatura (CRÍTICAS)
 
@@ -149,11 +141,11 @@ El sistema utiliza una **separación clara entre esquemas y datos** que residen 
 
 **Regex de validación:** `/^(page|blog)\.(.+)\.yaml$/`
 
-#### Estructura en Repositorio de Cliente (Astro)
+#### Estructura en Repositorio de un website (Astro)
 
 ```
 mi-proyecto/
-├── cms/                          # Esquemas YAML (RAÍZ del proyecto)
+├── cms/                         # Esquemas YAML (RAÍZ del proyecto)
 │   ├── page.index.yaml          # Página principal (homepage)
 │   ├── page.about.yaml          # Página "Sobre nosotros"
 │   ├── page.contact.yaml        # Página de contacto
@@ -162,11 +154,11 @@ mi-proyecto/
 │   ├── blog.categories.yaml     # Categorías del blog
 │   └── ...
 ├── src/
-│   ├── data/                    # Datos JSON (dentro de src/)
+│   ├── data/                   # Datos JSON (dentro de src/)
 │   │   ├── index.json          # Contenido de homepage
 │   │   ├── about.json          # Contenido de "Sobre nosotros"
 │   │   ├── contact.json        # Contenido de contacto
-│   │   └── posts/             # Posts del blog
+│   │   └── posts/              # Posts del blog
 │   │       ├── mi-primer-post.json
 │   │       └── otro-post.json
 │   ├── pages/                   # Páginas Astro
@@ -338,7 +330,7 @@ El CMS implementa un sistema de **auto-descubrimiento de tipos de contenido**:
 
 ```typescript
 // GET /api/cms
-// Escanea public/cms/*.yaml → retorna lista de content types
+// Escanea cms/*.yaml → retorna lista de content types
 // Regex: /^(page|blog)\.(.+)\.yaml$/
 // Retorna: [{ type: 'page', name: 'index' }, { type: 'blog', name: 'posts' }]
 ```
@@ -691,27 +683,20 @@ case 'mytype':
 
 El CMS implementa una **arquitectura de API dual**:
 
-### 5.1 Legacy API
-
-**Endpoint:** `server/api/page.ts`
-
-- **GET /api/page**: Retorna `app/assets/data/page.json`
-- **PUT /api/page**: Escribe a `app/assets/data/page.json`
-- Usado por editor legacy (`app/pages/editor.vue`)
-
-### 5.2 Modern CMS API
+### 5.1 CMS API
 
 **Endpoint base:** `server/api/cms/`
 
-| Endpoint                      | Método       | Descripción                                            |
-| ----------------------------- | ------------ | ------------------------------------------------------ |
-| `/api/cms`                    | GET          | Descubre todos los content types (escanea cms/\*.yaml) |
-| `/api/cms/page/{name}`        | GET/PUT      | Cargar/actualizar página                               |
-| `/api/cms/blog/{name}`        | GET          | Listar todos los posts de blog                         |
-| `/api/cms/blog/{name}/{slug}` | GET/POST/PUT | CRUD de blog post                                      |
-| `/api/upload`                 | POST         | Upload de archivos (imágenes)                          |
+| Endpoint                      | Método       | Descripción                                                                                                |
+| ----------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
+| `/api/cms`                    | GET          | Descubre todos los content types (escanea cms/\*.yaml desde el repositorio, que es la fuente de la verdad) |
+| `/api/cms/page/{name}`        | GET          | Cargar la página con la versión en base de datos                                                           |
+| `/api/cms/page/{name}`        | PUT          | Actualizar la página en la base de datos                                                                   |
+| `/api/cms/blog/{name}`        | GET          | Listar todos los posts de blog                                                                             |
+| `/api/cms/blog/{name}/{slug}` | GET/POST/PUT | CRUD de blog post en base de datos                                                                         |
+| `/api/upload`                 | POST         | Upload de archivos al Storage de Vercel (las imágenes se deben optimizar antes de subirlas al repositorio) |
 
-### 5.3 Patrón de Manejo HTTP
+### 5.2 Patrón de Manejo HTTP
 
 ```typescript
 export default defineEventHandler(async (event) => {
@@ -728,7 +713,7 @@ export default defineEventHandler(async (event) => {
 })
 ```
 
-### 5.4 Códigos de Error HTTP
+### 5.3 Códigos de Error HTTP
 
 | Código  | Uso                                         |
 | ------- | ------------------------------------------- |
@@ -738,24 +723,10 @@ export default defineEventHandler(async (event) => {
 | **409** | Conflicto (ej: slug de blog post ya existe) |
 | **500** | Error del servidor, problemas de filesystem |
 
-### 5.5 Patrón de Persistencia de Datos
+### 5.4 Patrón de Persistencia de Datos
 
 ```typescript
-import fs from 'fs'
-import { join } from 'path'
-
-// Lectura
-const dataPath = join(process.cwd(), 'src/data', `${name}.json`)
-const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'))
-
-// Escritura
-const dirPath = join(process.cwd(), 'src/data', name)
-fs.mkdirSync(dirPath, { recursive: true }) // Crear directorio si no existe
-fs.writeFileSync(
-  join(dirPath, `${slug}.json`),
-  JSON.stringify(body, null, 2), // JSON pretty-print
-  'utf-8',
-)
+// Se debe guardar en la base datos y solo al publicar se deben generar los archivos y hacer push en el repositorio asociado
 ```
 
 ---
@@ -854,7 +825,7 @@ El workflow de publicación sincroniza base de datos con repositorio Git:
 6. CMS hace commit del archivo actualizado
 7. CMS hace push a GitHub
 8. GitHub webhook notifica a Vercel
-9. Vercel ejecuta build de Astro/Next.js
+9. Vercel ejecuta build de Astro
 10. Vercel hace deploy a edge
 11. CMS actualiza status de página a "published"
 12. CMS registra en activity_logs
@@ -871,11 +842,11 @@ El workflow de publicación sincroniza base de datos con repositorio Git:
 // Tablas principales
 
 users: {
-  id: serial primary key,
+  id: uuid primary key,
   email: text unique not null,
   password: text not null,           // bcrypt hashed
   name: text,
-  role: enum('admin', 'owner', 'editor'),
+  role: enum('admin', 'partner', 'owner', 'editor'),
   github_data: jsonb,                // { installationId, accountType }
   created_at: timestamp,
   updated_at: timestamp
@@ -883,9 +854,13 @@ users: {
 
 sites: {
   id: uuid primary key,
-  owner_id: integer references users(id),
-  name: text not null,
   slug: text unique,
+  name: text not null,
+  description: text,
+  language: text default 'en',
+  domain: text,
+  site_url: text,
+  screenshot_url: text,
   github_repo_url: text,
   github_branch: text default 'main',
   vercel_project_id: text,
@@ -896,10 +871,10 @@ sites: {
   updated_at: timestamp
 }
 
-site_members: {
+site_users: {
   site_id: uuid references sites(id),
-  user_id: integer references users(id),
-  role: enum('owner', 'editor'),
+  user_id: uuid references users(id),
+  role: enum('owner', 'editor', 'partner'),
   created_at: timestamp
 }
 
@@ -930,7 +905,7 @@ media: {
 
 activity_logs: {
   id: serial primary key,
-  user_id: integer references users(id),
+  user_id: uuid references users(id),
   site_id: uuid references sites(id),
   action: text not null,             // 'login', 'publish', 'create_page'
   details: jsonb,
@@ -940,7 +915,7 @@ activity_logs: {
 
 audit_logs: {
   id: serial primary key,
-  user_id: integer references users(id),
+  user_id: uuid references users(id),
   action: text not null,
   target_type: text,                 // 'user', 'site', 'page'
   target_id: uuid,
@@ -950,7 +925,7 @@ audit_logs: {
 
 password_resets: {
   id: serial primary key,
-  user_id: integer references users(id),
+  user_id: uuid references users(id),
   token: text unique not null,
   expires_at: timestamp not null,
   created_at: timestamp
@@ -963,7 +938,6 @@ password_resets: {
 -- Índices para queries frecuentes
 CREATE INDEX idx_pages_site_id ON pages(site_id);
 CREATE INDEX idx_pages_status ON pages(status);
-CREATE INDEX idx_sites_owner_id ON sites(owner_id);
 CREATE INDEX idx_activity_logs_site_id ON activity_logs(site_id);
 CREATE INDEX idx_activity_logs_user_id ON activity_logs(user_id);
 
@@ -973,7 +947,11 @@ CREATE INDEX idx_pages_content_json ON pages USING GIN (content_json);
 
 ---
 
+⚠️ Este punto 9 implemetará en una fase futura.
+
 ## 9. Templates de Sitio
+
+Permite crear un sitio desde el CMS, crea el repositorio en GitHub y define una plantilla
 
 ### 9.1 Template: Therapy
 
@@ -1042,11 +1020,11 @@ cms/
 
 El CMS implementa i18n con soporte para:
 
-| Código | Idioma  | Estado          |
-| ------ | ------- | --------------- |
-| `es`   | Español | ✅ Implementado |
-| `en`   | Inglés  | ✅ Implementado |
-| `de`   | Alemán  | ✅ Implementado |
+| Código | Idioma  | Estado      |
+| ------ | ------- | ----------- |
+| `es`   | Español | Implementar |
+| `en`   | Inglés  | Implementar |
+| `de`   | Alemán  | Implementar |
 
 ### 10.2 Configuración
 
@@ -1114,20 +1092,42 @@ El sistema utiliza componentes de Nuxt UI para mantener coherencia:
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Navbar (logo, búsqueda, usuario, notificaciones)            │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│                Main Content Area                            │
+│                                                             │
+│          ┌────────────────────────────────────────┐         │
+│          │         Website list + Actions         │         │
+│          ├────────────────────────────────────────┤         │
+│          │                                        │         │
+│          │            Screenshot                  │         │
+│          │                                        │         │
+│          └────────────────────────────────────────┘         │
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│ Footer (minimal, links legales)                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 11.3 Layout Editor
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Navbar (Site selector, búsqueda, actions, notificaciones)   │
 ├────────────┬────────────────────────────────────────────────┤
 │            │                                                │
 │  Sidebar   │              Main Content Area                 │
 │            │                                                │
-│  - Sites   │  ┌────────────────────────────────────────┐   │
-│  - Pages   │  │         Page Header + Actions         │   │
-│  - Media   │  ├────────────────────────────────────────┤   │
-│  - Settings│  │                                        │   │
-│            │  │              Content                  │   │
-│            │  │                                        │   │
-│            │  └────────────────────────────────────────┘   │
+│ - Pages    │  ┌────────────────────────────────────────┐    │
+│ - Media    │  │         Page Header + Actions          │    │
+│ - Settings │  ├────────────────────────────────────────┤    │
+│ - Admin    │  │                                        │    │
+│            │  │              Content                   │    │
+│            │  │                                        │    │
+│            │  └────────────────────────────────────────┘    │
 │            │                                                │
 ├────────────┴────────────────────────────────────────────────┤
-│ Footer (minimal, links legales)                            │
+│ Footer (usuario, minimal, links legales)                    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -1137,37 +1137,37 @@ El sistema utiliza componentes de Nuxt UI para mantener coherencia:
 
 ### 12.1 Funcionalidades Prioritarias (P0)
 
-> **NOTA:** Todos los estados están marcados como **⏳ Pendiente de implementar** ya que el proyecto se reiniciará con vibe coding.
+> **NOTA:** Todos los estados están marcados como **⏳ Pendiente de implementar** ya que el proyecto se creará con vibe coding.
 
-| #   | Funcionalidad                | Descripción                                   | Estado |
-| --- | ---------------------------- | --------------------------------------------- | ------ |
-| 1   | Estructura base del proyecto | Nuxt 4 + Nuxt UI + Drizzle configurados       | ⏳     |
-| 2   | Schema de base de datos      | Tablas para users, sites, pages, media        | ⏳     |
-| 3   | Sistema de autenticación     | Login/logout con roles (Admin/Owner/Editor)   | ⏳     |
-| 4   | Dashboard principal          | Lista de sitios según rol de usuario          | ⏳     |
-| 5   | Gestión de sitios            | CRUD de sitios (crear, listar, ver, archivar) | ⏳     |
-| 6   | Editor visual de contenido   | Form Renderer dinámico con tipos básicos      | ⏳     |
-| 7   | Layout y navegación          | Sidebar, navbar, responsive                   | ⏳     |
-| 8   | Multiidioma                  | Soporte ES/EN/DE con @nuxtjs/i18n             | ⏳     |
-| 9   | GitHub OAuth                 | Conexión con repositorios del cliente         | ⏳     |
-| 10  | GitHub integration básica    | Leer/escribir archivos cms/\*.yaml            | ⏳     |
-| 11  | Vercel API integration       | Consultar estado de deployments               | ⏳     |
-| 12  | Preview avanzado             | iframe mostrando preview del sitio            | ⏳     |
+| #   | Funcionalidad                | Descripción                                         | Estado |
+| --- | ---------------------------- | --------------------------------------------------- | ------ |
+| 1   | Estructura base del proyecto | Nuxt 4 + Nuxt UI + Drizzle configurados             | ⏳     |
+| 2   | Schema de base de datos      | Tablas para users, sites, pages, media, etc         | ⏳     |
+| 3   | Sistema de autenticación     | Login/logout con roles (Admin/Owner/Editor/Partner) | ⏳     |
+| 4   | Dashboard principal          | Lista de sitios según rol de usuario                | ⏳     |
+| 5   | Gestión de sitios            | CRUD de sitios (crear, listar, ver, archivar)       | ⏳     |
+| 6   | Editor visual de contenido   | Form Renderer dinámico con tipos básicos            | ⏳     |
+| 7   | Layout y navegación          | Sidebar, navbar, responsive                         | ⏳     |
+| 8   | Multiidioma                  | Soporte ES/EN/DE con @nuxtjs/i18n                   | ⏳     |
 
-### 12.2 Funcionalidades Pendientes
+### 12.2 Funcionalidades Adicionales
 
-| #   | Funcionalidad                  | Prioridad | Estimación |
-| --- | ------------------------------ | --------- | ---------- |
-| 13  | Publish system completo        | P1        | 1 semana   |
-| 14  | Media Manager (upload/galería) | P1        | 3-4 días   |
-| 15  | Analytics dashboard            | P2        | 2-3 días   |
-| 16  | Conflict detection (Git sync)  | P2        | 2-3 días   |
-| 17  | Activity logs UI               | P2        | 1-2 días   |
-| 18  | Onboarding flow                | P3        | 2-3 días   |
+| #   | Funcionalidad                  | Estado                                |
+| --- | ------------------------------ | ------------------------------------- | --- |
+| 9   | GitHub OAuth                   | Conexión con repositorios del cliente | ⏳  |
+| 10  | GitHub integration básica      | Leer/escribir archivos cms/\*.yaml    | ⏳  |
+| 11  | Vercel API integration         | Consultar estado de deployments       | ⏳  |
+| 12  | Preview avanzado               | iframe mostrando preview del sitio    | ⏳  |
+| 13  | Publish system completo        | ⏳                                    |
+| 14  | Media Manager (upload/galería) | ⏳                                    |
+| 15  | Analytics dashboard            | ⏳                                    |
+| 16  | Conflict detection (Git sync)  | ⏳                                    |
+| 17  | Activity logs UI               | ⏳                                    |
+| 18  | Onboarding flow                | ⏳                                    |
 
 ### 12.3 Próximo Paso: Vibe Coding
 
-> **El proyecto será recreado utilizando vibe coding** - un enfoque de desarrollo asistido por IA donde las especificaciones y documentación servirán como base para generar código de manera automatizada.
+> **El proyecto será creará utilizando vibe coding** - un enfoque de desarrollo asistido por IA donde las especificaciones y documentación servirán como base para generar código de manera automatizada.
 
 ---
 
@@ -1367,7 +1367,7 @@ sumaq-sites/
 │   │       └── blob.get.ts
 │   ├── db/
 │   │   ├── schema.ts
-│   │   ├── index.ts
+│   │   ├── client.ts
 │   │   └── migrations/
 │   └── utils/
 │       ├── password.ts
@@ -1380,7 +1380,7 @@ sumaq-sites/
 │       ├── page.ts
 │       └── schema.ts
 ├── docs/
-│   └── Sumaq_Sites_Documento_Consolidado.md
+│   └── sumaq-sites-definition.md
 ├── .env.example
 ├── nuxt.config.ts
 ├── drizzle.config.ts
@@ -1492,45 +1492,45 @@ BLOB_READ_WRITE_TOKEN=<vercel-blob-token>
 
 ## 17. Casos de Uso Detallados
 
-### 17.1 Caso: Terapeuta Crea Sitio
+### 17.1 Caso: Developer Crea Sitio
 
-**Actor:** María, terapeuta sin conocimientos técnicos
-
-**Flujo:**
-
-1. María accede a `sumaq-sites.com` y hace clic en "Registrarse"
-2. Completa formulario con email, contraseña, nombre
-3. Sistema crea usuario con rol "Owner"
-4. Dashboard muestra "Crea tu primer sitio"
-5. María hace clic en "Nuevo sitio"
-6. Modal: nombre "María García Terapia", template "Therapy"
-7. Sistema crea registro en DB, muestra sitio en dashboard
-8. María ve secciones: Homepage, About, Services, Contact
-9. María hace clic en "Services"
-10. Editor muestra formulario con campos: nombre, descripción, precio
-11. María edita, auto-save cada 3s guarda en DB
-12. María hace clic en "Publicar"
-13. Sistema genera `cms/page.services.yaml` y lo push a GitHub
-14. Vercel detecta cambios, hace build, deploya
-15. María recibe notificación: "¡Publicado!"
-
-### 17.2 Caso: Editor Modifica Blog Post
-
-**Actor:** Juan, editor asignado a sitio de María
+**Actor:** Eduardo, developer de Sumaq Sites con amplios conocimientos técnicos
 
 **Flujo:**
 
-1. Juan recibe email de María con enlace de acceso
+1. Eduardo accede a `sumaq-sites.com` y accede como admin"
+2. Dashboard muestra "Crea tu primer sitio"
+3. Eduardo hace clic en "Nuevo sitio"
+4. Modal: con la lista de repositorios de Sumaq Sites que tienen el prefijo _www-_
+5. Selecciona uno y el sistema crea registro en DB, muestra sitio en dashboard
+6. Eduardo selecciona el sitio web y carga la pagina con en layout del sitio web
+7. Se ven las opciones dentro de Pages como un submenu: Homepage, About, Services, Contact
+8. Eduardo confirma que el sitio esta funcionado
+9. Eduardo regresa al dashboard y selecciona la opción admin del menu de su perfil
+10. Va a la opcion de usuarios para crear uno nuevo
+11. Completa formulario con email, nombre, rol y lo asocia a un sitio web
+12. El usuario recibe un email con las indicaciones para iniciar sesion
+
+### 17.2 Caso: Owner Modifica Sitio Web
+
+**Actor:** Juan, terapeuta sin conocimientos técnicos
+
+**Flujo:**
+
+1. Juan recibe email de Sumaq Sites con enlace de acceso
 2. Juan hace login con sus credenciales
-3. Dashboard muestra sitio de María (no ve otros sitios)
-4. Juan navega a Pages → Blog
-5. Editor muestra campos: título, contenido rich text, tags
-6. Juan escribe post sobre "Técnicas de mindfulness"
-7. Usa toolbar de TipTap para formato enriquecido
-8. Guarda como draft (status: draft)
-9. María recibe notificación de nuevo draft
-10. María revisa, hace clic en "Publicar"
-11. Sistema actualiza blog en repositorio
+3. Dashboard muestra sitio que le pertenece (no ve otros sitios)
+4. Selecciona su sitio y carga el editor con el layout
+5. Se ven las opciones dentro de Pages como un submenu: Homepage, About, Services, Contact
+6. Juan hace clic en "Services"
+7. Editor muestra formulario con campos: nombre, descripción, precio, contenido rich text, tags, etc
+8. Juan edita, auto-save cada 3s guarda en DB
+9. Guarda como draft (status: draft)
+10. Juan revisa, hace clic en "Publicar"
+11. Sistema genera `cms/page.services.yaml` y lo pushea a GitHub
+12. Sistema actualiza la información del repositorio
+13. Vercel detecta cambios, hace build, deploya
+14. Juan recibe notificación: "¡Publicado!"
 
 ---
 
@@ -1594,51 +1594,19 @@ BLOB_READ_WRITE_TOKEN=<vercel-blob-token>
 
 ## 21. Próximos Pasos
 
-### 21.1 Inmediatos (Esta semana)
-
 1. **Completar GitHub integration** para leer/escribir archivos `cms/*.yaml`
 2. **Integrar Vercel API** para monitorear deployments
 3. **Implementar preview iframe** del sitio en editor
-
-### 21.2 Corto Plazo (2-4 semanas)
-
 4. **Publish system completo** - DB → Git → Deploy
 5. **Media Manager** - Upload drag & drop, galería
 6. **Analytics dashboard** - Stats básicas desde Vercel API
-
-### 21.3 Mediano Plazo (1-2 meses)
-
 7. **Conflict detection** - UI para resolver conflictos Git
 8. **Activity logs UI** - Dashboard de actividad
 9. **Onboarding flow** - Wizard guiado para nuevos usuarios
 
 ---
 
-## 22. Resumen de Funcionalidades
-
-> **NOTA:** Todos los estados están marcados como **⏳ Pendiente de implementar** ya que el proyecto se reiniciará con vibe coding.
-
-| #   | Funcionalidad                        | Prioridad | Estado |
-| --- | ------------------------------------ | --------- | ------ |
-| 1   | Nuxt 4 + Nuxt UI base                | P0        | ⏳     |
-| 2   | Drizzle schema (users, sites, pages) | P0        | ⏳     |
-| 3   | Auth con roles (Admin/Owner/Editor)  | P0        | ⏳     |
-| 4   | Dashboard con sitios por rol         | P0        | ⏳     |
-| 5   | Form Renderer dinámico               | P0        | ⏳     |
-| 6   | GitHub OAuth flow                    | P1        | ⏳     |
-| 7   | i18n (ES/EN/DE)                      | P1        | ⏳     |
-| 8   | Auto-save en editor                  | P0        | ⏳     |
-| 9   | GitHub file read/write (cms/\*.yaml) | P1        | ⏳     |
-| 10  | Vercel deployment monitoring         | P1        | ⏳     |
-| 11  | Preview iframe                       | P2        | ⏳     |
-| 12  | Media Manager                        | P1        | ⏳     |
-| 13  | Analytics dashboard                  | P2        | ⏳     |
-| 14  | Publish system (DB→Git→Deploy)       | P1        | ⏳     |
-| 15  | Conflict detection                   | P2        | ⏳     |
-
----
-
-## 23. Anexo: Glosario
+## 22. Anexo: Glosario
 
 | Término           | Definición                                                          |
 | ----------------- | ------------------------------------------------------------------- |
@@ -1651,69 +1619,6 @@ BLOB_READ_WRITE_TOKEN=<vercel-blob-token>
 | **Owner**         | Rol con acceso completo a sus propios sitios                        |
 | **Editor**        | Rol con acceso de edición a sitios asignados                        |
 | **Admin**         | Rol administrativo con acceso total al sistema                      |
-
----
-
-## Registro de Cambios
-
-### v1.4 (Abril 2026) - Estados MVP marcados como pendientes + Vibe Coding
-
-**Cambios principales:**
-
-1. **Estados del MVP:** Todos los estados ✅ y 🔄 cambiados a ⏳ (pendiente de implementar)
-2. **Nueva nota de estado:** Sección al inicio del documento indicando que el proyecto se reiniciará
-3. **Ejemplos reales añadidos:** Sección 4.8 ahora incluye los ejemplos reales de `page.example.yaml` y `page.example.json`
-4. **Próximo paso documentado:** Nueva subsección 12.3 indicando el uso de vibe coding
-
-**Archivos de ejemplo añadidos:**
-
-- `page.example.yaml` → Estructura YAML completa con secciones: meta, brand, navigation, welcome, about, profile, footer
-- `page.example.json` → JSON resultante con datos de ejemplo
-
-**Motivación:**
-El proyecto será recreado utilizando vibe coding, un enfoque de desarrollo asistido por IA. Este documento sirve como especificación de referencia.
-
----
-
-### v1.3 (Abril 2026) - Corrección de rutas y estructura Astro
-
-**Cambios:**
-
-- Corrección de `public/cms` y `public/data` → ahora `/cms/` y `src/data/`
-- Actualización de estructura de repositorio de cliente (Astro)
-- Diferenciación clara entre Sumaq CMS (Nuxt) y Sitios de Clientes (Astro)
-- Nueva tabla de Arquitectura Dual
-
----
-
-### v1.2 (Abril 2026) - Actualización desde archivos de código
-
-**Nuevas secciones añadidas:**
-
-1. **Sección 5: Arquitectura de API Dual** - Detalle completo de Legacy API vs Modern CMS API
-2. **Sección 13: Convenciones de Código** - Estilo, naming, patrones de API, testing
-
-**Actualizaciones significativas:**
-
-| Sección     | Cambio                                                                         |
-| ----------- | ------------------------------------------------------------------------------ |
-| **2.3**     | Arquitectura de archivos: `public/cms/` (active) vs `app/assets/cms/` (backup) |
-| **3.1**     | Añadido rol "Partner" como 4to rol del sistema                                 |
-| **4.2**     | Pipeline Schema-to-Form detallado con diagrama                                 |
-| **4.3**     | Sistema de auto-descubrimiento con regex de validación                         |
-| **4.4**     | Preview en tiempo real con PreviewPanel.vue                                    |
-| **4.5**     | Tabla de tipos de campos con mapeo Zod                                         |
-| **4.6**     | Error reporting detallado con mapeo de rutas                                   |
-| **4.10**    | Guía para agregar nuevos tipos de campo                                        |
-| **5.1-5.5** | Nueva sección API Dual con patrones de código                                  |
-| **13**      | Nueva sección de convenciones de código                                        |
-| **14**      | Estructura actualizada con componentes del editor                              |
-| **16**      | Endpoints de API modernos del CMS documentados                                 |
-
-**Fuente de información:**
-
-- `instructions-cms.md` - Guías para agentes del CMS (Nuxt 4, autenticación, roles)
-- `instructions-editor.md` - Instrucciones del editor (formularios dinámicos, TipTap, preview)
 
 ---
 
