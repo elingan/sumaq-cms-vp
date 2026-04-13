@@ -11,7 +11,7 @@
   },
   "auth": {
     "email": "Email",
-    "emailPlaceholder": "you@example.com",
+    "emailPlaceholder": "you{'@'}example.com",
     "password": "Password",
     "passwordPlaceholder": "••••••••",
     "welcomeBack": "Welcome back",

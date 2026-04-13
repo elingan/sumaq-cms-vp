@@ -11,7 +11,7 @@
   },
   "auth": {
     "email": "Correo electrónico",
-    "emailPlaceholder": "tú@ejemplo.com",
+    "emailPlaceholder": "tú{'@'}ejemplo.com",
     "password": "Contraseña",
     "passwordPlaceholder": "••••••••",
     "welcomeBack": "Bienvenido de vuelta",

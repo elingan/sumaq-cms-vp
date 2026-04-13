@@ -4,10 +4,13 @@
  */
 import { drizzle } from 'drizzle-orm/pglite'
 import { PGlite } from '@electric-sql/pglite'
+import { mkdirSync } from 'node:fs'
 import { hashSync } from 'bcryptjs'
 import { users, sites, siteUsers, pages } from './schema'
 
-const client = new PGlite('./.data/pglite')
+const dataDir = process.env.PGLITE_DATA_DIR || `${process.cwd()}/.data/pglite`
+mkdirSync(dataDir, { recursive: true })
+const client = new PGlite(dataDir)
 const db = drizzle(client)
 
 /** Create enums and tables if they don't exist yet (schema push). */
@@ -111,6 +114,7 @@ async function seed() {
 
   if (!admin) {
     console.log('Admin user already exists — skipping.')
+    await client.close()
     process.exit(0)
   }
 
@@ -130,6 +134,7 @@ async function seed() {
 
   if (!site) {
     console.log('Demo site already exists — skipping.')
+    await client.close()
     process.exit(0)
   }
 
@@ -162,9 +167,12 @@ async function seed() {
   console.log('    Email:    admin@sumaq.io')
   console.log('    Password: Admin123!')
   console.log('')
+
+  await client.close()
 }
 
-seed().catch((e) => {
+seed().catch(async (e) => {
   console.error('Seed failed:', e)
+  await client.close()
   process.exit(1)
 })

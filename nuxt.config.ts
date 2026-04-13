@@ -1,13 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: [
-    '@nuxt/eslint',
-    '@nuxt/ui',
-    '@nuxthub/core',
-    '@nuxtjs/i18n',
-    'nuxt-auth-utils',
-    '@nuxt/image',
-  ],
+  modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxtjs/i18n', 'nuxt-auth-utils', '@nuxt/image'],
 
   devtools: {
     enabled: true,
@@ -23,8 +16,20 @@ export default defineNuxtConfig({
 
   nitro: {
     externals: {
-      // PGlite includes WASM – must NOT be bundled by Rollup/Nitro
-      inline: ['@electric-sql/pglite'],
+      // PGlite must NOT be inlined — it resolves pglite.data relative to its own dist/
+      external: ['@electric-sql/pglite'],
+    },
+    serverAssets: [
+      {
+        baseName: 'pglite',
+        dir: './node_modules/@electric-sql/pglite/dist',
+      },
+    ],
+  },
+
+  vite: {
+    optimizeDeps: {
+      include: ['zod'],
     },
   },
 
@@ -41,19 +46,23 @@ export default defineNuxtConfig({
 
   i18n: {
     strategy: 'no_prefix',
+    langDir: 'locales',
     defaultLocale: 'en',
     locales: [
       { code: 'en', name: 'English', file: 'en.json' },
       { code: 'es', name: 'Español', file: 'es.json' },
       { code: 'de', name: 'Deutsch', file: 'de.json' },
     ],
-    langDir: './app/i18n',
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: 'i18n_redirected',
-      redirectOn: 'root',
-      alwaysRedirect: false,
-      fallbackLocale: 'en',
+    // detectBrowserLanguage: {
+    //   useCookie: true,
+    //   cookieKey: 'i18n_redirected',
+    //   redirectOn: 'root',
+    //   alwaysRedirect: false,
+    //   fallbackLocale: 'en',
+    // },
+    compilation: {
+      escapeHtml: false,
+      strictMessage: false,
     },
   },
 })

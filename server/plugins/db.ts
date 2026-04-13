@@ -5,7 +5,8 @@ export default defineNitroPlugin(async () => {
   if (!process.env.DATABASE_URL) {
     try {
       const { PGlite } = await import('@electric-sql/pglite')
-      const client = new PGlite('./.data/pglite')
+      const dataDir = process.env.PGLITE_DATA_DIR || `${process.cwd()}/.data/pglite`
+      const client = new PGlite(dataDir)
 
       await client.exec(`
         DO $$ BEGIN

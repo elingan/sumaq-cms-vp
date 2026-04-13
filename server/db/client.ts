@@ -1,10 +1,11 @@
+import { PGlite } from '@electric-sql/pglite'
+import { drizzle as drizzlePglite } from 'drizzle-orm/pglite'
 import type { DrizzleConfig } from 'drizzle-orm'
 import * as schema from './schema'
 
 // Shared Drizzle config for both PGlite and Neon
 const config: DrizzleConfig<typeof schema> = { schema }
 
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 let _db: ReturnType<typeof createPgliteDb> | null = null
 
 function createNeonDb() {
@@ -15,10 +16,9 @@ function createNeonDb() {
 }
 
 function createPgliteDb() {
-  const { PGlite } = require('@electric-sql/pglite')
-  const { drizzle } = require('drizzle-orm/pglite')
-  const client = new PGlite('./.data/pglite')
-  return drizzle(client, config)
+  const pgliteDataDir = process.env.PGLITE_DATA_DIR || `${process.cwd()}/.data/pglite`
+  const client = new PGlite(pgliteDataDir)
+  return drizzlePglite(client, config)
 }
 
 export function getDb() {
