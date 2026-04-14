@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
     "prepare": "vp config",
-    "seed": "tsx server/db/seed.ts"
+    "seed": "tsx server/db/seed.ts",
+    "cleanup": "nuxt cleanup",
+    "nuxt": "nuxt"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.4.4",

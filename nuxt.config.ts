@@ -1,6 +1,13 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxtjs/i18n', 'nuxt-auth-utils', '@nuxt/image'],
+  modules: [
+    '@nuxt/eslint',
+    '@nuxt/ui',
+    '@nuxtjs/i18n',
+    'nuxt-auth-utils',
+    '@nuxt/image',
+    '@nuxthub/core',
+  ],
 
   devtools: {
     enabled: true,
@@ -14,17 +21,10 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2025-01-15',
 
-  nitro: {
-    externals: {
-      // PGlite must NOT be inlined — it resolves pglite.data relative to its own dist/
-      external: ['@electric-sql/pglite'],
+  hub: {
+    db: {
+      dialect: 'postgresql',
     },
-    serverAssets: [
-      {
-        baseName: 'pglite',
-        dir: './node_modules/@electric-sql/pglite/dist',
-      },
-    ],
   },
 
   vite: {

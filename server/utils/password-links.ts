@@ -1,6 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto'
 import { and, desc, eq, gt, isNull } from 'drizzle-orm'
-import type { Database } from '../db/client'
 import { passwordResets } from '../db/schema'
 
 export type PasswordLinkPurpose = 'invite' | 'reset'
@@ -10,7 +9,11 @@ const PASSWORD_LINK_TTL_MS: Record<PasswordLinkPurpose, number> = {
   reset: 1000 * 60 * 60,
 }
 
-type PasswordLinkDb = Pick<Database, 'delete' | 'insert' | 'select'>
+type PasswordLinkDb = {
+  delete: any
+  insert: any
+  select: any
+}
 
 interface PasswordLinkOptions {
   event?: unknown
@@ -110,7 +113,9 @@ export async function issuePasswordLink({
     purpose,
     expiresAt,
   })
-
+  console.log(
+    `Issued ${purpose} password link for user ${userId}, expires at ${expiresAt.toISOString()}`,
+  )
   return {
     token,
     expiresAt,

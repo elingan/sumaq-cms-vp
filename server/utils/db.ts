@@ -1,5 +1,5 @@
-import { getDb } from '../db/client'
+import { db } from 'hub:db'
 
 export function useDrizzle() {
-  return getDb()
+  return db
 }
