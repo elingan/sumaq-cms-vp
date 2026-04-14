@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
-import { users } from '~~/server/db/schema'
+import { users } from '#server/db/schema'
+import { createAuditLog } from '#server/utils/audit'
 
 const PatchUserSchema = z.object({
   name: z.string().optional(),
@@ -39,7 +40,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (result.data.password) {
-    updates.password = await hashUserPassword(result.data.password)
+    updates.password = await hashPassword(result.data.password)
   }
 
   const [updated] = await db

@@ -1,12 +1,13 @@
 /**
- * Seed script: populates the database with initial demo data.
- * Run with: pnpm tsx server/db/seed.ts
+ * Seed script: creates the admin account and emits a secure password link.
+ * Run with: vp run seed
  */
 import { drizzle } from 'drizzle-orm/pglite'
+import { eq } from 'drizzle-orm'
 import { PGlite } from '@electric-sql/pglite'
 import { mkdirSync } from 'node:fs'
-import { hashSync } from 'bcryptjs'
-import { users, sites, siteUsers, pages } from './schema'
+import { users } from './schema'
+import { issuePasswordLink } from '../utils/password-links'
 
 const dataDir = process.env.PGLITE_DATA_DIR || `${process.cwd()}/.data/pglite`
 mkdirSync(dataDir, { recursive: true })
@@ -32,54 +33,17 @@ async function ensureSchema() {
       CREATE TYPE page_status AS ENUM ('draft', 'published');
     EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+    DO $$ BEGIN
+      CREATE TYPE password_reset_purpose AS ENUM ('invite', 'reset');
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
     CREATE TABLE IF NOT EXISTS users (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       email TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL,
+      password TEXT,
       name TEXT,
       role user_role NOT NULL DEFAULT 'editor',
       github_data JSONB,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-
-    CREATE TABLE IF NOT EXISTS sites (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      slug TEXT UNIQUE,
-      name TEXT NOT NULL,
-      description TEXT,
-      language TEXT NOT NULL DEFAULT 'en',
-      domain TEXT,
-      site_url TEXT,
-      screenshot_url TEXT,
-      github_repo_url TEXT,
-      github_branch TEXT NOT NULL DEFAULT 'main',
-      vercel_project_id TEXT,
-      vercel_url TEXT,
-      template TEXT NOT NULL DEFAULT 'blank',
-      status site_status NOT NULL DEFAULT 'active',
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-
-    CREATE TABLE IF NOT EXISTS site_users (
-      site_id UUID NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
-      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      role site_user_role NOT NULL,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      PRIMARY KEY (site_id, user_id)
-    );
-
-    CREATE TABLE IF NOT EXISTS pages (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      site_id UUID NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
-      type TEXT NOT NULL DEFAULT 'page',
-      name TEXT NOT NULL,
-      title TEXT,
-      content_json JSONB,
-      schema_yaml TEXT,
-      status page_status NOT NULL DEFAULT 'draft',
-      published_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
@@ -93,6 +57,49 @@ async function ensureSchema() {
       changes JSONB,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS password_resets (
+      id SERIAL PRIMARY KEY,
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token_hash TEXT UNIQUE NOT NULL,
+      purpose password_reset_purpose NOT NULL,
+      expires_at TIMESTAMPTZ NOT NULL,
+      used_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    ALTER TABLE users
+    ALTER COLUMN password DROP NOT NULL;
+
+    ALTER TABLE password_resets
+    ADD COLUMN IF NOT EXISTS token_hash TEXT;
+
+    ALTER TABLE password_resets
+    ADD COLUMN IF NOT EXISTS purpose password_reset_purpose;
+
+    ALTER TABLE password_resets
+    ADD COLUMN IF NOT EXISTS used_at TIMESTAMPTZ;
+
+    DO $$ BEGIN
+      IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'password_resets'
+          AND column_name = 'token'
+      ) THEN
+        ALTER TABLE password_resets
+        ALTER COLUMN token DROP NOT NULL;
+      END IF;
+    END $$;
+
+    CREATE UNIQUE INDEX IF NOT EXISTS password_resets_token_hash_unique
+    ON password_resets (token_hash);
+
+    CREATE INDEX IF NOT EXISTS idx_password_resets_user_id
+    ON password_resets (user_id);
+
+    CREATE INDEX IF NOT EXISTS idx_password_resets_expires_at
+    ON password_resets (expires_at);
   `)
 }
 
@@ -100,72 +107,49 @@ async function seed() {
   console.log('Ensuring schema exists...')
   await ensureSchema()
 
-  console.log('Seeding admin user...')
-  const [admin] = await db
+  console.log('Ensuring admin user exists...')
+
+  const [createdAdmin] = await db
     .insert(users)
     .values({
       email: 'admin@sumaq.io',
-      password: hashSync('Admin123!', 10),
+      password: null,
       name: 'Sumaq Admin',
       role: 'admin',
     })
     .onConflictDoNothing()
     .returning()
 
-  if (!admin) {
-    console.log('Admin user already exists — skipping.')
-    await client.close()
-    process.exit(0)
+  const [existingAdmin] = createdAdmin
+    ? [createdAdmin]
+    : await db
+        .select({
+          id: users.id,
+          email: users.email,
+          password: users.password,
+        })
+        .from(users)
+        .where(eq(users.email, 'admin@sumaq.io'))
+        .limit(1)
+
+  if (!existingAdmin) {
+    throw new Error('Admin user could not be created or loaded')
   }
 
-  console.log('Seeding demo site...')
-  const [site] = await db
-    .insert(sites)
-    .values({
-      name: 'Mi Sitio Demo',
-      slug: 'demo',
-      description: 'A demo site created by the seed script.',
-      language: 'es',
-      template: 'therapy',
-      status: 'active',
-    })
-    .onConflictDoNothing()
-    .returning()
-
-  if (!site) {
-    console.log('Demo site already exists — skipping.')
-    await client.close()
-    process.exit(0)
-  }
-
-  console.log('Assigning admin as site owner...')
-  await db
-    .insert(siteUsers)
-    .values({
-      siteId: site.id,
-      userId: admin.id,
-      role: 'owner',
-    })
-    .onConflictDoNothing()
-
-  console.log('Creating homepage page...')
-  await db
-    .insert(pages)
-    .values({
-      siteId: site.id,
-      type: 'page',
-      name: 'index',
-      title: 'Homepage',
-      status: 'draft',
-    })
-    .onConflictDoNothing()
+  const purpose = existingAdmin.password ? 'reset' : 'invite'
+  const passwordLink = await issuePasswordLink({
+    db,
+    userId: existingAdmin.id,
+    purpose,
+  })
 
   console.log('')
   console.log('✓ Seed complete!')
   console.log('')
-  console.log('  Admin credentials:')
-  console.log('    Email:    admin@sumaq.io')
-  console.log('    Password: Admin123!')
+  console.log('  Admin account:')
+  console.log('    Email: admin@sumaq.io')
+  console.log(`    Purpose: ${purpose}`)
+  console.log(`    Link: ${passwordLink.link}`)
   console.log('')
 
   await client.close()

@@ -1,10 +1,11 @@
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
-import { users } from '~~/server/db/schema'
+import { users } from '#server/db/schema'
+import { createAuditLog } from '#server/utils/audit'
+import { issuePasswordLink } from '#server/utils/password-links'
 
 const CreateUserSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
   name: z.string().optional(),
   role: z.enum(['admin', 'partner', 'owner', 'editor']).default('editor'),
 })
@@ -38,13 +39,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 409, message: 'Email already in use' })
   }
 
-  const hashed = await hashUserPassword(result.data.password)
-
   const [user] = await db
     .insert(users)
     .values({
       email: result.data.email.toLowerCase(),
-      password: hashed,
+      password: null,
       name: result.data.name,
       role: result.data.role,
     })
@@ -56,6 +55,15 @@ export default defineEventHandler(async (event) => {
       createdAt: users.createdAt,
     })
 
+  const passwordSetup = await issuePasswordLink({
+    db,
+    userId: user!.id,
+    purpose: 'invite',
+    event,
+  })
+
+  console.info(`Password setup link for ${user!.email}: ${passwordSetup.link}`)
+
   await createAuditLog(
     session.user.id,
     'create_user',
@@ -63,5 +71,16 @@ export default defineEventHandler(async (event) => {
     event,
   )
 
-  return user
+  await createAuditLog(
+    session.user.id,
+    'generate_user_password_link',
+    { targetType: 'user', targetId: user!.id, purpose: 'invite' },
+    event,
+  )
+
+  return {
+    user,
+    passwordSetupLink: passwordSetup.link,
+    passwordSetupExpiresAt: passwordSetup.expiresAt,
+  }
 })

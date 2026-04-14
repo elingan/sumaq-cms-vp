@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { eq, and } from 'drizzle-orm'
-import { pages, siteUsers } from '~~/server/db/schema'
+import { pages, siteUsers } from '#server/db/schema'
 
 const UpdatePageSchema = z.object({
   title: z.string().optional(),

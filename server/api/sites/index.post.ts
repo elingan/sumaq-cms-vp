@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
-import { sites, siteUsers } from '~~/server/db/schema'
+import { sites, siteUsers } from '#server/db/schema'
 
 const CreateSiteSchema = z.object({
   name: z.string().min(1),

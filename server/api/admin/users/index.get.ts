@@ -1,4 +1,5 @@
-import { users } from '~~/server/db/schema'
+import { sql } from 'drizzle-orm'
+import { users } from '#server/db/schema'
 
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event)
@@ -15,6 +16,7 @@ export default defineEventHandler(async (event) => {
       email: users.email,
       name: users.name,
       role: users.role,
+      hasPassword: sql<boolean>`${users.password} is not null`,
       createdAt: users.createdAt,
     })
     .from(users)

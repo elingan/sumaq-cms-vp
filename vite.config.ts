@@ -9,6 +9,7 @@ export default defineConfig({
     semi: false,
     commaDangle: 'always-multiline',
     braceStyle: '1tbs',
+    arrowParens: 'always',
   },
   lint: { options: { typeAware: true, typeCheck: true } },
 })

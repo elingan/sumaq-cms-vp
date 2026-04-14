@@ -81,7 +81,6 @@ const { locale, setLocale } = useI18n()
                 v-model="locale"
                 :items="availableLocales"
                 value-key="value"
-                :ui="{ width: 'w-20' }"
                 size="sm"
                 @update:model-value="(v: string) => setLocale(v as 'en' | 'es' | 'de')"
               />

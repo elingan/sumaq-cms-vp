@@ -18,13 +18,14 @@ export const userRoleEnum = pgEnum('user_role', ['admin', 'partner', 'owner', 'e
 export const siteUserRoleEnum = pgEnum('site_user_role', ['owner', 'editor', 'partner'])
 export const siteStatusEnum = pgEnum('site_status', ['active', 'archived'])
 export const pageStatusEnum = pgEnum('page_status', ['draft', 'published'])
+export const passwordResetPurposeEnum = pgEnum('password_reset_purpose', ['invite', 'reset'])
 
 // ─── Tables ──────────────────────────────────────────────────────────────────
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   email: text('email').unique().notNull(),
-  password: text('password').notNull(),
+  password: text('password'),
   name: text('name'),
   role: userRoleEnum('role').notNull().default('editor'),
   githubData: jsonb('github_data'),
@@ -130,15 +131,24 @@ export const auditLogs = pgTable('audit_logs', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
-export const passwordResets = pgTable('password_resets', {
-  id: serial('id').primaryKey(),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  token: text('token').unique().notNull(),
-  expiresAt: timestamp('expires_at').notNull(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-})
+export const passwordResets = pgTable(
+  'password_resets',
+  {
+    id: serial('id').primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    tokenHash: text('token_hash').unique().notNull(),
+    purpose: passwordResetPurposeEnum('purpose').notNull(),
+    expiresAt: timestamp('expires_at').notNull(),
+    usedAt: timestamp('used_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_password_resets_user_id').on(table.userId),
+    index('idx_password_resets_expires_at').on(table.expiresAt),
+  ],
+)
 
 // ─── Relations ───────────────────────────────────────────────────────────────
 

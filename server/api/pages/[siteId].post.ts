@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { eq, and } from 'drizzle-orm'
-import { pages, siteUsers } from '~~/server/db/schema'
+import { pages, siteUsers } from '#server/db/schema'
 
 const CreatePageSchema = z.object({
   name: z.string().min(1).max(255),

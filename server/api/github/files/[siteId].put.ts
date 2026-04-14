@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { eq, and } from 'drizzle-orm'
-import { sites, siteUsers } from '~~/server/db/schema'
+import { sites, siteUsers } from '#server/db/schema'
 
 const PushFileSchema = z.object({
   path: z.string().min(1),

@@ -1,3 +1,35 @@
+<template>
+  <div class="flex flex-col items-center justify-center min-h-screen gap-4 p-4">
+    <UPageCard class="w-full max-w-md">
+      <UAuthForm
+        :schema="schema"
+        :fields="fields"
+        :title="t('auth.welcomeBack')"
+        :description="t('auth.loginDescription')"
+        icon="i-lucide-lock"
+        :submit="{ label: t('auth.login'), block: true, loading }"
+        @submit="onSubmit"
+      >
+        <template #password-hint>
+          <ULink to="/forgot-password" class="text-primary font-medium">
+            {{ t('auth.forgotPassword') }}
+          </ULink>
+        </template>
+
+        <template v-if="error" #validation>
+          <UAlert color="error" icon="i-lucide-info" :title="error" />
+        </template>
+
+        <template #footer>
+          {{ t('auth.termsPrefix') }}
+          <ULink to="#" class="text-primary font-medium">{{ t('auth.termsLink') }}</ULink
+          >.
+        </template>
+      </UAuthForm>
+    </UPageCard>
+  </div>
+</template>
+
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
@@ -7,7 +39,7 @@ definePageMeta({ layout: 'default' })
 const { t } = useI18n()
 
 const schema = z.object({
-  email: z.string().email(t('auth.invalidEmail')),
+  email: z.email(t('auth.invalidEmail')),
   password: z.string().min(8, t('auth.passwordMin')),
 })
 
@@ -51,35 +83,3 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
   }
 }
 </script>
-
-<template>
-  <div class="flex flex-col items-center justify-center min-h-screen gap-4 p-4">
-    <UPageCard class="w-full max-w-md">
-      <UAuthForm
-        :schema="schema"
-        :fields="fields"
-        :title="t('auth.welcomeBack')"
-        :description="t('auth.loginDescription')"
-        icon="i-lucide-lock"
-        :submit="{ label: t('auth.login'), block: true, loading }"
-        @submit="onSubmit"
-      >
-        <template #password-hint>
-          <ULink to="#" class="text-primary font-medium" tabindex="-1">
-            {{ t('auth.forgotPassword') }}
-          </ULink>
-        </template>
-
-        <template v-if="error" #validation>
-          <UAlert color="error" icon="i-lucide-info" :title="error" />
-        </template>
-
-        <template #footer>
-          {{ t('auth.termsPrefix') }}
-          <ULink to="#" class="text-primary font-medium">{{ t('auth.termsLink') }}</ULink
-          >.
-        </template>
-      </UAuthForm>
-    </UPageCard>
-  </div>
-</template>

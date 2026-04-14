@@ -1,5 +1,5 @@
 import { eq, and } from 'drizzle-orm'
-import { sites, siteUsers } from '~~/server/db/schema'
+import { sites, siteUsers } from '#server/db/schema'
 
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event)

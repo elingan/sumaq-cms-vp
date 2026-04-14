@@ -6,7 +6,10 @@ import * as schema from './schema'
 // Shared Drizzle config for both PGlite and Neon
 const config: DrizzleConfig<typeof schema> = { schema }
 
-let _db: ReturnType<typeof createPgliteDb> | null = null
+type NeonDatabase = ReturnType<typeof createNeonDb>
+type PGliteDatabase = ReturnType<typeof createPgliteDb>
+
+let _db: NeonDatabase | PGliteDatabase | null = null
 
 function createNeonDb() {
   const { neon } = require('@neondatabase/serverless')
@@ -21,7 +24,7 @@ function createPgliteDb() {
   return drizzlePglite(client, config)
 }
 
-export function getDb() {
+export function getDb(): NeonDatabase | PGliteDatabase {
   if (_db) return _db
 
   if (process.env.DATABASE_URL) {
