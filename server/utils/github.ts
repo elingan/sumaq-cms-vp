@@ -1,11 +1,332 @@
+import { createSign, randomUUID } from 'node:crypto'
+import { eq } from 'drizzle-orm'
 import { Octokit } from 'octokit'
+import { users } from '#server/db/schema'
 
-function getOctokit(): Octokit {
+interface GitHubAppConnection {
+  installationId: number
+  accountLogin?: string
+  accountType?: string
+  installedAt: string
+}
+
+interface GitHubRepository {
+  name: string
+  fullName: string
+  url: string
+  defaultBranch: string
+}
+
+interface GlobalConnection {
+  adminUserId: string
+  connection: GitHubAppConnection
+}
+
+interface AdminGitHubData {
+  githubApp?: GitHubAppConnection
+  [key: string]: unknown
+}
+
+function parseGitHubData(input: unknown): AdminGitHubData {
+  if (!input) return {}
+  if (typeof input === 'string') {
+    try {
+      const parsed = JSON.parse(input) as unknown
+      return typeof parsed === 'object' && parsed !== null ? (parsed as AdminGitHubData) : {}
+    } catch {
+      return {}
+    }
+  }
+  return typeof input === 'object' && input !== null ? (input as AdminGitHubData) : {}
+}
+
+function getGitHubTokenOctokit(): Octokit {
   const token = process.env.GITHUB_TOKEN
   if (!token) {
-    throw createError({ statusCode: 500, message: 'GitHub token not configured' })
+    throw createError({ statusCode: 500, message: 'GitHub is not configured' })
   }
   return new Octokit({ auth: token })
+}
+
+function getGitHubAppConfig() {
+  const appId = process.env.GITHUB_APP_ID
+  const privateKey = process.env.GITHUB_PRIVATE_KEY?.replace(/\\n/g, '\n')
+
+  if (!appId || !privateKey) {
+    throw createError({
+      statusCode: 500,
+      message: 'GitHub App is not configured (GITHUB_APP_ID / GITHUB_PRIVATE_KEY)',
+    })
+  }
+
+  return { appId, privateKey }
+}
+
+function base64UrlEncode(value: string) {
+  return Buffer.from(value, 'utf-8').toString('base64url')
+}
+
+function createGitHubAppJwt(): string {
+  const { appId, privateKey } = getGitHubAppConfig()
+  const now = Math.floor(Date.now() / 1000)
+  const header = base64UrlEncode(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))
+  const payload = base64UrlEncode(
+    JSON.stringify({
+      iat: now - 60,
+      exp: now + 9 * 60,
+      iss: appId,
+    }),
+  )
+
+  const tokenBase = `${header}.${payload}`
+  const signature = createSign('RSA-SHA256').update(tokenBase).sign(privateKey, 'base64url')
+
+  return `${tokenBase}.${signature}`
+}
+
+function getGitHubAppOctokit() {
+  return new Octokit({ auth: createGitHubAppJwt() })
+}
+
+async function getInstallationToken(installationId: number): Promise<string> {
+  const octokit = getGitHubAppOctokit()
+  const { data } = await octokit.request(
+    'POST /app/installations/{installation_id}/access_tokens',
+    {
+      installation_id: installationId,
+    },
+  )
+  return data.token
+}
+
+async function getInstallationOctokit(installationId: number): Promise<Octokit> {
+  const token = await getInstallationToken(installationId)
+  return new Octokit({ auth: token })
+}
+
+async function getGlobalConnectionOrTokenOctokit(): Promise<Octokit> {
+  const globalConnection = await getGlobalGitHubConnection()
+  if (globalConnection) {
+    return getInstallationOctokit(globalConnection.connection.installationId)
+  }
+  return getGitHubTokenOctokit()
+}
+
+function parseInstallationId(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isInteger(value)) return value
+  if (typeof value === 'string') {
+    const parsed = Number.parseInt(value, 10)
+    if (Number.isInteger(parsed) && parsed > 0) return parsed
+  }
+  return null
+}
+
+export function createGitHubConnectState() {
+  return randomUUID()
+}
+
+export function getGitHubInstallUrl(state: string): string {
+  const appSlug = process.env.GITHUB_APP_SLUG
+  if (!appSlug) {
+    throw createError({
+      statusCode: 500,
+      message: 'GitHub App slug is not configured (GITHUB_APP_SLUG)',
+    })
+  }
+
+  const installUrl = new URL(`https://github.com/apps/${appSlug}/installations/new`)
+  installUrl.searchParams.set('state', state)
+  return installUrl.toString()
+}
+
+export async function getGitHubInstallationDetails(installationId: number) {
+  const octokit = getGitHubAppOctokit()
+  const { data } = await octokit.request('GET /app/installations/{installation_id}', {
+    installation_id: installationId,
+  })
+
+  const account = data.account
+  const accountLogin = account && 'login' in account ? account.login : undefined
+  const accountType = account && 'type' in account ? account.type : undefined
+
+  return {
+    accountLogin,
+    accountType,
+  }
+}
+
+export async function getGlobalGitHubConnection(): Promise<GlobalConnection | null> {
+  const db = useDrizzle()
+
+  const admins = await db
+    .select({ id: users.id, githubData: users.githubData })
+    .from(users)
+    .where(eq(users.role, 'admin'))
+
+  for (const admin of admins) {
+    const githubData = parseGitHubData(admin.githubData)
+    const installationId = parseInstallationId(githubData.githubApp?.installationId)
+    if (!installationId) continue
+
+    return {
+      adminUserId: admin.id,
+      connection: {
+        installationId,
+        accountLogin: githubData.githubApp?.accountLogin,
+        accountType: githubData.githubApp?.accountType,
+        installedAt: githubData.githubApp?.installedAt ?? new Date().toISOString(),
+      },
+    }
+  }
+
+  return null
+}
+
+export async function saveGlobalGitHubConnection(
+  adminUserId: string,
+  connection: Omit<GitHubAppConnection, 'installedAt'> & { installedAt?: string },
+) {
+  const db = useDrizzle()
+
+  const [admin] = await db
+    .select({ githubData: users.githubData })
+    .from(users)
+    .where(eq(users.id, adminUserId))
+    .limit(1)
+
+  if (!admin) {
+    throw createError({ statusCode: 404, message: 'Admin user not found' })
+  }
+
+  const githubData = parseGitHubData(admin.githubData)
+  githubData.githubApp = {
+    installationId: connection.installationId,
+    accountLogin: connection.accountLogin,
+    accountType: connection.accountType,
+    installedAt: connection.installedAt ?? new Date().toISOString(),
+  }
+
+  await db.update(users).set({ githubData, updatedAt: new Date() }).where(eq(users.id, adminUserId))
+}
+
+export async function clearGlobalGitHubConnection() {
+  const globalConnection = await getGlobalGitHubConnection()
+  if (!globalConnection) return
+
+  const db = useDrizzle()
+  const [admin] = await db
+    .select({ githubData: users.githubData })
+    .from(users)
+    .where(eq(users.id, globalConnection.adminUserId))
+    .limit(1)
+
+  if (!admin) return
+
+  const githubData = parseGitHubData(admin.githubData)
+  if (!githubData.githubApp) return
+
+  delete githubData.githubApp
+
+  await db
+    .update(users)
+    .set({ githubData, updatedAt: new Date() })
+    .where(eq(users.id, globalConnection.adminUserId))
+}
+
+export async function listInstallationRepositories(prefix = 'www-'): Promise<GitHubRepository[]> {
+  const globalConnection = await getGlobalGitHubConnection()
+  if (!globalConnection) {
+    throw createError({ statusCode: 409, message: 'GitHub App is not connected' })
+  }
+
+  const octokit = await getInstallationOctokit(globalConnection.connection.installationId)
+
+  const repositories: GitHubRepository[] = []
+  let page = 1
+
+  while (true) {
+    const { data } = await octokit.request('GET /installation/repositories', {
+      per_page: 100,
+      page,
+    })
+
+    for (const repo of data.repositories) {
+      if (!repo.name.startsWith(prefix)) continue
+      repositories.push({
+        name: repo.name,
+        fullName: repo.full_name,
+        url: repo.html_url,
+        defaultBranch: repo.default_branch,
+      })
+    }
+
+    if (data.repositories.length < 100) break
+    page += 1
+  }
+
+  return repositories.sort((a, b) => a.fullName.localeCompare(b.fullName))
+}
+
+export async function listRepositoryBranches(fullName: string): Promise<string[]> {
+  const globalConnection = await getGlobalGitHubConnection()
+  if (!globalConnection) {
+    throw createError({ statusCode: 409, message: 'GitHub App is not connected' })
+  }
+
+  const [owner, repo] = fullName.split('/')
+  if (!owner || !repo) {
+    throw createError({ statusCode: 400, message: 'Invalid repository full name' })
+  }
+
+  const octokit = await getInstallationOctokit(globalConnection.connection.installationId)
+  const branches: string[] = []
+  let page = 1
+
+  while (true) {
+    const { data } = await octokit.request('GET /repos/{owner}/{repo}/branches', {
+      owner,
+      repo,
+      per_page: 100,
+      page,
+    })
+
+    for (const branch of data) {
+      branches.push(branch.name)
+    }
+
+    if (data.length < 100) break
+    page += 1
+  }
+
+  return branches.sort((a, b) => a.localeCompare(b))
+}
+
+export async function validateRepositoryAccess(repoUrl: string) {
+  const globalConnection = await getGlobalGitHubConnection()
+  if (!globalConnection) {
+    throw createError({ statusCode: 409, message: 'GitHub App is not connected' })
+  }
+
+  const { owner, repo } = parseGitHubUrl(repoUrl)
+  const octokit = await getInstallationOctokit(globalConnection.connection.installationId)
+
+  try {
+    const { data } = await octokit.request('GET /repos/{owner}/{repo}', { owner, repo })
+    return {
+      fullName: data.full_name,
+      defaultBranch: data.default_branch,
+      url: data.html_url,
+    }
+  } catch (error: unknown) {
+    const status = (error as { status?: number }).status
+    if (status === 404) {
+      throw createError({
+        statusCode: 400,
+        message: 'Repository is not available in the connected GitHub App installation',
+      })
+    }
+    throw error
+  }
 }
 
 /**
@@ -27,7 +348,7 @@ export async function listCmsSchemas(
   repoUrl: string,
   branch = 'main',
 ): Promise<Array<{ name: string; path: string; sha: string }>> {
-  const octokit = getOctokit()
+  const octokit = await getGlobalConnectionOrTokenOctokit()
   const { owner, repo } = parseGitHubUrl(repoUrl)
 
   try {
@@ -57,7 +378,7 @@ export async function getRepoFileContent(
   filePath: string,
   branch = 'main',
 ): Promise<string | null> {
-  const octokit = getOctokit()
+  const octokit = await getGlobalConnectionOrTokenOctokit()
   const { owner, repo } = parseGitHubUrl(repoUrl)
 
   try {
@@ -86,7 +407,7 @@ export async function updateRepoFile(
   content: string,
   commitMessage: string,
 ): Promise<void> {
-  const octokit = getOctokit()
+  const octokit = await getGlobalConnectionOrTokenOctokit()
   const { owner, repo } = parseGitHubUrl(repoUrl)
 
   // Get current file SHA if it exists (required for updates)

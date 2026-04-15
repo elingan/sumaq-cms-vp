@@ -3,7 +3,7 @@ export type SiteUserRole = 'owner' | 'editor' | 'partner'
 
 export interface Site {
   id: string
-  slug: string
+  slug: string | null
   name: string
   description: string | null
   language: string

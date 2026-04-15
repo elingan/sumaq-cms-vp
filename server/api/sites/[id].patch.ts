@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { eq, and } from 'drizzle-orm'
 import { sites, siteUsers } from '#server/db/schema'
+import { validateRepositoryAccess } from '#server/utils/github'
 
 const PatchSiteSchema = z.object({
   name: z.string().min(1).optional(),
@@ -60,9 +61,25 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const updateData: Record<string, unknown> = { ...result.data }
+
+  if (typeof result.data.githubRepoUrl !== 'undefined') {
+    if (result.data.githubRepoUrl) {
+      const repo = await validateRepositoryAccess(result.data.githubRepoUrl)
+      updateData.githubRepoUrl = repo.url
+
+      if (!result.data.githubBranch) {
+        updateData.githubBranch = repo.defaultBranch
+      }
+    } else {
+      updateData.githubRepoUrl = null
+      updateData.githubBranch = result.data.githubBranch || 'main'
+    }
+  }
+
   const [updated] = await db
     .update(sites)
-    .set({ ...result.data, updatedAt: new Date() })
+    .set({ ...updateData, updatedAt: new Date() })
     .where(eq(sites.id, id))
     .returning()
 

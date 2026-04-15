@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Site } from '~/shared/types/site'
+import type { Site } from '#shared/types/site'
 
 definePageMeta({ layout: 'dashboard' })
 

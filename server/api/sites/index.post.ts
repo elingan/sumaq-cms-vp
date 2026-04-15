@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { sites, siteUsers } from '#server/db/schema'
+import { validateRepositoryAccess } from '#server/utils/github'
 
 const CreateSiteSchema = z.object({
   name: z.string().min(1),
@@ -47,11 +48,21 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 409, message: 'Slug already in use' })
   }
 
+  let githubRepoUrl: string | null = result.data.githubRepoUrl || null
+  let githubBranch = result.data.githubBranch
+
+  if (githubRepoUrl) {
+    const repo = await validateRepositoryAccess(githubRepoUrl)
+    githubRepoUrl = repo.url
+    githubBranch = githubBranch || repo.defaultBranch
+  }
+
   const [site] = await db
     .insert(sites)
     .values({
       ...result.data,
-      githubRepoUrl: result.data.githubRepoUrl || null,
+      githubRepoUrl,
+      githubBranch,
       siteUrl: result.data.siteUrl || null,
     })
     .returning()

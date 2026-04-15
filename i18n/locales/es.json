@@ -75,7 +75,18 @@
     "language": "Idioma",
     "template": "Plantilla",
     "githubRepoUrl": "URL del repositorio GitHub",
+    "githubRepository": "Repositorio GitHub",
     "githubBranch": "Rama de GitHub",
+    "connectGitHubApp": "Conectar GitHub App",
+    "githubNotConnected": "GitHub App no está conectada",
+    "githubNotConnectedDescription": "Conecta la aplicación para seleccionar repositorios y ramas.",
+    "githubConnectedAs": "Conectado como {account}",
+    "loadingRepositories": "Cargando repositorios...",
+    "selectRepository": "Selecciona un repositorio",
+    "noGitHubRepositories": "No hay repositorios disponibles",
+    "noGitHubRepositoriesDescription": "No se encontraron repositorios con el prefijo exacto www-.",
+    "githubReposLoadFailed": "No se pudieron cargar los repositorios de GitHub.",
+    "githubBranchesLoadFailed": "No se pudieron cargar las ramas del repositorio.",
     "siteUrl": "URL del sitio",
     "domain": "Dominio",
     "updated": "Actualizado",
@@ -159,6 +170,19 @@
     "title": "Facturación"
   },
   "admin": {
-    "title": "Administración"
+    "title": "Administración",
+    "description": "Configura las integraciones globales del CMS.",
+    "githubIntegrationTitle": "Integración con GitHub",
+    "githubIntegrationDescription": "Conecta la GitHub App para acceder a repositorios y crear websites desde el CMS.",
+    "githubConnected": "Conectado",
+    "githubDisconnected": "Desconectado",
+    "githubLoadingStatus": "Cargando estado de conexión...",
+    "githubStatusLoadError": "No se pudo cargar el estado de GitHub.",
+    "githubConnectedAs": "Conectado como {account}",
+    "githubDisconnectedHelp": "Conecta la GitHub App para habilitar selección de repositorios.",
+    "connectGitHubApp": "Conectar GitHub App",
+    "reconnectGitHubApp": "Reconectar GitHub App",
+    "disconnectGitHubApp": "Desconectar GitHub App",
+    "githubDisconnectError": "No se pudo desconectar la GitHub App."
   }
 }

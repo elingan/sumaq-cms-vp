@@ -75,7 +75,18 @@
     "language": "Language",
     "template": "Template",
     "githubRepoUrl": "GitHub Repository URL",
+    "githubRepository": "GitHub Repository",
     "githubBranch": "GitHub Branch",
+    "connectGitHubApp": "Connect GitHub App",
+    "githubNotConnected": "GitHub App is not connected",
+    "githubNotConnectedDescription": "Connect the app to select repositories and branches.",
+    "githubConnectedAs": "Connected as {account}",
+    "loadingRepositories": "Loading repositories...",
+    "selectRepository": "Select a repository",
+    "noGitHubRepositories": "No repositories available",
+    "noGitHubRepositoriesDescription": "No repositories were found with the exact prefix www-.",
+    "githubReposLoadFailed": "Could not load GitHub repositories.",
+    "githubBranchesLoadFailed": "Could not load repository branches.",
     "siteUrl": "Site URL",
     "domain": "Domain",
     "updated": "Updated",
@@ -159,6 +170,19 @@
     "title": "Billing"
   },
   "admin": {
-    "title": "Admin"
+    "title": "Admin",
+    "description": "Configure global CMS integrations.",
+    "githubIntegrationTitle": "GitHub Integration",
+    "githubIntegrationDescription": "Connect the GitHub App to access repositories and create websites from the CMS.",
+    "githubConnected": "Connected",
+    "githubDisconnected": "Disconnected",
+    "githubLoadingStatus": "Loading connection status...",
+    "githubStatusLoadError": "Could not load GitHub status.",
+    "githubConnectedAs": "Connected as {account}",
+    "githubDisconnectedHelp": "Connect the GitHub App to enable repository selection.",
+    "connectGitHubApp": "Connect GitHub App",
+    "reconnectGitHubApp": "Reconnect GitHub App",
+    "disconnectGitHubApp": "Disconnect GitHub App",
+    "githubDisconnectError": "Could not disconnect the GitHub App."
   }
 }

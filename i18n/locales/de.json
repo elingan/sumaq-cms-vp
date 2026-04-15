@@ -75,7 +75,18 @@
     "language": "Sprache",
     "template": "Vorlage",
     "githubRepoUrl": "GitHub-Repository-URL",
+    "githubRepository": "GitHub-Repository",
     "githubBranch": "GitHub-Branch",
+    "connectGitHubApp": "GitHub App verbinden",
+    "githubNotConnected": "GitHub App ist nicht verbunden",
+    "githubNotConnectedDescription": "Verbinde die App, um Repositories und Branches auszuwählen.",
+    "githubConnectedAs": "Verbunden als {account}",
+    "loadingRepositories": "Repositories werden geladen...",
+    "selectRepository": "Repository auswählen",
+    "noGitHubRepositories": "Keine Repositories verfügbar",
+    "noGitHubRepositoriesDescription": "Es wurden keine Repositories mit dem exakten Präfix www- gefunden.",
+    "githubReposLoadFailed": "GitHub-Repositories konnten nicht geladen werden.",
+    "githubBranchesLoadFailed": "Repository-Branches konnten nicht geladen werden.",
     "siteUrl": "Website-URL",
     "domain": "Domain",
     "updated": "Aktualisiert",
@@ -159,6 +170,19 @@
     "title": "Abrechnung"
   },
   "admin": {
-    "title": "Admin"
+    "title": "Admin",
+    "description": "Globale CMS-Integrationen konfigurieren.",
+    "githubIntegrationTitle": "GitHub-Integration",
+    "githubIntegrationDescription": "Verbinde die GitHub App, um auf Repositories zuzugreifen und Websites im CMS zu erstellen.",
+    "githubConnected": "Verbunden",
+    "githubDisconnected": "Getrennt",
+    "githubLoadingStatus": "Verbindungsstatus wird geladen...",
+    "githubStatusLoadError": "GitHub-Status konnte nicht geladen werden.",
+    "githubConnectedAs": "Verbunden als {account}",
+    "githubDisconnectedHelp": "Verbinde die GitHub App, um die Repository-Auswahl zu aktivieren.",
+    "connectGitHubApp": "GitHub App verbinden",
+    "reconnectGitHubApp": "GitHub App neu verbinden",
+    "disconnectGitHubApp": "GitHub App trennen",
+    "githubDisconnectError": "Die GitHub App konnte nicht getrennt werden."
   }
 }

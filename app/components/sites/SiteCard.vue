@@ -1,8 +1,18 @@
 <script setup lang="ts">
-import type { Site } from '~/shared/types/site'
+type SiteCardStatus = 'active' | 'archived'
+
+interface SiteCardSite {
+  id: string
+  name: string
+  domain: string | null
+  siteUrl: string | null
+  template: string
+  status: SiteCardStatus
+  updatedAt: string | Date
+}
 
 interface Props {
-  site: Site
+  site: SiteCardSite
 }
 
 const props = defineProps<Props>()
