@@ -140,5 +140,25 @@
     "feature5Desc": "Integrated with Vercel for instant previews and one-click production deploys.",
     "feature6Title": "Open source",
     "feature6Desc": "Self-host on your own infrastructure or use our managed cloud offering."
+  },
+  "underConstruction": {
+    "title": "Under Construction",
+    "description": "This section is not available yet. Come back soon!"
+  },
+  "app": {
+    "name": "Sumaq Sites",
+    "builtWith": "Build with Nuxt UI • © {year}"
+  },
+  "settings": {
+    "title": "Settings"
+  },
+  "profile": {
+    "title": "Profile"
+  },
+  "billing": {
+    "title": "Billing"
+  },
+  "admin": {
+    "title": "Admin"
   }
 }

@@ -140,5 +140,25 @@
     "feature5Desc": "Integriert mit Vercel für sofortige Vorschauen und Ein-Klick-Produktions-Deploys.",
     "feature6Title": "Open Source",
     "feature6Desc": "Selbst hosten auf deiner eigenen Infrastruktur oder unser verwaltetes Cloud-Angebot nutzen."
+  },
+  "underConstruction": {
+    "title": "Im Aufbau",
+    "description": "Dieser Bereich ist noch nicht verfügbar. Schau bald wieder vorbei!"
+  },
+  "app": {
+    "name": "Sumaq Sites",
+    "builtWith": "Erstellen mit Nuxt UI • © {year}"
+  },
+  "settings": {
+    "title": "Einstellungen"
+  },
+  "profile": {
+    "title": "Profil"
+  },
+  "billing": {
+    "title": "Abrechnung"
+  },
+  "admin": {
+    "title": "Admin"
   }
 }

@@ -1,60 +1,77 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center p-4">
+  <div v-if="submitted" class="p-4">
     <UPageCard class="w-full max-w-md">
       <template #title>
-        {{ submitted ? t('auth.resetPasswordSuccessTitle') : pageTitle }}
+        {{ t('auth.resetPasswordSuccessTitle') }}
       </template>
 
       <template #description>
-        {{ submitted ? t('auth.resetPasswordSuccess') : pageDescription }}
+        {{ t('auth.resetPasswordSuccess') }}
       </template>
 
-      <div v-if="submitted" class="space-y-4">
+      <div class="space-y-4">
         <UAlert color="success" icon="i-lucide-badge-check" :title="t('auth.resetPasswordDone')" />
 
         <UButton block to="/login">
           {{ t('auth.backToLogin') }}
         </UButton>
       </div>
+    </UPageCard>
+    <div class="mt-4 text-center">
+      <ULink to="/login" class="text-primary font-medium">{{ t('auth.backToLogin') }}</ULink>
+    </div>
+  </div>
 
-      <div v-else-if="tokenError" class="space-y-4">
+  <div v-else-if="tokenError" class="p-4">
+    <UPageCard class="w-full max-w-md">
+      <template #title>
+        {{ pageTitle }}
+      </template>
+
+      <template #description>
+        {{ pageDescription }}
+      </template>
+
+      <div class="space-y-4">
         <UAlert color="error" icon="i-lucide-circle-alert" :title="tokenError" />
 
         <UButton block color="neutral" variant="ghost" to="/forgot-password">
           {{ t('auth.requestAnotherLink') }}
         </UButton>
       </div>
-
-      <UForm v-else :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
-        <UAlert v-if="error" color="error" icon="i-lucide-alert-circle" :title="error" />
-
-        <UFormField :label="t('auth.password')" name="password" required>
-          <UInput v-model="state.password" type="password" class="w-full" />
-        </UFormField>
-
-        <UFormField :label="t('auth.confirmPassword')" name="confirmPassword" required>
-          <UInput v-model="state.confirmPassword" type="password" class="w-full" />
-        </UFormField>
-
-        <div class="space-y-3 pt-2">
-          <UButton type="submit" block :loading="loading">
-            {{ tokenMeta?.purpose === 'invite' ? t('auth.setPassword') : t('auth.resetPassword') }}
-          </UButton>
-
-          <UButton block color="neutral" variant="ghost" to="/login">
-            {{ t('auth.backToLogin') }}
-          </UButton>
-        </div>
-      </UForm>
+      <!-- <template #footer>
+      </template> -->
     </UPageCard>
+    <div class="mt-4 text-center">
+      <ULink to="/login" class="text-primary font-medium">{{ t('auth.backToLogin') }}</ULink>
+    </div>
   </div>
+
+  <UAuthForm
+    v-else
+    :schema="schema"
+    :fields="fields"
+    :title="pageTitle"
+    :description="pageDescription"
+    icon="i-lucide-lock"
+    :submit="{ label: submitLabel, block: true, loading }"
+    @submit="onSubmit"
+  >
+    <template v-if="error" #validation>
+      <UAlert color="error" icon="i-lucide-alert-circle" :title="error" />
+    </template>
+
+    <template #footer>
+      <ULink to="/login" class="text-primary font-medium">{{ t('auth.backToLogin') }}</ULink>
+    </template>
+  </UAuthForm>
 </template>
 
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'auth' })
 
 const { t } = useI18n()
 const route = useRoute()
@@ -76,16 +93,33 @@ const schema = z
 
 type Schema = z.output<typeof schema>
 
-const state = reactive<Schema>({
-  password: '',
-  confirmPassword: '',
-})
+type TokenMeta = {
+  purpose: 'invite' | 'reset'
+  expiresAt: string
+}
 
 const loading = ref(false)
 const submitted = ref(false)
 const error = ref<string | null>(null)
 const tokenError = ref<string | null>(null)
-const tokenMeta = ref<{ purpose: 'invite' | 'reset'; expiresAt: string } | null>(null)
+const tokenMeta = ref<TokenMeta | null>(null)
+
+const fields = computed(() => [
+  {
+    name: 'password',
+    type: 'password' as const,
+    label: t('auth.password'),
+    placeholder: t('auth.passwordPlaceholder'),
+    required: true,
+  },
+  {
+    name: 'confirmPassword',
+    type: 'password' as const,
+    label: t('auth.confirmPassword'),
+    placeholder: t('auth.passwordPlaceholder'),
+    required: true,
+  },
+])
 
 const pageTitle = computed(() =>
   tokenMeta.value?.purpose === 'invite'
@@ -97,6 +131,10 @@ const pageDescription = computed(() =>
   tokenMeta.value?.purpose === 'invite'
     ? t('auth.setInitialPasswordDescription')
     : t('auth.resetPasswordDescription'),
+)
+
+const submitLabel = computed(() =>
+  tokenMeta.value?.purpose === 'invite' ? t('auth.setPassword') : t('auth.resetPassword'),
 )
 
 if (!token.value) {

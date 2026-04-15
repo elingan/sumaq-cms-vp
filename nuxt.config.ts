@@ -36,7 +36,7 @@ export default defineNuxtConfig({
       stylistic: {
         quotes: 'single',
         semi: false,
-        commaDangle: 'always-multiline',
+        commaDangle: 'never',
         braceStyle: '1tbs',
         arrowParens: true,
       },

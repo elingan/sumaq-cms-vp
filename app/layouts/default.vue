@@ -1,36 +1,41 @@
-<script setup lang="ts">
-const { t } = useI18n()
-</script>
-
 <template>
-  <UApp>
-    <UHeader>
-      <template #left>
-        <NuxtLink to="/">
-          <AppLogo class="h-6 w-auto shrink-0" />
-        </NuxtLink>
-      </template>
-
-      <template #right>
-        <UColorModeButton />
-        <UButton
-          to="/login"
-          color="neutral"
-          variant="ghost"
-          :label="t('nav.login')"
-          icon="i-lucide-log-in"
-        />
-      </template>
-    </UHeader>
+  <div>
+    <AppHeader />
 
     <UMain>
       <slot />
     </UMain>
 
-    <UFooter>
-      <template #left>
-        <p class="text-sm text-muted">Sumaq CMS · © {{ new Date().getFullYear() }}</p>
-      </template>
-    </UFooter>
-  </UApp>
+    <AppFooter />
+  </div>
 </template>
+
+<script setup lang="ts">
+// const { loggedIn, user } = useUserSession()
+// const router = useRouter()
+
+// const userMenuItems = computed(() => [
+//   [{
+//     label: user.value?.email || '',
+//     slot: 'account',
+//     disabled: true
+//   }],
+//   [{
+//     label: 'Dashboard',
+//     icon: 'i-heroicons-home',
+//     click: () => router.push('/dashboard')
+//   }, {
+//     label: 'Settings',
+//     icon: 'i-heroicons-cog-6-tooth',
+//     click: () => router.push('/settings')
+//   }],
+//   [{
+//     label: 'Logout',
+//     icon: 'i-heroicons-arrow-right-on-rectangle',
+//     click: async () => {
+//       await $fetch('/api/auth/logout', { method: 'POST' })
+//       await router.push('/login')
+//     }
+//   }]
+// ])
+</script>

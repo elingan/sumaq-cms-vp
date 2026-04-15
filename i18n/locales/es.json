@@ -140,5 +140,25 @@
     "feature5Desc": "Integrado con Vercel para previsualizaciones instantáneas y despliegues en un clic.",
     "feature6Title": "Código abierto",
     "feature6Desc": "Aloja en tu propia infraestructura o usa nuestra oferta cloud administrada."
+  },
+  "underConstruction": {
+    "title": "En construcción",
+    "description": "Esta sección aún no está disponible. ¡Vuelve pronto!"
+  },
+  "app": {
+    "name": "Sumaq Sites",
+    "builtWith": "Construido con Nuxt UI • © {year}"
+  },
+  "settings": {
+    "title": "Ajustes"
+  },
+  "profile": {
+    "title": "Perfil"
+  },
+  "billing": {
+    "title": "Facturación"
+  },
+  "admin": {
+    "title": "Administración"
   }
 }

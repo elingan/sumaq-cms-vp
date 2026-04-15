@@ -1,15 +1,34 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center p-4">
+  <UAuthForm
+    v-if="!submitted"
+    :schema="schema"
+    :fields="fields"
+    :title="t('auth.forgotPasswordTitle')"
+    :description="t('auth.forgotPasswordDescription')"
+    icon="i-lucide-mail"
+    :submit="{ label: t('auth.sendResetLink'), block: true, loading }"
+    @submit="onSubmit"
+  >
+    <template v-if="error" #validation>
+      <UAlert color="error" icon="i-lucide-alert-circle" :title="error" />
+    </template>
+
+    <template #footer>
+      <ULink to="/login" class="text-primary font-medium">{{ t('auth.backToLogin') }}</ULink>
+    </template>
+  </UAuthForm>
+
+  <div v-else class="flex min-h-screen items-center justify-center p-4">
     <UPageCard class="w-full max-w-md">
       <template #title>
         {{ t('auth.forgotPasswordTitle') }}
       </template>
 
       <template #description>
-        {{ submitted ? t('auth.forgotPasswordSuccess') : t('auth.forgotPasswordDescription') }}
+        {{ t('auth.forgotPasswordSuccess') }}
       </template>
 
-      <div v-if="submitted" class="space-y-4">
+      <div class="space-y-4">
         <UAlert
           color="success"
           icon="i-lucide-mail-check"
@@ -20,24 +39,6 @@
           {{ t('auth.backToLogin') }}
         </UButton>
       </div>
-
-      <UForm v-else :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
-        <UAlert v-if="error" color="error" icon="i-lucide-alert-circle" :title="error" />
-
-        <UFormField :label="t('auth.email')" name="email" required>
-          <UInput v-model="state.email" type="email" class="w-full" />
-        </UFormField>
-
-        <div class="space-y-3 pt-2">
-          <UButton type="submit" block :loading="loading">
-            {{ t('auth.sendResetLink') }}
-          </UButton>
-
-          <UButton block color="neutral" variant="ghost" to="/login">
-            {{ t('auth.backToLogin') }}
-          </UButton>
-        </div>
-      </UForm>
     </UPageCard>
   </div>
 </template>
@@ -46,7 +47,7 @@
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'auth' })
 
 const { t } = useI18n()
 
@@ -56,9 +57,15 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
-const state = reactive<Schema>({
-  email: '',
-})
+const fields = computed(() => [
+  {
+    name: 'email',
+    type: 'email' as const,
+    label: t('auth.email'),
+    placeholder: t('auth.emailPlaceholder'),
+    required: true,
+  },
+])
 
 const loading = ref(false)
 const submitted = ref(false)

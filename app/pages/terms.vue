@@ -1,5 +1,5 @@
 <template>
-  <div></div>
+  <UnderConstruction />
 </template>
 
 <script lang="ts" setup></script>
