@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "nuxt dev -p 3010",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
@@ -15,10 +15,9 @@
     "nuxt": "nuxt"
   },
   "dependencies": {
-    "@electric-sql/pglite": "^0.4.4",
     "@iconify-json/lucide": "^1.2.101",
     "@iconify-json/simple-icons": "^1.2.77",
-    "@neondatabase/serverless": "^1.0.2",
+    "@libsql/client": "^0.15.15",
     "@nuxt/image": "2.0.0",
     "@nuxt/ui": "^4.6.1",
     "@nuxthub/core": "0.10.7",

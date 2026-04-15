@@ -1,40 +1,39 @@
-import {
-  pgTable,
-  pgEnum,
-  uuid,
-  text,
-  timestamp,
-  jsonb,
-  integer,
-  serial,
-  index,
-  primaryKey,
-} from 'drizzle-orm/pg-core'
-import { relations } from 'drizzle-orm'
+import { sql, relations } from 'drizzle-orm'
+import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
-export const userRoleEnum = pgEnum('user_role', ['admin', 'partner', 'owner', 'editor'])
-export const siteUserRoleEnum = pgEnum('site_user_role', ['owner', 'editor', 'partner'])
-export const siteStatusEnum = pgEnum('site_status', ['active', 'archived'])
-export const pageStatusEnum = pgEnum('page_status', ['draft', 'published'])
-export const passwordResetPurposeEnum = pgEnum('password_reset_purpose', ['invite', 'reset'])
+export const userRoleValues = ['admin', 'partner', 'owner', 'editor'] as const
+export const siteUserRoleValues = ['owner', 'editor', 'partner'] as const
+export const siteStatusValues = ['active', 'archived'] as const
+export const pageStatusValues = ['draft', 'published'] as const
+export const passwordResetPurposeValues = ['invite', 'reset'] as const
+
+type JsonRecord = Record<string, unknown>
 
 // ─── Tables ──────────────────────────────────────────────────────────────────
 
-export const users = pgTable('users', {
-  id: uuid('id').primaryKey().defaultRandom(),
+export const users = sqliteTable('users', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   email: text('email').unique().notNull(),
   password: text('password'),
   name: text('name'),
-  role: userRoleEnum('role').notNull().default('editor'),
-  githubData: jsonb('github_data'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  role: text('role', { enum: userRoleValues }).notNull().default('editor'),
+  githubData: text('github_data', { mode: 'json' }).$type<JsonRecord | null>(),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
 })
 
-export const sites = pgTable('sites', {
-  id: uuid('id').primaryKey().defaultRandom(),
+export const sites = sqliteTable('sites', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   slug: text('slug').unique(),
   name: text('name').notNull(),
   description: text('description'),
@@ -47,42 +46,54 @@ export const sites = pgTable('sites', {
   vercelProjectId: text('vercel_project_id'),
   vercelUrl: text('vercel_url'),
   template: text('template').notNull().default('blank'),
-  status: siteStatusEnum('status').notNull().default('active'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  status: text('status', { enum: siteStatusValues }).notNull().default('active'),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
 })
 
-export const siteUsers = pgTable(
+export const siteUsers = sqliteTable(
   'site_users',
   {
-    siteId: uuid('site_id')
+    siteId: text('site_id')
       .notNull()
       .references(() => sites.id, { onDelete: 'cascade' }),
-    userId: uuid('user_id')
+    userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    role: siteUserRoleEnum('role').notNull(),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    role: text('role', { enum: siteUserRoleValues }).notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
   },
   (table) => [primaryKey({ columns: [table.siteId, table.userId] })],
 )
 
-export const pages = pgTable(
+export const pages = sqliteTable(
   'pages',
   {
-    id: uuid('id').primaryKey().defaultRandom(),
-    siteId: uuid('site_id')
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    siteId: text('site_id')
       .notNull()
       .references(() => sites.id, { onDelete: 'cascade' }),
     type: text('type').notNull().default('page'),
     name: text('name').notNull(),
     title: text('title'),
-    contentJson: jsonb('content_json'),
+    contentJson: text('content_json', { mode: 'json' }).$type<JsonRecord | null>(),
     schemaYaml: text('schema_yaml'),
-    status: pageStatusEnum('status').notNull().default('draft'),
-    publishedAt: timestamp('published_at'),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+    status: text('status', { enum: pageStatusValues }).notNull().default('draft'),
+    publishedAt: integer('published_at', { mode: 'timestamp' }),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
   },
   (table) => [
     index('idx_pages_site_id').on(table.siteId),
@@ -90,9 +101,11 @@ export const pages = pgTable(
   ],
 )
 
-export const media = pgTable('media', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  siteId: uuid('site_id')
+export const media = sqliteTable('media', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  siteId: text('site_id')
     .notNull()
     .references(() => sites.id, { onDelete: 'cascade' }),
   filename: text('filename').notNull(),
@@ -100,20 +113,24 @@ export const media = pgTable('media', {
   thumbnailUrl: text('thumbnail_url'),
   sizeBytes: integer('size_bytes'),
   mimeType: text('mime_type'),
-  dimensions: jsonb('dimensions'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  dimensions: text('dimensions', { mode: 'json' }).$type<JsonRecord | null>(),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
 })
 
-export const activityLogs = pgTable(
+export const activityLogs = sqliteTable(
   'activity_logs',
   {
-    id: serial('id').primaryKey(),
-    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
-    siteId: uuid('site_id').references(() => sites.id, { onDelete: 'cascade' }),
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+    siteId: text('site_id').references(() => sites.id, { onDelete: 'cascade' }),
     action: text('action').notNull(),
-    details: jsonb('details'),
+    details: text('details', { mode: 'json' }).$type<JsonRecord | null>(),
     ipAddress: text('ip_address'),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
   },
   (table) => [
     index('idx_activity_logs_site_id').on(table.siteId),
@@ -121,28 +138,32 @@ export const activityLogs = pgTable(
   ],
 )
 
-export const auditLogs = pgTable('audit_logs', {
-  id: serial('id').primaryKey(),
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+export const auditLogs = sqliteTable('audit_logs', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
   action: text('action').notNull(),
   targetType: text('target_type'),
-  targetId: uuid('target_id'),
-  changes: jsonb('changes'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  targetId: text('target_id'),
+  changes: text('changes', { mode: 'json' }).$type<JsonRecord | null>(),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
 })
 
-export const passwordResets = pgTable(
+export const passwordResets = sqliteTable(
   'password_resets',
   {
-    id: serial('id').primaryKey(),
-    userId: uuid('user_id')
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     tokenHash: text('token_hash').unique().notNull(),
-    purpose: passwordResetPurposeEnum('purpose').notNull(),
-    expiresAt: timestamp('expires_at').notNull(),
-    usedAt: timestamp('used_at'),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    purpose: text('purpose', { enum: passwordResetPurposeValues }).notNull(),
+    expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+    usedAt: integer('used_at', { mode: 'timestamp' }),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
   },
   (table) => [
     index('idx_password_resets_user_id').on(table.userId),

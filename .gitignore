@@ -1,6 +1,6 @@
 # Nuxt dev/build outputs
 .output
-.data
+# .data se cambió a SQLite
 .nuxt
 .nitro
 .cache

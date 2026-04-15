@@ -2,16 +2,23 @@
  * Seed script: creates the admin account and emits a secure password link.
  * Run with: vp run seed
  */
-import { drizzle } from 'drizzle-orm/pglite'
+import { createClient } from '@libsql/client'
 import { eq } from 'drizzle-orm'
-import { PGlite } from '@electric-sql/pglite'
+import { drizzle } from 'drizzle-orm/libsql'
 import { mkdirSync } from 'node:fs'
 import { users } from './schema'
 import { issuePasswordLink } from '../utils/password-links'
 
-const dataDir = process.env.PGLITE_DATA_DIR || `${process.cwd()}/.data/db/pglite`
+const dataDir = `${process.cwd()}/.data/db`
 mkdirSync(dataDir, { recursive: true })
-const client = new PGlite(dataDir)
+
+const url = process.env.TURSO_DATABASE_URL || process.env.LIBSQL_URL || `file:${dataDir}/sqlite.db`
+const authToken = process.env.TURSO_AUTH_TOKEN || process.env.LIBSQL_AUTH_TOKEN
+
+const client = createClient({
+  url,
+  authToken,
+})
 const db = drizzle(client)
 
 async function seed() {
@@ -62,11 +69,11 @@ async function seed() {
   console.log(`    Link: ${passwordLink.link}`)
   console.log('')
 
-  await client.close()
+  client.close()
 }
 
 seed().catch(async (e) => {
   console.error('Seed failed:', e)
-  await client.close()
+  client.close()
   process.exit(1)
 })

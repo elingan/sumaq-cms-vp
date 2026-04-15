@@ -1,64 +1,84 @@
-# Nuxt Starter Template
+# Sumaq CMS
 
-[![Nuxt UI](https://img.shields.io/badge/Made%20with-Nuxt%20UI-00DC82?logo=nuxt&labelColor=020420)](https://ui.nuxt.com)
+Sumaq CMS is a Nuxt 4 application backed by NuxtHub, Drizzle ORM and SQLite.
 
-Use this template to get started with [Nuxt UI](https://ui.nuxt.com) quickly.
+## Database setup
 
-- [Live demo](https://starter-template.nuxt.dev/)
-- [Documentation](https://ui.nuxt.com/docs/getting-started/installation/nuxt)
+The project uses SQLite in local development and Turso in production.
 
-<a href="https://starter-template.nuxt.dev/" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://ui.nuxt.com/assets/templates/nuxt/starter-dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://ui.nuxt.com/assets/templates/nuxt/starter-light.png">
-    <img alt="Nuxt Starter Template" src="https://ui.nuxt.com/assets/templates/nuxt/starter-light.png" width="830" height="466">
-  </picture>
-</a>
+- Local database file: `.data/db/sqlite.db`
+- Production driver: libSQL via `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`
+- NuxtHub manages schema generation and migration discovery automatically
 
-> The starter template for Vue is on https://github.com/nuxt-ui-templates/starter-vue.
+## Install
 
-## Quick Start
-
-```bash [Terminal]
-npm create nuxt@latest -- -t ui
-```
-
-## Deploy your own
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-name=starter&repository-url=https%3A%2F%2Fgithub.com%2Fnuxt-ui-templates%2Fstarter&demo-image=https%3A%2F%2Fui.nuxt.com%2Fassets%2Ftemplates%2Fnuxt%2Fstarter-dark.png&demo-url=https%3A%2F%2Fstarter-template.nuxt.dev%2F&demo-title=Nuxt%20Starter%20Template&demo-description=A%20minimal%20template%20to%20get%20started%20with%20Nuxt%20UI.)
-
-## Setup
-
-Make sure to install the dependencies:
+Use the Vite+ wrapper defined by the project:
 
 ```bash
-pnpm install
+vp install
 ```
 
-## Development Server
+## Local development
 
-Start the development server on `http://localhost:3000`:
+1. Create your local environment file from `.env.example` and set `NUXT_SESSION_PASSWORD`.
+2. Generate migrations after schema changes:
 
 ```bash
-pnpm dev
+npx nuxt db generate
 ```
 
-## Production
-
-Build the application for production:
+3. Apply migrations locally:
 
 ```bash
-pnpm build
+npx nuxt db migrate
 ```
 
-Locally preview production build:
+4. Seed the admin account:
 
 ```bash
-pnpm preview
+vp run seed
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+5. Start the app:
 
-## Renovate integration
+```bash
+vp run dev
+```
 
-Install [Renovate GitHub app](https://github.com/apps/renovate/installations/select_target) on your repository and you are good to go.
+The SQLite database will be created automatically at `.data/db/sqlite.db`.
+
+## Production with Vercel + Turso
+
+Configure these environment variables in Vercel:
+
+```bash
+NUXT_SESSION_PASSWORD=your-32-char-minimum-secret-key-here
+TURSO_DATABASE_URL=libsql://your-database-name-your-org.turso.io
+TURSO_AUTH_TOKEN=your-turso-auth-token
+```
+
+NuxtHub will detect the Turso credentials and use the libSQL driver automatically.
+
+If your deployment pipeline does not run migrations during startup, execute them explicitly with:
+
+```bash
+npx nuxt db migrate
+```
+
+## Quality checks
+
+```bash
+vp run typecheck
+vp lint
+```
+
+## Useful commands
+
+```bash
+npx nuxt db generate
+npx nuxt db migrate
+npx nuxt db drop-all
+vp run seed
+vp run build
+vp preview
+```
