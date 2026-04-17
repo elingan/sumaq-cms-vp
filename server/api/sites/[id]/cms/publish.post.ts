@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
     siteId: getRouterParam(event, 'id'),
   })
 
-  const body = await readBody(event).catch(() => ({}))
+  const body = (await readBody(event).catch(() => undefined)) ?? {}
   const data = PublishSchema.parse(body)
   const session = await requireUserSession(event)
   const site = await getEditableSiteById(event, params.siteId)
