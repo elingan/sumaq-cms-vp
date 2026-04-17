@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Site } from '#shared/types/site'
 
-definePageMeta({ layout: 'dashboard' })
+definePageMeta({ layout: 'site' })
 
 const { t } = useI18n()
 const route = useRoute()

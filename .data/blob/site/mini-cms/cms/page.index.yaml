@@ -1,0 +1,161 @@
+meta:
+  label: Metadata
+  description: Configuration schema for CMS pages
+  fields:
+    - id: title
+      label: Title
+      type: string
+    - id: description
+      label: Description
+      type: string
+brand:
+  label: Brand
+  description: Configuration schema for brand information
+  fields:
+    - id: name
+      label: Name
+      type: string
+    - id: logo
+      label: Logo
+      type: image
+    - id: link
+      label: Link
+      type: url
+navigation:
+  label: Navigation
+  description: Configuration schema for navigation menu
+  fields:
+    - id: items
+      label: Menu Items
+      type: list
+      fields:
+        - id: label
+          label: Label
+          type: string
+        - id: link
+          label: Link
+          type: url
+welcome:
+  label: Welcome
+  description: Configuration schema for welcome section
+  fields:
+    - id: id
+      label: ID
+      type: string
+    - id: title
+      label: Title
+      type: string
+    - id: description
+      label: Description
+      type: string
+about:
+  label: About
+  description: Configuration schema for about section
+  fields:
+    - id: id
+      label: ID
+      type: string
+    - id: title
+      label: Title
+      type: string
+    - id: description
+      label: Description
+      type: text
+    - id: content
+      label: Rich Content
+      type: richtext
+    - id: category
+      label: Category
+      type: select
+      options:
+        values: [Tech, News, Sports]
+    - id: author
+      label: Author
+      type: select
+      options:
+        values:
+          - value: bob
+            label: Bob Smith
+          - value: patricia
+            label: Patricia Wills
+          - value: alice
+            label: Alice Brown
+    - id: tags
+      label: Tags
+      type: select
+      options:
+        multiple: true
+        values: [Tech, News, Sports, Business, Entertainment]
+    # - id: media
+    #   label: Media
+    #   type: media
+    # fields:
+    #   - id: type
+    #     label: Type
+    #     type: select
+    #     options:
+    #       - image
+    #       - video
+    #   - id: name
+    #     label: Name
+    #     type: string
+    #   - id: link
+    #     label: Link
+    #     type: url
+    - id: features
+      label: Features
+      type: list
+      fields:
+        - id: title
+          label: Title
+          type: string
+        - id: description
+          label: Description
+          type: string
+profile:
+  label: Profile
+  description: Configuration schema for profile section
+  fields:
+    - id: id
+      label: ID
+      type: string
+    - id: title
+      label: Title
+      type: string
+    - id: contact
+      label: Contacto
+      type: object
+      fields:
+        - id: email
+          label: Email
+          type: string
+        - id: phone
+          label: Teléfono
+          type: string
+        - id: address
+          label: Dirección
+          type: object
+          fields:
+            - id: email
+              label: Email
+              type: string
+            - id: city
+              label: Ciudad
+              type: string
+footer:
+  label: Footer
+  description: Configuration schema for footer section
+  fields:
+    - id: copy
+      label: Copyright Text
+      type: string
+    - id: legal
+      label: Legal Links
+      type: list
+      fields:
+        - id: label
+          label: Label
+          type: string
+        - id: link
+          label: Link
+          type: url

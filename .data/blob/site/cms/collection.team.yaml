@@ -1,0 +1,50 @@
+meta:
+  label: Post Metadata
+  description: Metadata for individual blog post
+  fields:
+    - id: slug
+      label: URL Slug
+      type: string
+    - id: title
+      label: Title
+      type: string
+    - id: date
+      label: Publication Date
+      type: date
+    - id: author
+      label: Author
+      type: string
+    - id: published
+      label: Published
+      type: boolean
+      default: true
+
+content:
+  label: Post Content
+  description: Main content of the blog post
+  fields:
+    - id: excerpt
+      label: Excerpt
+      type: text
+    - id: body
+      label: Body
+      type: richtext
+    - id: image
+      label: Featured Image
+      type: image
+
+seo:
+  label: SEO
+  description: SEO optimization fields
+  fields:
+    - id: tags
+      label: Tags
+      type: select
+      options:
+        multiple: true
+        values: [Tech, News, Tutorial, Review, Business]
+    - id: category
+      label: Category
+      type: select
+      options:
+        values: [Tech, News, Tutorial, Review]

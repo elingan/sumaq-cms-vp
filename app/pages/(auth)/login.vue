@@ -55,6 +55,12 @@ const fields = computed(() => [
     placeholder: t('auth.passwordPlaceholder'),
     required: true,
   },
+  {
+    name: 'remember',
+    type: 'checkbox',
+    label: 'Remember me',
+    description: 'You will be logged in for 30 days.',
+  },
 ])
 
 const error = ref<string | null>(null)

@@ -1,0 +1,18 @@
+meta:
+  label: Metadata
+  description: Configuration schema for CMS pages
+  fields:
+    - id: title
+      label: Title
+      type: string
+    - id: description
+      label: Description
+      type: string
+
+impressum:
+  label: Impressum
+  description: Configuration schema for impressum section
+  fields:
+    - id: body
+      label: Body
+      type: richtext

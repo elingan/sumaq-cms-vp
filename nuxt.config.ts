@@ -9,6 +9,15 @@ export default defineNuxtConfig({
     '@nuxthub/core',
   ],
 
+  // or overwrite only in production
+  $production: {
+    hub: {
+      blob: {
+        driver: 'vercel-blob',
+      },
+    },
+  },
+
   devtools: {
     enabled: true,
   },
@@ -23,6 +32,10 @@ export default defineNuxtConfig({
 
   hub: {
     db: 'sqlite',
+    blob: {
+      driver: 'fs',
+      dir: '.data/blob',
+    },
   },
 
   vite: {

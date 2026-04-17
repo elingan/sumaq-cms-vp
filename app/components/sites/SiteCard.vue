@@ -3,6 +3,7 @@ type SiteCardStatus = 'active' | 'archived'
 
 interface SiteCardSite {
   id: string
+  slug: string | null
   name: string
   domain: string | null
   siteUrl: string | null
@@ -16,17 +17,16 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{
-  (e: 'refresh'): void
-}>()
 
 const { t } = useI18n()
+const localePath = useLocalePath()
 
 const statusColor = computed(() => (props.site.status === 'active' ? 'success' : 'neutral'))
+const sitePath = computed(() => localePath(`/site/${props.site.slug ?? props.site.id}`))
 </script>
 
 <template>
-  <UCard class="hover:shadow-md transition-shadow cursor-pointer" :to="`/site/${site.id}`">
+  <UCard class="hover:shadow-md transition-shadow cursor-pointer" :to="sitePath">
     <template #header>
       <div class="flex items-start justify-between gap-2">
         <h3 class="font-semibold truncate">
@@ -37,8 +37,8 @@ const statusColor = computed(() => (props.site.status === 'active' ? 'success' :
         </UBadge>
       </div>
     </template>
-    <p>({{ site.id }})</p>
-    <ULink :to="`/site/${site.id}`" class="text-sm text-muted">
+    <p>({{ site.slug ?? site.id }})</p>
+    <ULink :to="sitePath" class="text-sm text-muted">
       {{ site.domain ?? site.siteUrl ?? t('sites.noDomain') }}
     </ULink>
 

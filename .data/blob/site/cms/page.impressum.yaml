@@ -1,0 +1,67 @@
+meta:
+  label: Metadata
+  description: Configuration schema for CMS pages
+  fields:
+    - id: title
+      label: Title
+      type: string
+    - id: description
+      label: Description
+      type: string
+brand:
+  label: Brand
+  description: Configuration schema for brand information
+  fields:
+    - id: name
+      label: Name
+      type: string
+    - id: logo
+      label: Logo
+      type: image
+    - id: link
+      label: Link
+      type: url
+navigation:
+  label: Navigation
+  description: Configuration schema for navigation menu
+  fields:
+    - id: items
+      label: Menu Items
+      type: list
+      fields:
+        - id: label
+          label: Label
+          type: string
+        - id: link
+          label: Link
+          type: url
+impressum:
+  label: Impressum
+  description: Configuration schema for impressum section
+  fields:
+    - id: id
+      label: ID
+      type: string
+    - id: title
+      label: Title
+      type: string
+    - id: body
+      label: Body
+      type: richtext
+footer:
+  label: Footer
+  description: Configuration schema for footer section
+  fields:
+    - id: copy
+      label: Copyright Text
+      type: string
+    - id: legal
+      label: Legal Links
+      type: list
+      fields:
+        - id: label
+          label: Label
+          type: string
+        - id: link
+          label: Link
+          type: url

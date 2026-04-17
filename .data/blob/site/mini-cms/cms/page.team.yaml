@@ -1,0 +1,13 @@
+meta:
+  label: Blog Metadata
+  description: Configuration for blog index
+  fields:
+    - id: title
+      label: Blog Title
+      type: string
+    - id: description
+      label: Blog Description
+      type: string
+    - id: postsPerPage
+      label: Posts Per Page
+      type: number

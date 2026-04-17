@@ -10,5 +10,7 @@ export default withNuxt({
         multiline: { max: 1 },
       },
     ],
+    // Stylistic rules - disable conflicting indent rule
+    '@stylistic/comma-dangle': 'off',
   },
 })

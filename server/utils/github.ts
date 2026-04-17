@@ -17,6 +17,12 @@ interface GitHubRepository {
   defaultBranch: string
 }
 
+export interface RepoFileChange {
+  path: string
+  content?: string
+  delete?: boolean
+}
+
 interface GlobalConnection {
   adminUserId: string
   connection: GitHubAppConnection
@@ -435,4 +441,83 @@ export async function updateRepoFile(
     branch,
     ...(sha ? { sha } : {}),
   })
+}
+
+export async function syncRepoFiles(
+  repoUrl: string,
+  branch: string,
+  changes: RepoFileChange[],
+  commitMessage: string,
+): Promise<{ commitSha: string }> {
+  if (!changes.length) {
+    throw createError({ statusCode: 400, message: 'No file changes to sync' })
+  }
+
+  const octokit = await getGlobalConnectionOrTokenOctokit()
+  const { owner, repo } = parseGitHubUrl(repoUrl)
+
+  const refResponse = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
+    owner,
+    repo,
+    ref: `heads/${branch}`,
+  })
+
+  const headSha = refResponse.data.object.sha
+  const commitResponse = await octokit.request(
+    'GET /repos/{owner}/{repo}/git/commits/{commit_sha}',
+    {
+      owner,
+      repo,
+      commit_sha: headSha,
+    },
+  )
+
+  const treeItems: Array<{
+    path: string
+    mode: '100644'
+    type: 'blob'
+    content?: string
+    sha?: null
+  }> = changes.map((change) => {
+    if (change.delete) {
+      return {
+        path: change.path,
+        mode: '100644',
+        type: 'blob',
+        sha: null,
+      }
+    }
+
+    return {
+      path: change.path,
+      mode: '100644',
+      type: 'blob',
+      content: change.content ?? '',
+    }
+  })
+
+  const treeResponse = await octokit.request('POST /repos/{owner}/{repo}/git/trees', {
+    owner,
+    repo,
+    base_tree: commitResponse.data.tree.sha,
+    tree: treeItems,
+  })
+
+  const newCommitResponse = await octokit.request('POST /repos/{owner}/{repo}/git/commits', {
+    owner,
+    repo,
+    message: commitMessage,
+    tree: treeResponse.data.sha,
+    parents: [headSha],
+  })
+
+  await octokit.request('PATCH /repos/{owner}/{repo}/git/refs/{ref}', {
+    owner,
+    repo,
+    ref: `heads/${branch}`,
+    sha: newCommitResponse.data.sha,
+    force: false,
+  })
+
+  return { commitSha: newCommitResponse.data.sha }
 }
