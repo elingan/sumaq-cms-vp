@@ -37,6 +37,10 @@ const statusColor = computed(() => (props.site.status === 'active' ? 'success' :
         </UBadge>
       </div>
     </template>
+    <p>({{ site.id }})</p>
+    <ULink :to="`/site/${site.id}`" class="text-sm text-muted">
+      {{ site.domain ?? site.siteUrl ?? t('sites.noDomain') }}
+    </ULink>
 
     <div class="text-sm text-muted space-y-1">
       <p v-if="site.domain" class="truncate">

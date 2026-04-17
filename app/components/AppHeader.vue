@@ -17,7 +17,7 @@
         class="h-8 ml-4"
         decorative
       />
-      <UserProfile v-if="loggedIn" />
+      <UserMenu v-if="loggedIn" />
     </template>
   </UHeader>
 </template>
