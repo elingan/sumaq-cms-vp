@@ -7,7 +7,8 @@
     "admin": "Admin",
     "users": "Usuarios",
     "login": "Iniciar sesión",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "calendar": "Calendario"
   },
   "auth": {
     "email": "Correo electrónico",
@@ -55,7 +56,8 @@
     "delete": "Eliminar",
     "archive": "Archivar",
     "cancel": "Cancelar",
-    "confirm": "Confirmar"
+    "confirm": "Confirmar",
+    "createCalendar": "Crear calendario"
   },
   "status": {
     "draft": "Borrador",
@@ -66,7 +68,10 @@
   "dashboard": {
     "sitesSubtitle": "Todos tus sitios en un solo lugar",
     "noSites": "Aún no hay sitios",
-    "noSitesDescription": "Crea tu primer sitio para comenzar."
+    "noSitesDescription": "Crea tu primer sitio para comenzar.",
+    "calendarSubtitle": "Todo tu calendario en un solo lugar",
+    "noCalendar": "Aún no hay calendario",
+    "noCalendarDescription": "Crea tu primer calendario para comenzar."
   },
   "sites": {
     "name": "Nombre del sitio",

@@ -1,6 +1,6 @@
 <template>
-  <UPage>
-    <UPageHeader
+  <UPage class="max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- <UPageHeader
       :title="$t('nav.sites')"
       :description="$t('dashboard.sitesSubtitle')"
       :ui="{
@@ -8,49 +8,78 @@
         container: 'max-w-(--ui-container) px-4 sm:px-6 lg:px-8 ',
         description: 'mt-0',
       }"
-    />
-    <UPageBody>
-      <UPageSection>
-        <div v-if="pending" class="flex justify-center">
-          <UIcon name="i-lucide-loader-circle" class="animate-spin size-8 text-muted" />
-        </div>
-
-        <div
-          v-else-if="sites && sites.length > 0"
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-        >
-          <SitesSiteCard v-for="site in sites" :key="site.id" :site="site" @refresh="refresh" />
-        </div>
-
-        <div v-else class="flex flex-col items-center justify-center py-24 gap-4 text-center">
-          <UIcon name="i-lucide-globe" class="size-12 text-muted" />
-          <h2 class="text-lg font-semibold">
-            {{ $t('dashboard.noSites') }}
-          </h2>
-          <p class="text-muted text-sm max-w-sm">
-            {{ $t('dashboard.noSitesDescription') }}
-          </p>
+    /> -->
+    <div class="space-y-8 mb-16">
+      <UPageHeader :title="$t('nav.sites')" :description="$t('dashboard.sitesSubtitle')">
+        <template #links>
           <UButton
             v-if="canCreateSites"
             icon="i-lucide-plus"
             :label="$t('actions.createSite')"
             @click="showCreateModal = true"
           />
-        </div>
-      </UPageSection>
-    </UPageBody>
+        </template>
+      </UPageHeader>
+
+      <SitesSiteCard v-for="site in sites" :key="site.id" :site="site" @refresh="refresh" />
+
+      <UPageCTA
+        v-if="!sites?.length"
+        title="Trusted and supported by our amazing community"
+        description="We've built a strong, lasting partnership. Their trust is our driving force, propelling us towards shared success."
+        :links="siteLinks"
+      />
+      <div v-if="pending" class="flex justify-center">
+        <UIcon name="i-lucide-loader-circle" class="animate-spin size-8 text-muted" />
+      </div>
+    </div>
+    <!-- </UPageBody> -->
+    <div class="space-y-8 mb-16">
+      <UPageHeader :title="$t('nav.calendar')" :description="$t('dashboard.calendarSubtitle')">
+        <template #links>
+          <UButton
+            v-if="canCreateSites"
+            icon="i-lucide-plus"
+            :label="$t('actions.createCalendar')"
+            @click="showCreateModal = true"
+          />
+        </template>
+      </UPageHeader>
+      <UPageCTA
+        title="Trusted and supported by our amazing community"
+        description="We've built a strong, lasting partnership. Their trust is our driving force, propelling us towards shared success."
+        :links="siteLinks"
+      />
+    </div>
 
     <SitesSiteForm v-model:open="showCreateModal" @saved="handleSiteSaved" />
   </UPage>
 </template>
 
 <script setup lang="ts">
+import type { ButtonProps } from '@nuxt/ui'
+
 definePageMeta({ layout: 'default', title: 'Dashboard' })
 
 const { canCreateSites } = useRole()
 const showCreateModal = ref(false)
 
 const { data: sites, refresh, pending } = await useFetch('/api/sites')
+
+const siteLinks = ref<ButtonProps[]>([
+  {
+    label: 'Get started',
+    color: 'primary',
+    variant: 'solid',
+    trailingIcon: 'i-lucide-plus',
+  },
+  {
+    label: 'Learn more',
+    color: 'neutral',
+    variant: 'subtle',
+    trailingIcon: 'i-lucide-arrow-right',
+  },
+])
 
 function handleSiteSaved() {
   refresh()

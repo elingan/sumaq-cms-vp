@@ -7,13 +7,14 @@
       sideOffset: 8,
     }"
   >
-    <UButton :avatar="avatar" color="neutral" variant="ghost" />
+    <UButton :avatar="avatar" :label="displayName" color="neutral" variant="ghost" />
     <template #content-top>
       <UUser
         :name="displayName"
         :description="description"
         :avatar="avatar"
-        class="pointer-events-none px-2 pt-2"
+        size="xl"
+        class="pointer-events-none p-4 border-b border-muted"
       />
     </template>
   </UDropdownMenu>

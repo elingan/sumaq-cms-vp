@@ -7,7 +7,8 @@
     "admin": "Admin",
     "users": "Benutzer",
     "login": "Anmelden",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "calendar": "Kalender"
   },
   "auth": {
     "email": "E-Mail",
@@ -55,7 +56,8 @@
     "delete": "Löschen",
     "archive": "Archivieren",
     "cancel": "Abbrechen",
-    "confirm": "Bestätigen"
+    "confirm": "Bestätigen",
+    "createCalendar": "Kalender erstellen"
   },
   "status": {
     "draft": "Entwurf",
@@ -66,7 +68,10 @@
   "dashboard": {
     "sitesSubtitle": "Alle deine Websites an einem Ort",
     "noSites": "Noch keine Websites",
-    "noSitesDescription": "Erstelle deine erste Website, um loszulegen."
+    "noSitesDescription": "Erstelle deine erste Website, um loszulegen.",
+    "calendarSubtitle": "Alle deine Kalender an einem Ort",
+    "noCalendar": "Noch kein Kalender",
+    "noCalendarDescription": "Erstelle deinen ersten Kalender, um loszulegen."
   },
   "sites": {
     "name": "Websitename",

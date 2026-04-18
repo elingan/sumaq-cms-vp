@@ -7,7 +7,8 @@
     "admin": "Admin",
     "users": "Users",
     "login": "Log in",
-    "logout": "Log out"
+    "logout": "Log out",
+    "calendar": "Calendar"
   },
   "auth": {
     "email": "Email",
@@ -55,7 +56,8 @@
     "delete": "Delete",
     "archive": "Archive",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "createCalendar": "Create calendar"
   },
   "status": {
     "draft": "Draft",
@@ -66,7 +68,10 @@
   "dashboard": {
     "sitesSubtitle": "All your sites in one place",
     "noSites": "No sites yet",
-    "noSitesDescription": "Create your first site to get started."
+    "noSitesDescription": "Create your first site to get started.",
+    "calendarSubtitle": "All your calendar in one place",
+    "noCalendar": "No calendar yet",
+    "noCalendarDescription": "Create your first calendar to get started."
   },
   "sites": {
     "name": "Site Name",
