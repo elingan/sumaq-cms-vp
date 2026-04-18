@@ -54,7 +54,7 @@
     />
 
     <!-- Form -->
-    <DynamicForm
+    <EditorDynamicForm
       v-else-if="sections.length"
       :sections="sections"
       :model-value="formState"

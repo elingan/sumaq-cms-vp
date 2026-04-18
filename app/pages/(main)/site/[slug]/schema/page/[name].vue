@@ -3,5 +3,5 @@ definePageMeta({ layout: 'site' })
 </script>
 
 <template>
-  <EditorSchemaEditorView schema-type="page" />
+  <SchemaEditorView schema-type="page" />
 </template>

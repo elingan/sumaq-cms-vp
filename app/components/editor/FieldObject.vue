@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-4 pl-4 border-l-2 border-default">
     <template v-for="subField in field.fields" :key="subField.key">
-      <DynamicField
+      <EditorDynamicField
         :field="subField"
         :model-value="(modelValue as Record<string, unknown>)?.[subField.key]"
         :error="errors?.[subField.key]"

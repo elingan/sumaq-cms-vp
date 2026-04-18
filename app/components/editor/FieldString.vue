@@ -1,6 +1,6 @@
 <template>
   <UInput
-    :model-value="modelValue as string"
+    :model-value="String(modelValue ?? '')"
     :placeholder="field.placeholder"
     @update:model-value="emit('update:modelValue', $event)"
   />
@@ -14,9 +14,7 @@ interface Props {
   modelValue?: unknown
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  modelValue: '',
-})
+defineProps<Props>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: unknown): void

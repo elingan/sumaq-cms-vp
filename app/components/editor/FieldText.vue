@@ -1,6 +1,6 @@
 <template>
   <UTextarea
-    :model-value="modelValue as string"
+    :model-value="String(modelValue ?? '')"
     :placeholder="field.placeholder"
     :rows="4"
     @update:model-value="emit('update:modelValue', $event)"
@@ -15,9 +15,7 @@ interface Props {
   modelValue?: unknown
 }
 
-withDefaults(defineProps<Props>(), {
-  modelValue: '',
-})
+defineProps<Props>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: unknown): void

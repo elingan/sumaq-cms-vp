@@ -85,7 +85,6 @@
 
 <script setup lang="ts">
 import type { SiteCmsNavigation } from '#shared/types/cms'
-import SchemaMonacoEditor from './SchemaMonacoEditor.vue'
 
 interface Props {
   schemaType: 'page' | 'collection'
@@ -207,7 +206,7 @@ watch(siteCmsError, (error) => {
 })
 
 onBeforeRouteLeave(() => {
-  if (isDirty.value && process.client) {
+  if (isDirty.value && import.meta.client) {
     return window.confirm('Tienes cambios sin guardar. Deseas salir de todas formas?')
   }
 })

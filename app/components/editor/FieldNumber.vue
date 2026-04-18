@@ -3,7 +3,7 @@
     type="number"
     :model-value="String(modelValue ?? '')"
     :placeholder="field.placeholder"
-    @update:model-value="emit('update:modelValue', $event === '' ? null : Number($event))"
+    @update:model-value="emit('update:modelValue', $event === '' ? undefined : Number($event))"
   />
 </template>
 
@@ -15,9 +15,7 @@ interface Props {
   modelValue?: unknown
 }
 
-withDefaults(defineProps<Props>(), {
-  modelValue: null,
-})
+defineProps<Props>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: unknown): void

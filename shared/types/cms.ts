@@ -24,6 +24,28 @@ export interface SiteCmsDiffSummary {
   deleted: string[]
 }
 
+export type SiteDataDiffSummary = SiteCmsDiffSummary
+
+export interface SiteDataDraftSummary {
+  hasWorkspace: boolean
+  hasDraftChanges: boolean
+  changesCount: number
+  diff: SiteDataDiffSummary
+}
+
+export interface SiteDataSyncResult {
+  synced: boolean
+  requiresConfirmation: boolean
+  source: 'github' | 'empty'
+  diff: SiteDataDiffSummary
+}
+
+export interface SiteDataStatusResponse {
+  siteId: string
+  source: 'github' | 'empty'
+  draft: SiteDataDraftSummary
+}
+
 export interface SiteCmsDraftSummary {
   hasWorkspace: boolean
   hasDraftChanges: boolean

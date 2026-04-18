@@ -16,7 +16,7 @@
       </template>
 
       <div class="flex flex-col gap-4">
-        <DynamicField
+        <EditorDynamicField
           v-for="field in section.fields"
           :key="field.key"
           :field="field"

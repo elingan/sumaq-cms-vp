@@ -1,5 +1,5 @@
 import * as z from 'zod'
-import type { SchemaField, SchemaSection } from '#shared/types/schema'
+import type { SchemaField, SchemaSection, SelectOption } from '#shared/types/schema'
 
 function isUrlOrRelativeAnchor(val: string): boolean {
   if (!val) return true
@@ -16,6 +16,7 @@ function fieldToZod(field: SchemaField): z.ZodTypeAny {
   switch (field.type) {
     case 'string':
     case 'text':
+    case 'richtext':
       return z.string().optional()
     case 'number':
       return z.number().optional()
@@ -26,11 +27,29 @@ function fieldToZod(field: SchemaField): z.ZodTypeAny {
     case 'url':
       return z.string().refine(isUrlOrRelativeAnchor, { message: 'Invalid URL' }).optional()
     case 'image':
+    case 'video':
       return z.string().optional()
     case 'select':
-      if (field.options && field.options.length > 0) {
+      if (Array.isArray(field.options) && field.options.length > 0) {
         return z.enum(field.options as [string, ...string[]]).optional()
       }
+
+      if (field.options && typeof field.options === 'object' && !Array.isArray(field.options)) {
+        const values = field.options.values
+
+        if (Array.isArray(values) && values.length > 0) {
+          const allowedValues =
+            typeof values[0] === 'string'
+              ? (values as string[])
+              : (values as SelectOption[]).map((option) => option.value)
+
+          if (allowedValues.length) {
+            const enumSchema = z.enum(allowedValues as [string, ...string[]])
+            return field.options.multiple ? z.array(enumSchema).optional() : enumSchema.optional()
+          }
+        }
+      }
+
       return z.string().optional()
     case 'object': {
       if (!field.fields?.length) return z.record(z.string(), z.unknown()).optional()
@@ -47,6 +66,14 @@ function fieldToZod(field: SchemaField): z.ZodTypeAny {
         itemShape[f.id] = fieldToZod(f)
       }
       return z.array(z.object(itemShape)).optional()
+    }
+    case 'media': {
+      if (!field.fields?.length) return z.record(z.string(), z.unknown()).optional()
+      const mediaShape: Record<string, z.ZodTypeAny> = {}
+      for (const f of field.fields) {
+        mediaShape[f.id] = fieldToZod(f)
+      }
+      return z.object(mediaShape).optional()
     }
     default:
       return z.unknown().optional()

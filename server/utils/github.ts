@@ -376,6 +376,47 @@ export async function listCmsSchemas(
   }
 }
 
+export async function listRepoFilesByPrefix(
+  repoUrl: string,
+  prefix: string,
+  branch = 'main',
+): Promise<Array<{ name: string; path: string; sha: string }>> {
+  const octokit = await getGlobalConnectionOrTokenOctokit()
+  const { owner, repo } = parseGitHubUrl(repoUrl)
+
+  const normalizedPrefix = prefix.replace(/^\/+/, '').replace(/\/+$/, '')
+
+  const refResponse = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
+    owner,
+    repo,
+    ref: `heads/${branch}`,
+  })
+
+  const commitResponse = await octokit.request(
+    'GET /repos/{owner}/{repo}/git/commits/{commit_sha}',
+    {
+      owner,
+      repo,
+      commit_sha: refResponse.data.object.sha,
+    },
+  )
+
+  const treeResponse = await octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
+    owner,
+    repo,
+    tree_sha: commitResponse.data.tree.sha,
+    recursive: '1',
+  })
+
+  return (treeResponse.data.tree ?? [])
+    .filter((item) => item.type === 'blob' && item.path?.startsWith(`${normalizedPrefix}/`))
+    .map((item) => ({
+      name: item.path!.slice(normalizedPrefix.length + 1),
+      path: item.path!,
+      sha: item.sha ?? '',
+    }))
+}
+
 /**
  * Get the raw content of a file from a GitHub repo
  */

@@ -5,11 +5,15 @@ export default defineConfig({
     '*': 'vp check --fix',
   },
   fmt: {
+    ignorePatterns: ['app-previous-editor/**'],
     singleQuote: true,
     semi: false,
     commaDangle: 'never',
     braceStyle: '1tbs',
     arrowParens: 'always',
   },
-  lint: { options: { typeAware: true, typeCheck: true } },
+  lint: {
+    ignorePatterns: ['app-previous-editor/**'],
+    options: { typeAware: true, typeCheck: true },
+  },
 })

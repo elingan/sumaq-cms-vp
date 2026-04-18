@@ -62,6 +62,23 @@
             <p class="mt-2 text-xs text-muted">
               {{ publishSummaryText }}
             </p>
+
+            <UButton
+              block
+              icon="i-lucide-file-up"
+              color="neutral"
+              variant="soft"
+              class="mt-3"
+              :loading="isPublishingData"
+              :disabled="!canPublishData"
+              @click="publishData"
+            >
+              Publica data
+            </UButton>
+
+            <p class="mt-2 text-xs text-muted">
+              {{ publishDataSummaryText }}
+            </p>
           </div>
 
           <UNavigationMenu
@@ -116,7 +133,11 @@
 
 <script setup lang="ts">
 import type { NavigationMenuItem } from '#ui/types'
-import type { SiteCmsNavigation } from '#shared/types/cms'
+import type {
+  SiteCmsNavigation,
+  SiteDataStatusResponse,
+  SiteDataSyncResult,
+} from '#shared/types/cms'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -126,6 +147,9 @@ const { isAdmin, isEditor, isOwner } = useRole()
 
 const open = ref(false)
 const isPublishingSchemas = ref(false)
+const isPublishingData = ref(false)
+const isSyncingData = ref(false)
+const hasSyncedDataOnLoad = ref(false)
 
 const slug = computed(() => route.params.slug as string)
 const dashboardPath = computed(() => localePath('/dashboard'))
@@ -140,6 +164,26 @@ const {
   key: `site-cms-${slug.value}`,
 })
 
+const siteId = computed(() => siteCms.value?.site.id ?? null)
+
+const dataStatus = ref<SiteDataStatusResponse | null>(null)
+
+async function refreshDataStatus() {
+  if (!siteId.value) {
+    dataStatus.value = null
+    return
+  }
+
+  try {
+    const response = await $fetch<{ data: SiteDataStatusResponse }>(
+      `/api/sites/${siteId.value}/data/status`,
+    )
+    dataStatus.value = response.data
+  } catch {
+    dataStatus.value = null
+  }
+}
+
 const siteName = computed(() => siteCms.value?.site.name ?? slug.value)
 const canPublishSchemas = computed(() => {
   return !!siteCms.value?.site.githubRepoUrl && !!siteCms.value?.draft.hasDraftChanges
@@ -151,9 +195,88 @@ const publishSummaryText = computed(() => {
 
   return 'No hay cambios pendientes en los esquemas.'
 })
+const canPublishData = computed(() => {
+  return !!siteCms.value?.site.githubRepoUrl && !!dataStatus.value?.draft.hasDraftChanges
+})
+const publishDataSummaryText = computed(() => {
+  if (dataStatus.value?.draft.hasDraftChanges) {
+    return `${dataStatus.value.draft.changesCount} cambio(s) de contenido listos para publicar en GitHub.`
+  }
+
+  return 'No hay cambios pendientes en /data.'
+})
 
 function closeSidebar() {
   open.value = false
+}
+
+async function syncDataWorkspace(force = false) {
+  if (!siteCms.value?.site.id || isSyncingData.value) {
+    return null
+  }
+
+  isSyncingData.value = true
+
+  try {
+    const result = await $fetch<{ data: SiteDataSyncResult }>(
+      `/api/sites/${siteCms.value.site.id}/data/sync`,
+      {
+        method: 'POST',
+        body: { force },
+      },
+    )
+
+    await refreshDataStatus()
+    return result
+  } catch (error) {
+    toast.add({
+      title: 'No se pudo sincronizar data',
+      description:
+        error instanceof Error ? error.message : 'Error inesperado al sincronizar /data.',
+      color: 'error',
+      icon: 'i-lucide-triangle-alert',
+    })
+    return null
+  } finally {
+    isSyncingData.value = false
+  }
+}
+
+async function publishData() {
+  if (!siteCms.value?.site.id || !canPublishData.value) {
+    return
+  }
+
+  isPublishingData.value = true
+
+  try {
+    const response = await $fetch<{ data: { published: boolean } }>(
+      `/api/sites/${siteCms.value.site.id}/data/publish`,
+      {
+        method: 'POST',
+      },
+    )
+
+    await refreshDataStatus()
+
+    toast.add({
+      title: response.data.published ? 'Contenido publicado' : 'Sin cambios por publicar',
+      description: response.data.published
+        ? 'La carpeta /data fue sincronizada con GitHub.'
+        : 'GitHub ya estaba sincronizado con el workspace draft de /data.',
+      color: response.data.published ? 'success' : 'neutral',
+      icon: response.data.published ? 'i-lucide-check' : 'i-lucide-info',
+    })
+  } catch (error) {
+    toast.add({
+      title: 'No se pudo publicar /data',
+      description: error instanceof Error ? error.message : 'Error inesperado al publicar.',
+      color: 'error',
+      icon: 'i-lucide-triangle-alert',
+    })
+  } finally {
+    isPublishingData.value = false
+  }
 }
 
 async function publishSchemas() {
@@ -307,4 +430,38 @@ const supportLinks = computed<NavigationMenuItem[]>(() => [
       ]
     : []),
 ])
+
+onMounted(() => {
+  watch(siteId, () => refreshDataStatus(), { immediate: true })
+
+  watch(
+    () => siteCms.value?.site.id,
+    async (siteId) => {
+      if (!siteId || hasSyncedDataOnLoad.value) {
+        return
+      }
+
+      hasSyncedDataOnLoad.value = true
+      const result = await syncDataWorkspace(false)
+
+      if (!result?.data.requiresConfirmation || !import.meta.client) {
+        return
+      }
+
+      const shouldForceSync = window.confirm(
+        'Hay diferencias entre /data local y GitHub. Deseas sobrescribir el draft local con GitHub?',
+      )
+
+      if (!shouldForceSync) {
+        return
+      }
+
+      await syncDataWorkspace(true)
+      await refreshSiteCms()
+      await refreshDataStatus()
+      await refreshNuxtData(`site-cms-${slug.value}`)
+    },
+    { immediate: true },
+  )
+})
 </script>
