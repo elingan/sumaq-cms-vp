@@ -6,7 +6,7 @@ import { getRepoFileContent, listCmsSchemas } from '#server/utils/github'
 
 type SiteRecord = InferSelectModel<typeof sites>
 
-const LEGACY_BLOB_CMS_PREFIX = 'site/cms/'
+const LEGACY_BLOB_CMS_PREFIX = 'sites/template/cms/'
 const CMS_FILE_PATTERN = /^(page|collection)\.(.+)\.yaml$/i
 
 interface BlobListItem {
@@ -34,7 +34,7 @@ function getSiteSlug(site: SiteRecord) {
 }
 
 export function getSiteCmsBlobPrefix(site: SiteRecord) {
-  return `site/${getSiteSlug(site)}/cms/`
+  return `sites/${getSiteSlug(site)}/cms/`
 }
 
 export function buildCmsFileName(type: 'page' | 'collection', name: string) {

@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "title": "Impressum",
+    "description": "asasas"
+  },
+  "brand": {
+    "name": "asasas",
+    "logo": "https://placehold.co/100x100",
+    "link": "/#"
+  },
+  "navigation": {
+    "items": [
+      {
+        "label": "demo",
+        "link": "/demo",
+        "order": 0
+      }
+    ]
+  },
+  "impressum": {
+    "id": "aaaa",
+    "title": "ssss",
+    "body": "<p>Esto es el body</p><p><em>Muy</em> <strong>chivo</strong></p>"
+  },
+  "footer": {
+    "copy": "sasasas",
+    "legal": []
+  }
+}

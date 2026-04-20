@@ -112,7 +112,7 @@
             color="warning"
             variant="subtle"
             title="Using example CMS content"
-            :description="`No se encontro la carpeta /cms en el repositorio. Se usara el workspace draft en Blob bajo /site/${slug}/cms.`"
+            :description="`No se encontro la carpeta /cms en el repositorio. Se usara el workspace draft en Blob bajo /sites/${slug}/cms.`"
           />
 
           <UAlert

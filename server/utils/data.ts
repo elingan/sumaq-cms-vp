@@ -28,7 +28,7 @@ function getSiteSlug(site: SiteRecord) {
 }
 
 export function getSiteDataBlobPrefix(site: SiteRecord) {
-  return `site/${getSiteSlug(site)}/data/`
+  return `sites/${getSiteSlug(site)}/data/`
 }
 
 export function buildPageDataFileName(name: string) {

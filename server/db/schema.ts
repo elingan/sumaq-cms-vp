@@ -3,11 +3,50 @@ import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlit
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
-export const userRoleValues = ['admin', 'partner', 'owner', 'editor'] as const
-export const siteUserRoleValues = ['owner', 'editor', 'partner'] as const
-export const siteStatusValues = ['active', 'archived'] as const
-export const pageStatusValues = ['draft', 'published'] as const
-export const passwordResetPurposeValues = ['invite', 'reset'] as const
+export const UserRole = {
+  Admin: 'admin',
+  Partner: 'partner',
+  Owner: 'owner',
+  Editor: 'editor',
+} as const
+
+export type UserRoleValue = (typeof UserRole)[keyof typeof UserRole]
+
+export const SiteUserRole = {
+  Owner: 'owner',
+  Editor: 'editor',
+  Partner: 'partner',
+} as const
+
+export type SiteUserRoleValue = (typeof SiteUserRole)[keyof typeof SiteUserRole]
+
+export const SiteStatus = {
+  Active: 'active',
+  Archived: 'archived',
+} as const
+
+export type SiteStatusValue = (typeof SiteStatus)[keyof typeof SiteStatus]
+
+export const PageStatus = {
+  Draft: 'draft',
+  Published: 'published',
+} as const
+
+export type PageStatusValue = (typeof PageStatus)[keyof typeof PageStatus]
+
+export const PasswordResetPurpose = {
+  Invite: 'invite',
+  Reset: 'reset',
+} as const
+
+export type PasswordResetPurposeValue =
+  (typeof PasswordResetPurpose)[keyof typeof PasswordResetPurpose]
+
+export const UserRoleValues = ['admin', 'partner', 'owner', 'editor'] as const
+export const SiteUserRoleValues = ['owner', 'editor', 'partner'] as const
+export const SiteStatusValues = ['active', 'archived'] as const
+export const PageStatusValues = ['draft', 'published'] as const
+export const PasswordResetPurposeValues = ['invite', 'reset'] as const
 
 type JsonRecord = Record<string, unknown>
 
@@ -20,7 +59,7 @@ export const users = sqliteTable('users', {
   email: text('email').unique().notNull(),
   password: text('password'),
   name: text('name'),
-  role: text('role', { enum: userRoleValues }).notNull().default('editor'),
+  role: text('role', { enum: UserRoleValues }).notNull().default(UserRole.Editor),
   githubData: text('github_data', { mode: 'json' }).$type<JsonRecord | null>(),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
@@ -46,7 +85,7 @@ export const sites = sqliteTable('sites', {
   vercelProjectId: text('vercel_project_id'),
   vercelUrl: text('vercel_url'),
   template: text('template').notNull().default('blank'),
-  status: text('status', { enum: siteStatusValues }).notNull().default('active'),
+  status: text('status', { enum: SiteStatusValues }).notNull().default(SiteStatus.Active),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),
@@ -64,7 +103,7 @@ export const siteUsers = sqliteTable(
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    role: text('role', { enum: siteUserRoleValues }).notNull(),
+    role: text('role', { enum: SiteUserRoleValues }).notNull(),
     createdAt: integer('created_at', { mode: 'timestamp' })
       .notNull()
       .default(sql`(unixepoch())`),
@@ -86,7 +125,7 @@ export const pages = sqliteTable(
     title: text('title'),
     contentJson: text('content_json', { mode: 'json' }).$type<JsonRecord | null>(),
     schemaYaml: text('schema_yaml'),
-    status: text('status', { enum: pageStatusValues }).notNull().default('draft'),
+    status: text('status', { enum: PageStatusValues }).notNull().default(PageStatus.Draft),
     publishedAt: integer('published_at', { mode: 'timestamp' }),
     createdAt: integer('created_at', { mode: 'timestamp' })
       .notNull()
@@ -158,7 +197,7 @@ export const passwordResets = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     tokenHash: text('token_hash').unique().notNull(),
-    purpose: text('purpose', { enum: passwordResetPurposeValues }).notNull(),
+    purpose: text('purpose', { enum: PasswordResetPurposeValues }).notNull(),
     expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
     usedAt: integer('used_at', { mode: 'timestamp' }),
     createdAt: integer('created_at', { mode: 'timestamp' })

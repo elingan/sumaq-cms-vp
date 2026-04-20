@@ -20,7 +20,7 @@
           v-for="field in section.fields"
           :key="field.key"
           :field="field"
-          :model-value="(formState[section.key] as Record<string, unknown>)?.[field.key]"
+          :model-value="formState[section.key]?.[field.key]"
           :error="fieldError(section.key, field.key)"
           @update:model-value="updateField(section.key, field.key, $event)"
         />
@@ -34,13 +34,13 @@
 </template>
 
 <script setup lang="ts">
-import type { SchemaSection } from '#shared/types/schema'
+import type { SchemaSection, FormState } from '#shared/types/schema'
 
 const { t } = useI18n()
 
 interface Props {
   sections: SchemaSection[]
-  modelValue?: Record<string, unknown>
+  modelValue?: FormState
   isSaving?: boolean
 }
 
@@ -50,8 +50,8 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: Record<string, unknown>): void
-  (e: 'submit', value: Record<string, unknown>): void
+  (e: 'update:modelValue', value: FormState): void
+  (e: 'submit', value: FormState): void
 }>()
 
 const errors = ref<Record<string, string>>({})
@@ -62,7 +62,7 @@ function updateField(sectionKey: string, fieldKey: string, value: unknown) {
   const updated = {
     ...formState.value,
     [sectionKey]: {
-      ...(formState.value[sectionKey] as Record<string, unknown>),
+      ...formState.value[sectionKey],
       [fieldKey]: value,
     },
   }

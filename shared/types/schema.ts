@@ -43,3 +43,9 @@ export interface SchemaSection {
   icon?: string
   fields: SchemaField[]
 }
+
+export type SchemaFieldValue = unknown
+
+export type SectionFormState = Record<string, SchemaFieldValue>
+
+export type FormState = Record<string, SectionFormState>

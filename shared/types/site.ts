@@ -1,5 +1,6 @@
-export type SiteStatus = 'active' | 'archived'
-export type SiteUserRole = 'owner' | 'editor' | 'partner'
+import type { SiteStatusValue, SiteUserRoleValue } from './roles'
+
+export type { SiteStatusValue as SiteStatus, SiteUserRoleValue as SiteUserRole }
 
 export interface Site {
   id: string
@@ -15,7 +16,7 @@ export interface Site {
   vercelProjectId: string | null
   vercelUrl: string | null
   template: string
-  status: SiteStatus
+  status: SiteStatusValue
   createdAt: Date
   updatedAt: Date
 }
