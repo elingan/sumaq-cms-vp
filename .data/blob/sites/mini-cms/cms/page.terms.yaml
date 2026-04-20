@@ -1,0 +1,50 @@
+slug:
+  label: Slug
+  description: Route slug for the terms page
+  fields:
+    - id: value
+      label: Slug
+      type: string
+
+title:
+  label: Title
+  description: Main page title
+  fields:
+    - id: value
+      label: Title
+      type: string
+
+description:
+  label: Description
+  description: Short page description
+  fields:
+    - id: value
+      label: Description
+      type: text
+
+updatedAt:
+  label: Updated At
+  description: Last update date
+  fields:
+    - id: value
+      label: Date
+      type: string
+
+sections:
+  label: Sections
+  description: Terms content blocks
+  fields:
+    - id: items
+      label: Sections
+      type: list
+      fields:
+        - id: heading
+          label: Heading
+          type: string
+        - id: paragraphs
+          label: Paragraphs
+          type: list
+          fields:
+            - id: value
+              label: Paragraph
+              type: text

@@ -193,6 +193,8 @@ watch(
   () => props.open,
   (open) => {
     if (!open) return
+    resetStateFromProps(props.site ?? {})
+    githubError.value = null
     loadGitHubData()
   },
 )

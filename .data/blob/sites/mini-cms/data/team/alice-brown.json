@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "slug": "alice-brown",
+    "title": "Alice Brown",
+    "date": "2026-04-20",
+    "author": "Editorial Team",
+    "published": true
+  },
+  "content": {
+    "excerpt": "Product strategist focused on turning ideas into validated outcomes.",
+    "body": "Alice leads discovery and product strategy. She works with teams to prioritize roadmap initiatives, validate assumptions, and align delivery with measurable impact.",
+    "image": "https://picsum.photos/seed/alice/800/500"
+  },
+  "seo": {
+    "tags": ["Tech", "Business"],
+    "category": "Tech"
+  }
+}

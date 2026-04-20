@@ -1,0 +1,36 @@
+{
+  "slug": "privacy",
+  "title": "Privacy Policy",
+  "description": "How we collect, use, and protect personal information.",
+  "updatedAt": "2026-03-21",
+  "sections": [
+    {
+      "heading": "Information We Collect",
+      "paragraphs": [
+        "We collect only the information needed to provide and improve our services.",
+        "This may include contact details, project requirements, and analytics events."
+      ]
+    },
+    {
+      "heading": "How We Use Information",
+      "paragraphs": [
+        "We use your data to respond to inquiries, deliver services, and maintain security.",
+        "We do not sell personal information to third parties."
+      ]
+    },
+    {
+      "heading": "Data Retention",
+      "paragraphs": [
+        "We keep personal data only for as long as needed for legal, operational, or contractual reasons.",
+        "You can request deletion of your personal data at any time, subject to legal obligations."
+      ]
+    },
+    {
+      "heading": "Your Rights",
+      "paragraphs": [
+        "You may request access, correction, export, or deletion of your personal data.",
+        "Contact us by email to submit a privacy-related request."
+      ]
+    }
+  ]
+}

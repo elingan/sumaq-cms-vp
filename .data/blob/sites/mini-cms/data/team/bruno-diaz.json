@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "slug": "bruno-diaz",
+    "title": "Bruno Diaz",
+    "date": "2026-04-19",
+    "author": "Editorial Team",
+    "published": true
+  },
+  "content": {
+    "excerpt": "Frontend engineer crafting performant interfaces and design systems.",
+    "body": "Bruno builds accessible UI architectures and component libraries. His work improves development speed while preserving consistency across pages and products.",
+    "image": "https://picsum.photos/seed/bruno/800/500"
+  },
+  "seo": {
+    "tags": ["Tutorial", "Review"],
+    "category": "Tutorial"
+  }
+}

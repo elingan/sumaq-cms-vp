@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "slug": "carla-mendez",
+    "title": "Carla Mendez",
+    "date": "2026-04-18",
+    "author": "Editorial Team",
+    "published": false
+  },
+  "content": {
+    "excerpt": "Operations lead coordinating delivery quality and client communication.",
+    "body": "Carla coordinates timelines, quality checkpoints, and stakeholder updates. She ensures every project phase has clear ownership and predictable delivery.",
+    "image": "https://picsum.photos/seed/carla/800/500"
+  },
+  "seo": {
+    "tags": ["News", "Business"],
+    "category": "News"
+  }
+}

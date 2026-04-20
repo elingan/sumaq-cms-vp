@@ -1,1 +1,377 @@
-{}
+{
+  "name": "Professional Portfolio Template",
+  "language": "en",
+  "meta": {
+    "title": "Professional Portfolio - Your Name",
+    "description": "Professional services and expertise in your field",
+    "keywords": "professional, services, expertise, consulting",
+    "author": "Your Name",
+    "robots": "index, follow",
+    "theme": "light",
+    "siteUrl": "https://sumaq.site",
+    "image": "https://placehold.co/800x600",
+    "locale": "en_US",
+    "social": {
+      "openGraph": {
+        "type": "website"
+      },
+      "twitter": {
+        "card": "summary_large_image",
+        "site": "@yourbrand",
+        "creator": "@yourname"
+      }
+    },
+    "seo": {
+      "robots": "index, follow",
+      "validation": {
+        "enabled": true,
+        "minTitleLength": 30,
+        "minDescriptionLength": 120,
+        "requireImage": true
+      }
+    }
+  },
+  "brand": {
+    "name": "Your Name",
+    "tagline": "Your Professional Tagline",
+    "logo": "https://placehold.co/80x80",
+    "link": "#"
+  },
+  "navigation": [
+    {
+      "label": "About",
+      "link": "#about",
+      "order": 1
+    },
+    {
+      "label": "Services",
+      "link": "#services",
+      "order": 2
+    },
+    {
+      "label": "Approach",
+      "link": "#approach",
+      "order": 3
+    },
+    {
+      "label": "Portfolio",
+      "link": "#portfolio",
+      "order": 4
+    },
+    {
+      "label": "Gallery",
+      "link": "#gallery",
+      "order": 5
+    },
+    {
+      "label": "Contact",
+      "link": "#contact",
+      "order": 6
+    }
+  ],
+  "welcome": {
+    "anchor": "home",
+    "headline": "Hello, I'm",
+    "title": "Welcome, I'm [Your Name]",
+    "subtitle": "Your Professional Title or Specialty",
+    "description": "Brief introduction about what you do and your value proposition",
+    "tagline": "Professional services with a personal touch",
+    "cta": {
+      "primary": {
+        "text": "Get In Touch",
+        "link": "#contact"
+      },
+      "secondary": {
+        "text": "Learn More",
+        "link": "#about"
+      }
+    },
+    "media": {
+      "image": "https://picsum.photos/id/100/600/400",
+      "name": "Main image"
+    }
+  },
+  "about": {
+    "anchor": "about",
+    "headline": "Who are you?",
+    "icon": "icon",
+    "title": "About Me",
+    "subtitle": "Getting to know the professional behind the services",
+    "description": "Your professional background and personal story",
+    "highlights": {
+      "title": "Key Highlights",
+      "subtitle": "What sets me apart",
+      "items": [
+        {
+          "title": "Experience",
+          "description": "Years of experience in your field",
+          "icon": "icon"
+        },
+        {
+          "title": "Education",
+          "description": "Your educational background and certifications",
+          "icon": "icon"
+        },
+        {
+          "title": "Expertise",
+          "description": "Your core areas of expertise",
+          "icon": "icon"
+        }
+      ]
+    },
+    "quote": {
+      "texto": "A more personal touch about your values and what drives you",
+      "author": "Your Name"
+    },
+    "credentials": [
+      {
+        "title": "Degree/Certification Name",
+        "institution": "Institution Name",
+        "year": "Year"
+      }
+    ],
+    "media": {
+      "image": "https://placehold.co/400x500",
+      "name": "About me image"
+    }
+  },
+  "services": {
+    "anchor": "services",
+    "headline": "What do you do?",
+    "icon": "icon",
+    "title": "My Services",
+    "subtitle": "How I can help you achieve your goals",
+    "description": "Overview of your service philosophy and approach",
+    "offerings": [
+      {
+        "icon": "icon",
+        "name": "Service Name 1",
+        "description": "Detailed description of this service",
+        "features": ["Key feature 1", "Key feature 2", "Key feature 3"]
+      },
+      {
+        "icon": "icon",
+        "name": "Service Name 2",
+        "description": "Detailed description of this service",
+        "features": ["Key feature 1", "Key feature 2", "Key feature 3"]
+      }
+    ]
+  },
+  "approach": {
+    "anchor": "approach",
+    "icon": "icon",
+    "headline": "How do you do it?",
+    "title": "My Approach",
+    "subtitle": "The methodology behind successful outcomes",
+    "description": "Your professional philosophy and core beliefs about your work",
+    "process": [
+      {
+        "step": 1,
+        "title": "Discovery",
+        "description": "Understanding your needs and objectives",
+        "icon": "icon"
+      },
+      {
+        "step": 2,
+        "title": "Strategy",
+        "description": "Developing a tailored approach",
+        "icon": "icon"
+      },
+      {
+        "step": 3,
+        "title": "Implementation",
+        "description": "Executing the plan with precision",
+        "icon": "icon"
+      }
+    ]
+  },
+  "portfolio": {
+    "anchor": "portfolio",
+    "icon": "icon",
+    "title": "My Work",
+    "subtitle": "Recent projects and case studies",
+    "description": "A showcase of successful projects and the results achieved",
+    "projects": [
+      {
+        "title": "Project Title 1",
+        "description": "Brief description of the project and its objectives",
+        "link": "#",
+        "media": {
+          "image": "https://picsum.photos/800/450?random=20",
+          "name": "Main project showcase"
+        }
+      },
+      {
+        "title": "Project Title 2",
+        "description": "Brief description of the project and its objectives",
+        "link": "#",
+        "media": {
+          "image": "https://picsum.photos/800/450?random=21",
+          "name": "Main project showcase"
+        }
+      }
+    ]
+  },
+  "gallery": {
+    "anchor": "gallery",
+    "title": "Gallery",
+    "subtitle": "A visual journey through our work",
+    "images": [
+      {
+        "src": "https://picsum.photos/id/10/400/300",
+        "alt": "Project showcase 1",
+        "caption": "Creative design process"
+      },
+      {
+        "src": "https://picsum.photos/id/11/400/300",
+        "alt": "Project showcase 2",
+        "caption": "Team collaboration"
+      },
+      {
+        "src": "https://picsum.photos/id/12/400/300",
+        "alt": "Project showcase 3",
+        "caption": "Development in action"
+      },
+      {
+        "src": "https://picsum.photos/id/13/400/300",
+        "alt": "Project showcase 4",
+        "caption": "Final product reveal"
+      },
+      {
+        "src": "https://picsum.photos/id/14/400/300",
+        "alt": "Project showcase 5",
+        "caption": "Client presentation"
+      },
+      {
+        "src": "https://picsum.photos/id/16/400/300",
+        "alt": "Project showcase 6",
+        "caption": "Design iteration"
+      },
+      {
+        "src": "https://picsum.photos/id/27/400/300",
+        "alt": "Project showcase 7",
+        "caption": "Creative workspace"
+      },
+      {
+        "src": "https://picsum.photos/id/00/400/300",
+        "alt": "Project showcase 8",
+        "caption": "Project milestone"
+      }
+    ]
+  },
+  "testimonials": {
+    "anchor": "testimonials",
+    "title": "What Clients Say",
+    "subtitle": "Feedback from satisfied clients",
+    "stats": {
+      "totalClients": 50,
+      "averageRating": 4.9,
+      "projectsCompleted": 75,
+      "yearsExperience": 8
+    },
+    "reviews": [
+      {
+        "id": "review-1",
+        "content": "Working with this team was an exceptional experience. Their expertise and attention to detail resulted in outcomes that exceeded our expectations.",
+        "rating": 5,
+        "client": {
+          "name": "Sarah Johnson",
+          "title": "CEO",
+          "company": "TechStart Inc.",
+          "avatar": "https://picsum.photos/80/80?random=10"
+        },
+        "featured": true,
+        "verified": true
+      },
+      {
+        "id": "review-2",
+        "content": "The professionalism and quality of work delivered was outstanding. I would highly recommend their services to anyone looking for results.",
+        "rating": 5,
+        "client": {
+          "name": "Michael Chen",
+          "title": "Product Manager",
+          "company": "InnovateCo",
+          "avatar": "https://picsum.photos/80/80?random=11"
+        },
+        "featured": true,
+        "verified": true
+      },
+      {
+        "id": "review-3",
+        "content": "Excellent communication throughout the project and delivered exactly what was promised on time and within budget.",
+        "rating": 5,
+        "client": {
+          "name": "Emily Davis",
+          "title": "Marketing Director",
+          "company": "GrowthLabs",
+          "avatar": "https://picsum.photos/80/80?random=12"
+        },
+        "featured": false,
+        "verified": true
+      },
+      {
+        "id": "review-4",
+        "content": "A truly transformative partnership. They understood our vision from day one and brought it to life beautifully.",
+        "rating": 5,
+        "client": {
+          "name": "David Wilson",
+          "title": "Founder",
+          "company": "StartupHub",
+          "avatar": "https://picsum.photos/80/80?random=13"
+        },
+        "featured": true,
+        "verified": true
+      }
+    ]
+  },
+  "contact": {
+    "anchor": "contact",
+    "icon": "icon",
+    "headline": "Where are you?",
+    "title": "Get In Touch",
+    "subtitle": "Let's discuss how we can work together",
+    "description": "Brief message encouraging contact",
+    "email": {
+      "icon": "icon",
+      "label": "Email",
+      "value": "your.email@domain.com"
+    },
+    "phone": {
+      "icon": "icon",
+      "label": "Phone",
+      "value": "+1 (555) 123-4567"
+    },
+    "address": {
+      "street": "123 Your Street",
+      "city": "Your City",
+      "state": "Your State/Province",
+      "country": "Your Country"
+    }
+  },
+  "footer": {
+    "copyright": "© Your Name. All rights reserved.",
+    "tagline": "Professional services with a personal touch",
+    "social": [
+      {
+        "platform": "linkedin",
+        "link": "https://linkedin.com/in/yourprofile",
+        "icon": "linkedin"
+      },
+      {
+        "platform": "twitter",
+        "link": "https://twitter.com/yourhandle",
+        "icon": "twitter"
+      }
+    ],
+    "legal": [
+      {
+        "label": "Privacy Policy",
+        "link": "/privacy"
+      },
+      {
+        "label": "Terms of Service",
+        "link": "/terms"
+      }
+    ]
+  }
+}

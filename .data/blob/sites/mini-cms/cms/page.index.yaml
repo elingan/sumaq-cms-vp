@@ -1,19 +1,107 @@
+name:
+  label: Site Name
+  description: Top-level site name
+  fields:
+    - id: value
+      label: Name
+      type: string
+
+language:
+  label: Language
+  description: Content language code
+  fields:
+    - id: value
+      label: Language
+      type: string
+
 meta:
   label: Metadata
-  description: Configuration schema for CMS pages
+  description: SEO and social metadata
   fields:
     - id: title
       label: Title
       type: string
     - id: description
       label: Description
+      type: text
+    - id: keywords
+      label: Keywords
       type: string
+    - id: author
+      label: Author
+      type: string
+    - id: robots
+      label: Robots
+      type: string
+    - id: theme
+      label: Theme
+      type: string
+    - id: siteUrl
+      label: Site URL
+      type: url
+    - id: image
+      label: Default Image
+      type: image
+    - id: locale
+      label: Locale
+      type: string
+    - id: social
+      label: Social
+      type: object
+      fields:
+        - id: openGraph
+          label: Open Graph
+          type: object
+          fields:
+            - id: type
+              label: Type
+              type: string
+        - id: twitter
+          label: Twitter
+          type: object
+          fields:
+            - id: card
+              label: Card
+              type: string
+            - id: site
+              label: Site
+              type: string
+            - id: creator
+              label: Creator
+              type: string
+    - id: seo
+      label: SEO
+      type: object
+      fields:
+        - id: robots
+          label: Robots
+          type: string
+        - id: validation
+          label: Validation
+          type: object
+          fields:
+            - id: enabled
+              label: Enabled
+              type: boolean
+            - id: minTitleLength
+              label: Minimum Title Length
+              type: number
+            - id: minDescriptionLength
+              label: Minimum Description Length
+              type: number
+            - id: requireImage
+              label: Require Image
+              type: boolean
+
 brand:
   label: Brand
-  description: Configuration schema for brand information
+  description: Brand identity
   fields:
     - id: name
       label: Name
+      type: string
+    - id: tagline
+      label: Tagline
       type: string
     - id: logo
       label: Logo
@@ -21,12 +109,13 @@ brand:
     - id: link
       label: Link
       type: url
+
 navigation:
   label: Navigation
-  description: Configuration schema for navigation menu
+  description: Main navigation items
   fields:
     - id: items
-      label: Menu Items
+      label: Items
       type: list
       fields:
         - id: label
@@ -35,75 +124,249 @@ navigation:
         - id: link
           label: Link
           type: url
+        - id: order
+          label: Order
+          type: number
+
 welcome:
   label: Welcome
-  description: Configuration schema for welcome section
+  description: Hero and intro content
   fields:
-    - id: id
-      label: ID
+    - id: anchor
+      label: Anchor
+      type: string
+    - id: headline
+      label: Headline
       type: string
     - id: title
       label: Title
       type: string
-    - id: description
-      label: Description
-      type: string
-about:
-  label: About
-  description: Configuration schema for about section
-  fields:
-    - id: id
-      label: ID
-      type: string
-    - id: title
-      label: Title
+    - id: subtitle
+      label: Subtitle
       type: string
     - id: description
       label: Description
       type: text
-    - id: content
-      label: Rich Content
-      type: richtext
-    - id: category
-      label: Category
-      type: select
-      options:
-        values: [Tech, News, Sports]
-    - id: author
-      label: Author
-      type: select
-      options:
-        values:
-          - value: bob
-            label: Bob Smith
-          - value: patricia
-            label: Patricia Wills
-          - value: alice
-            label: Alice Brown
-    - id: tags
-      label: Tags
-      type: select
-      options:
-        multiple: true
-        values: [Tech, News, Sports, Business, Entertainment]
-    # - id: media
-    #   label: Media
-    #   type: media
-    # fields:
-    #   - id: type
-    #     label: Type
-    #     type: select
-    #     options:
-    #       - image
-    #       - video
-    #   - id: name
-    #     label: Name
-    #     type: string
-    #   - id: link
-    #     label: Link
-    #     type: url
-    - id: features
-      label: Features
+    - id: tagline
+      label: Tagline
+      type: string
+    - id: cta
+      label: Call To Action
+      type: object
+      fields:
+        - id: primary
+          label: Primary Button
+          type: object
+          fields:
+            - id: text
+              label: Text
+              type: string
+            - id: link
+              label: Link
+              type: url
+        - id: secondary
+          label: Secondary Button
+          type: object
+          fields:
+            - id: text
+              label: Text
+              type: string
+            - id: link
+              label: Link
+              type: url
+    - id: media
+      label: Media
+      type: object
+      fields:
+        - id: image
+          label: Image
+          type: image
+        - id: name
+          label: Image Name
+          type: string
+
+about:
+  label: About
+  description: About section content
+  fields:
+    - id: anchor
+      label: Anchor
+      type: string
+    - id: headline
+      label: Headline
+      type: string
+    - id: icon
+      label: Icon
+      type: string
+    - id: title
+      label: Title
+      type: string
+    - id: subtitle
+      label: Subtitle
+      type: string
+    - id: description
+      label: Description
+      type: text
+    - id: highlights
+      label: Highlights
+      type: object
+      fields:
+        - id: title
+          label: Title
+          type: string
+        - id: subtitle
+          label: Subtitle
+          type: string
+        - id: items
+          label: Items
+          type: list
+          fields:
+            - id: title
+              label: Title
+              type: string
+            - id: description
+              label: Description
+              type: text
+            - id: icon
+              label: Icon
+              type: string
+    - id: quote
+      label: Quote
+      type: object
+      fields:
+        - id: texto
+          label: Text
+          type: text
+        - id: author
+          label: Author
+          type: string
+    - id: credentials
+      label: Credentials
+      type: list
+      fields:
+        - id: title
+          label: Title
+          type: string
+        - id: institution
+          label: Institution
+          type: string
+        - id: year
+          label: Year
+          type: string
+    - id: media
+      label: Media
+      type: object
+      fields:
+        - id: image
+          label: Image
+          type: image
+        - id: name
+          label: Image Name
+          type: string
+
+services:
+  label: Services
+  description: Services and offerings
+  fields:
+    - id: anchor
+      label: Anchor
+      type: string
+    - id: headline
+      label: Headline
+      type: string
+    - id: icon
+      label: Icon
+      type: string
+    - id: title
+      label: Title
+      type: string
+    - id: subtitle
+      label: Subtitle
+      type: string
+    - id: description
+      label: Description
+      type: text
+    - id: offerings
+      label: Offerings
+      type: list
+      fields:
+        - id: icon
+          label: Icon
+          type: string
+        - id: name
+          label: Name
+          type: string
+        - id: description
+          label: Description
+          type: text
+        - id: features
+          label: Features
+          type: list
+          fields:
+            - id: value
+              label: Feature
+              type: string
+
+approach:
+  label: Approach
+  description: Methodology and process
+  fields:
+    - id: anchor
+      label: Anchor
+      type: string
+    - id: icon
+      label: Icon
+      type: string
+    - id: headline
+      label: Headline
+      type: string
+    - id: title
+      label: Title
+      type: string
+    - id: subtitle
+      label: Subtitle
+      type: string
+    - id: description
+      label: Description
+      type: text
+    - id: process
+      label: Process
+      type: list
+      fields:
+        - id: step
+          label: Step
+          type: number
+        - id: title
+          label: Title
+          type: string
+        - id: description
+          label: Description
+          type: text
+        - id: icon
+          label: Icon
+          type: string
+
+portfolio:
+  label: Portfolio
+  description: Project showcase
+  fields:
+    - id: anchor
+      label: Anchor
+      type: string
+    - id: icon
+      label: Icon
+      type: string
+    - id: title
+      label: Title
+      type: string
+    - id: subtitle
+      label: Subtitle
+      type: string
+    - id: description
+      label: Description
+      type: text
+    - id: projects
+      label: Projects
       type: list
       fields:
         - id: title
@@ -111,44 +374,201 @@ about:
           type: string
         - id: description
           label: Description
-          type: string
-profile:
-  label: Profile
-  description: Configuration schema for profile section
+          type: text
+        - id: link
+          label: Link
+          type: url
+        - id: media
+          label: Media
+          type: object
+          fields:
+            - id: image
+              label: Image
+              type: image
+            - id: name
+              label: Image Name
+              type: string
+
+gallery:
+  label: Gallery
+  description: Gallery image grid
   fields:
-    - id: id
-      label: ID
+    - id: anchor
+      label: Anchor
       type: string
     - id: title
       label: Title
       type: string
-    - id: contact
-      label: Contacto
+    - id: subtitle
+      label: Subtitle
+      type: string
+    - id: images
+      label: Images
+      type: list
+      fields:
+        - id: src
+          label: Image URL
+          type: image
+        - id: alt
+          label: Alt Text
+          type: string
+        - id: caption
+          label: Caption
+          type: string
+
+testimonials:
+  label: Testimonials
+  description: Client reviews and stats
+  fields:
+    - id: anchor
+      label: Anchor
+      type: string
+    - id: title
+      label: Title
+      type: string
+    - id: subtitle
+      label: Subtitle
+      type: string
+    - id: stats
+      label: Stats
       type: object
       fields:
-        - id: email
-          label: Email
+        - id: totalClients
+          label: Total Clients
+          type: number
+        - id: averageRating
+          label: Average Rating
+          type: number
+        - id: projectsCompleted
+          label: Projects Completed
+          type: number
+        - id: yearsExperience
+          label: Years Experience
+          type: number
+    - id: reviews
+      label: Reviews
+      type: list
+      fields:
+        - id: id
+          label: ID
           type: string
-        - id: phone
-          label: Teléfono
-          type: string
-        - id: address
-          label: Dirección
+        - id: content
+          label: Content
+          type: text
+        - id: rating
+          label: Rating
+          type: number
+        - id: client
+          label: Client
           type: object
           fields:
-            - id: email
-              label: Email
+            - id: name
+              label: Name
               type: string
-            - id: city
-              label: Ciudad
+            - id: title
+              label: Title
               type: string
+            - id: company
+              label: Company
+              type: string
+            - id: avatar
+              label: Avatar
+              type: image
+        - id: featured
+          label: Featured
+          type: boolean
+        - id: verified
+          label: Verified
+          type: boolean
+
+contact:
+  label: Contact
+  description: Contact information section
+  fields:
+    - id: anchor
+      label: Anchor
+      type: string
+    - id: icon
+      label: Icon
+      type: string
+    - id: headline
+      label: Headline
+      type: string
+    - id: title
+      label: Title
+      type: string
+    - id: subtitle
+      label: Subtitle
+      type: string
+    - id: description
+      label: Description
+      type: text
+    - id: email
+      label: Email
+      type: object
+      fields:
+        - id: icon
+          label: Icon
+          type: string
+        - id: label
+          label: Label
+          type: string
+        - id: value
+          label: Value
+          type: string
+    - id: phone
+      label: Phone
+      type: object
+      fields:
+        - id: icon
+          label: Icon
+          type: string
+        - id: label
+          label: Label
+          type: string
+        - id: value
+          label: Value
+          type: string
+    - id: address
+      label: Address
+      type: object
+      fields:
+        - id: street
+          label: Street
+          type: string
+        - id: city
+          label: City
+          type: string
+        - id: state
+          label: State
+          type: string
+        - id: country
+          label: Country
+          type: string
+
 footer:
   label: Footer
-  description: Configuration schema for footer section
+  description: Footer content and links
   fields:
-    - id: copy
-      label: Copyright Text
+    - id: copyright
+      label: Copyright
       type: string
+    - id: tagline
+      label: Tagline
+      type: string
+    - id: social
+      label: Social Links
+      type: list
+      fields:
+        - id: platform
+          label: Platform
+          type: string
+        - id: link
+          label: Link
+          type: url
+        - id: icon
+          label: Icon
+          type: string
     - id: legal
       label: Legal Links
       type: list

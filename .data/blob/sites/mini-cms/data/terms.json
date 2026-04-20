@@ -1,0 +1,36 @@
+{
+  "slug": "terms",
+  "title": "Terms of Service",
+  "description": "Conditions for using this website and related services.",
+  "updatedAt": "2026-03-21",
+  "sections": [
+    {
+      "heading": "Acceptance of Terms",
+      "paragraphs": [
+        "By using this website, you agree to these terms and all applicable laws.",
+        "If you do not agree with these terms, please do not use the site."
+      ]
+    },
+    {
+      "heading": "Service Scope",
+      "paragraphs": [
+        "Service details, timelines, and deliverables are defined in individual agreements.",
+        "Any estimate shared before contract signature is non-binding."
+      ]
+    },
+    {
+      "heading": "Intellectual Property",
+      "paragraphs": [
+        "Unless otherwise agreed, each party retains ownership of pre-existing intellectual property.",
+        "Final deliverables transfer according to the signed agreement."
+      ]
+    },
+    {
+      "heading": "Limitation of Liability",
+      "paragraphs": [
+        "We are not liable for indirect, incidental, or consequential damages.",
+        "Total liability is limited to fees paid under the relevant agreement, where permitted by law."
+      ]
+    }
+  ]
+}
