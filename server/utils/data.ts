@@ -197,29 +197,29 @@ export async function getSiteDataSourceSnapshot(site: SiteRecord): Promise<SiteD
 }
 
 export function diffDataMaps(
-  sourceFiles: Record<string, string>,
   draftFiles: Record<string, string>,
+  sourceFiles: Record<string, string>,
 ): SiteDataDiffSummary {
   const added: string[] = []
   const modified: string[] = []
   const deleted: string[] = []
-  const fileNames = new Set([...Object.keys(sourceFiles), ...Object.keys(draftFiles)])
+  const fileNames = new Set([...Object.keys(draftFiles), ...Object.keys(sourceFiles)])
 
   for (const fileName of fileNames) {
-    const sourceContent = sourceFiles[fileName]
     const draftContent = draftFiles[fileName]
+    const sourceContent = sourceFiles[fileName]
 
-    if (sourceContent !== undefined && draftContent === undefined) {
+    if (draftContent !== undefined && sourceContent === undefined) {
       added.push(fileName)
       continue
     }
 
-    if (sourceContent === undefined && draftContent !== undefined) {
+    if (draftContent === undefined && sourceContent !== undefined) {
       deleted.push(fileName)
       continue
     }
 
-    if (sourceContent !== draftContent) {
+    if (draftContent !== sourceContent) {
       modified.push(fileName)
     }
   }
@@ -270,7 +270,7 @@ export async function getSiteDataDiff(site: SiteRecord) {
     getSiteDataSourceSnapshot(site),
   ])
 
-  return diffDataMaps(sourceSnapshot.files, draftFiles)
+  return diffDataMaps(draftFiles, sourceSnapshot.files)
 }
 
 export async function syncSiteDataWorkspace(
@@ -282,7 +282,7 @@ export async function syncSiteDataWorkspace(
     getSiteDataSourceSnapshot(site),
   ])
 
-  const diff = diffDataMaps(sourceSnapshot.files, draftFiles)
+  const diff = diffDataMaps(draftFiles, sourceSnapshot.files)
   const changesCount = diff.added.length + diff.modified.length + diff.deleted.length
 
   if (!changesCount) {
@@ -303,13 +303,13 @@ export async function syncSiteDataWorkspace(
     }
   }
 
-  if (diff.deleted.length) {
-    await deleteSiteDataFiles(site, diff.deleted)
+  if (diff.added.length) {
+    await deleteSiteDataFiles(site, diff.added)
   }
 
   await copyDataFilesToSite(
     site,
-    [...diff.added, ...diff.modified].map((fileName) => ({
+    [...diff.deleted, ...diff.modified].map((fileName) => ({
       fileName,
       content: sourceSnapshot.files[fileName] ?? '',
     })),

@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import { parse } from 'yaml'
 import type { SiteCmsNavigation } from '#shared/types/cms'
-import type { SchemaSection } from '#shared/types/schema'
-import type { FormState } from '#shared/types/schema'
-import { parseSections } from '#shared/utils/schema'
 
 definePageMeta({ layout: 'site' })
 
@@ -13,7 +9,7 @@ const toast = useToast()
 
 const slug = computed(() => route.params.slug as string)
 const collectionName = computed(() => route.params.name as string)
-const selectedEntrySlug = computed(() => (route.query.entry as string | undefined) ?? '')
+const selectedEntrySlug = computed(() => route.params.entry as string | undefined)
 
 const { data: siteCms, error: siteCmsError } = await useFetch<SiteCmsNavigation>(
   () => `/api/sites/slug/${slug.value}/cms`,
@@ -24,34 +20,35 @@ const { data: siteCms, error: siteCmsError } = await useFetch<SiteCmsNavigation>
 )
 
 const siteId = computed(() => siteCms.value?.site.id ?? null)
-
-const schemaState = useEditorState<SchemaSection[]>()
 const entriesState = useEditorState<string[]>()
-const entryState = useEditorState<FormState>()
 const draftSlug = ref('')
+const collectionExists = computed(() => {
+  return (siteCms.value?.collections ?? []).some((entry) => entry.name === collectionName.value)
+})
 
-function parseSchemaSections(raw: Record<string, unknown>): SchemaSection[] {
-  return parseSections(raw)
-}
+const collectionPath = computed(() => `/site/${slug.value}/collection/${collectionName.value}`)
 
-async function loadCollectionSchema() {
-  if (!siteId.value) return
-
-  schemaState.setLoading()
-  try {
-    const schemaText = await $fetch<string>(
-      `/api/sites/${siteId.value}/cms/schema/collection/${collectionName.value}`,
-      { responseType: 'text' },
-    )
-    const parsed = parse(schemaText) as Record<string, unknown>
-    schemaState.setSuccess(parseSchemaSections(parsed))
-  } catch (err) {
-    schemaState.setError(err instanceof Error ? err.message : 'Failed to load schema')
+const collectionError = computed(() => {
+  if (siteCmsError.value) {
+    return null
   }
+
+  if (siteCms.value && !collectionExists.value) {
+    return `La colección "${collectionName.value}" no existe.`
+  }
+
+  return entriesState.error.value
+})
+
+function buildEntryPath(entry: string) {
+  return `${collectionPath.value}/${entry}`
 }
 
 async function loadEntries() {
-  if (!siteId.value) return
+  if (!siteId.value || !collectionExists.value) {
+    entriesState.reset()
+    return
+  }
 
   entriesState.setLoading()
   try {
@@ -64,39 +61,34 @@ async function loadEntries() {
   }
 }
 
-async function loadSelectedEntry() {
-  if (!siteId.value || !selectedEntrySlug.value) {
-    entryState.reset()
+async function ensureSelectedEntry() {
+  const entries = entriesState.data.value ?? []
+
+  if (!entries.length) {
+    if (selectedEntrySlug.value) {
+      await router.replace(collectionPath.value)
+    }
     return
   }
 
-  entryState.setLoading()
-  try {
-    const response = await $fetch<{ data: { content: Record<string, unknown> } }>(
-      `/api/sites/${siteId.value}/data/collection/${collectionName.value}/${selectedEntrySlug.value}`,
-    )
-    entryState.setSuccess(response.data.content as FormState)
-  } catch (err) {
-    entryState.setError(err instanceof Error ? err.message : 'Failed to load entry')
+  if (selectedEntrySlug.value && entries.includes(selectedEntrySlug.value)) {
+    return
   }
-}
 
-async function loadCollectionEditor() {
-  if (!siteId.value) return
-
-  schemaState.setLoading()
-  entriesState.setLoading()
-
-  try {
-    await Promise.all([loadCollectionSchema(), loadEntries()])
-    await loadSelectedEntry()
-  } catch (err) {
-    schemaState.setError(err instanceof Error ? err.message : 'Failed to load collection')
+  if (selectedEntrySlug.value) {
+    toast.add({
+      title: 'Entrada no encontrada',
+      description: `La entrada "${selectedEntrySlug.value}" no existe en esta colección.`,
+      color: 'warning',
+      icon: 'i-lucide-info',
+    })
   }
+
+  await router.replace(buildEntryPath(entries[0] as string))
 }
 
 async function openEntry(nextSlug: string) {
-  await router.replace({ query: { ...route.query, entry: nextSlug } })
+  await router.push(buildEntryPath(nextSlug))
 }
 
 async function createEntry() {
@@ -112,7 +104,7 @@ async function createEntry() {
     return
   }
 
-  if (entriesState.data?.includes(normalized)) {
+  if (entriesState.data.value?.includes(normalized)) {
     toast.add({
       title: 'Slug duplicado',
       description: 'Ya existe una entrada con ese slug.',
@@ -123,62 +115,30 @@ async function createEntry() {
   }
 
   draftSlug.value = ''
-  entryState.reset()
   await openEntry(normalized)
-}
-
-async function saveEntry(content: FormState) {
-  if (!siteId.value || !selectedEntrySlug.value) return
-
-  entryState.setSaving()
-
-  try {
-    const endpoint = [
-      '/api/sites',
-      siteId.value,
-      'data',
-      'collection',
-      collectionName.value,
-      selectedEntrySlug.value,
-    ].join('/')
-
-    await $fetch(endpoint, {
-      method: 'PUT',
-      body: { content },
-    })
-
-    await loadEntries()
-
-    toast.add({
-      title: 'Entrada guardada',
-      description: 'El borrador de la entrada se guardo en /data.',
-      color: 'success',
-      icon: 'i-lucide-check',
-    })
-
-    entryState.setSuccess(content)
-  } catch (err) {
-    entryState.setError(err instanceof Error ? err.message : 'Error inesperado al guardar.')
-  }
 }
 
 watch(
   [siteId, collectionName],
-  () => {
-    schemaState.reset()
+  async () => {
     entriesState.reset()
-    entryState.reset()
-    loadCollectionEditor()
+
+    await loadEntries()
+    await ensureSelectedEntry()
   },
   { immediate: true },
 )
 
-watch(selectedEntrySlug, () => {
-  loadSelectedEntry()
+watch(selectedEntrySlug, async () => {
+  if (!collectionExists.value || entriesState.isLoading.value) {
+    return
+  }
+
+  await ensureSelectedEntry()
 })
 
 useHead(() => ({
-  title: `${collectionName.value} — Collection Editor`,
+  title: `${collectionName.value} — Collection`,
 }))
 </script>
 
@@ -206,7 +166,7 @@ useHead(() => ({
 
           <div class="flex flex-col gap-2">
             <UButton
-              v-for="entry in entriesState.data"
+              v-for="entry in entriesState.data.value ?? []"
               :key="entry"
               :label="entry"
               :variant="selectedEntrySlug === entry ? 'solid' : 'ghost'"
@@ -215,7 +175,7 @@ useHead(() => ({
               @click="openEntry(entry)"
             />
 
-            <p v-if="entriesState.data?.length === 0" class="text-sm text-muted">
+            <p v-if="(entriesState.data.value?.length ?? 0) === 0" class="text-sm text-muted">
               No hay entradas aun.
             </p>
           </div>
@@ -233,16 +193,16 @@ useHead(() => ({
           />
 
           <UAlert
-            v-if="schemaState.error"
+            v-else-if="collectionError"
             icon="i-lucide-triangle-alert"
             color="error"
             variant="subtle"
-            title="No se pudo cargar la coleccion"
-            :description="schemaState.error"
+            title="No se pudo cargar la colección"
+            :description="collectionError"
             class="mb-4"
           />
 
-          <template v-if="schemaState.isLoading || entriesState.isLoading">
+          <template v-else-if="entriesState.isLoading.value">
             <div class="space-y-4">
               <USkeleton class="h-10 w-60" />
               <USkeleton class="h-52 w-full" />
@@ -251,31 +211,16 @@ useHead(() => ({
           </template>
 
           <UAlert
-            v-else-if="entryState.isError"
-            icon="i-lucide-triangle-alert"
-            color="error"
-            variant="subtle"
-            title="Error al cargar entrada"
-            :description="entryState.error ?? ''"
-            class="mb-4"
-          />
-
-          <UAlert
-            v-else-if="!selectedEntrySlug"
+            v-else-if="(entriesState.data.value?.length ?? 0) === 0"
             icon="i-lucide-info"
             color="info"
             variant="subtle"
-            title="Selecciona una entrada"
-            description="Elige una entrada del listado o crea una nueva con un slug."
+            title="No hay entradas"
+            description="Crea la primera entrada para esta colección usando un slug."
+            class="mb-4"
           />
 
-          <EditorDynamicForm
-            v-else-if="schemaState.data && entryState.data"
-            v-model="entryState.data"
-            :sections="schemaState.data"
-            :is-saving="entryState.isSaving"
-            @submit="saveEntry($event)"
-          />
+          <NuxtPage v-else />
         </div>
       </div>
     </template>

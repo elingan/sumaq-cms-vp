@@ -1,6 +1,6 @@
 meta:
   label: Post Metadata
-  description: Metadata for individual blog post
+  description: Metadata for individual team members
   fields:
     - id: slug
       label: URL Slug
