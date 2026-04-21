@@ -21,7 +21,15 @@
         </template>
       </UPageHeader>
 
-      <SitesSiteCard v-for="site in sites" :key="site.id" :site="site" @refresh="refresh" />
+      <UPageGrid>
+        <SitesSiteCard
+          v-for="site in sites"
+          :key="site.id"
+          :site="site"
+          :orientation="orientation"
+          @refresh="refresh"
+        />
+      </UPageGrid>
 
       <UPageCTA
         v-if="!sites?.length"
@@ -65,6 +73,10 @@ const { canCreateSites } = useRole()
 const showCreateModal = ref(false)
 
 const { data: sites, refresh, pending } = await useFetch('/api/sites')
+
+const orientation = computed(() =>
+  sites.value && sites.value.length > 1 ? 'vertical' : 'horizontal',
+)
 
 const siteLinks = ref<ButtonProps[]>([
   {

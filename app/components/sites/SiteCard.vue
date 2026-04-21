@@ -15,6 +15,7 @@ interface SiteCardSite {
 
 interface Props {
   site: SiteCardSite
+  orientation?: 'vertical' | 'horizontal'
 }
 
 const props = defineProps<Props>()
@@ -29,12 +30,38 @@ const sitePath = computed(() => localePath(`/site/${props.site.slug ?? props.sit
 <template>
   <UPageCard
     :key="props.site.id"
-    orientation="horizontal"
+    :orientation="props.orientation"
+    reverse
+    variant="soft"
+    class="hover:bg-primary/10 cursor-pointer"
+    title="Site name"
+    :description="sitePath"
+    :badge="t(`status.${props.site.status}`)"
+    :badge-color="statusColor"
+    :to="sitePath"
+  >
+    <NuxtImg
+      src="https://placehold.co/100"
+      alt="Tailwind CSS"
+      placeholder
+      height="200"
+      class="w-full object-cover rounded-lg"
+    />
+  </UPageCard>
+</template>
+
+<!-- <UPageCard
+    :key="props.site.id"
+    :orientation="props.orientation"
     reverse
     variant="soft"
     class="hover:bg-primary/10 cursor-pointer"
   >
-    <img src="https://placehold.co/400x300" alt="Tailwind CSS" class="w-full rounded-lg" />
+    <img
+      src="https://placehold.co/300x200"
+      alt="Tailwind CSS"
+      class="aspect-3/2 object-cover rounded-lg"
+    />
     <template #header>
       <div class="flex items-start justify-between gap-2">
         <h3 class="font-semibold truncate">
@@ -74,5 +101,4 @@ const sitePath = computed(() => localePath(`/site/${props.site.slug ?? props.sit
         {{ $t('sites.updated') }}: {{ new Date(site.updatedAt).toLocaleDateString() }}
       </p>
     </template>
-  </UPageCard>
-</template>
+  </UPageCard> -->

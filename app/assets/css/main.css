@@ -1,8 +1,19 @@
 @import 'tailwindcss';
 @import '@nuxt/ui';
 
-@theme static {
-  --font-sans: 'Lato', sans-serif;
+:root {
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --ui-primary: oklch(65.33% 0.184 266.79);
+  --ui-secondary: oklch(76.32% 0.139 237.2);
+  --ui-info: oklch(68.98% 0.165 257.1);
+  --ui-success: oklch(80.48% 0.15 174.63);
+  --ui-warning: oklch(80.94% 0.165 74.03);
+  --ui-error: oklch(74.75% 0.144 35.82);
+  --ui-dark: oklch(27.84% 0.027 257.53);
+}
+
+/* @theme static {
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
   --color-brand-50: #fdf5f0;
   --color-brand-100: #fae8dd;
   --color-brand-200: #f5d0bb;
@@ -14,4 +25,4 @@
   --color-brand-800: #8a3a2d;
   --color-brand-900: #6b2e25;
   --color-brand-950: #3d1a14;
-}
+} */
