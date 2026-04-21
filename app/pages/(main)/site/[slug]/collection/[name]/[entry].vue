@@ -26,6 +26,12 @@ const collectionExists = computed(() => {
 
 const schemaState = useEditorState<SchemaSection[]>()
 const entryState = useEditorState<FormState>()
+const entryFormState = computed<FormState>({
+  get: () => entryState.data.value ?? {},
+  set: (value) => {
+    entryState.data.value = value
+  },
+})
 
 function isErrorWithStatus(error: unknown, statusCode: number) {
   return typeof error === 'object' && error !== null && 'statusCode' in error
@@ -134,6 +140,12 @@ async function saveEntry(content: FormState) {
   }
 }
 
+const contextualSurface = useContextualSurface({
+  sections: computed(() => schemaState.data.value ?? []),
+  formState: entryFormState,
+  save: saveEntry,
+})
+
 watch(
   [siteId, collectionName, entrySlug],
   () => {
@@ -189,12 +201,102 @@ useHead(() => ({
       class="mb-4"
     />
 
-    <EditorDynamicForm
-      v-else-if="schemaState.data.value && entryState.data.value"
-      v-model="entryState.data.value"
-      :sections="schemaState.data.value"
-      :is-saving="entryState.isSaving.value"
-      @submit="saveEntry($event)"
-    />
+    <div v-else-if="schemaState.data.value && entryState.data.value" class="space-y-4">
+      <div class="flex flex-wrap items-center gap-2">
+        <UBadge
+          v-if="contextualSurface.hasContextualTargets.value"
+          color="primary"
+          variant="subtle"
+        >
+          {{ contextualSurface.contextualEditor.targets.value.length }} bloques editables
+        </UBadge>
+
+        <UButton
+          color="neutral"
+          variant="soft"
+          icon="i-lucide-panel-bottom-open"
+          :disabled="!contextualSurface.hasContextualTargets.value"
+          @click="contextualSurface.contextualEditor.setContextualMode(true)"
+        >
+          Vista previa editable
+        </UButton>
+
+        <UButton
+          color="neutral"
+          variant="ghost"
+          icon="i-lucide-table-properties"
+          @click="contextualSurface.contextualEditor.setContextualMode(false)"
+        >
+          Formulario completo
+        </UButton>
+      </div>
+
+      <UAlert
+        v-if="
+          contextualSurface.contextualEditor.isContextualMode.value &&
+          !contextualSurface.hasContextualTargets.value
+        "
+        icon="i-lucide-info"
+        color="info"
+        variant="subtle"
+        title="Sin bloques editables contextuales"
+        description="Esta entrada solo expone edición contextual para campos hoja. Usa el formulario completo para estructuras complejas."
+      />
+
+      <div
+        v-else-if="contextualSurface.contextualEditor.isContextualMode.value"
+        class="relative space-y-4 pb-40"
+      >
+        <UAlert
+          icon="i-lucide-sparkles"
+          color="primary"
+          variant="subtle"
+          title="Modo contextual activo"
+          description="Pasa el cursor por un bloque editable y haz click para abrir el panel inferior."
+        />
+
+        <EditorContextualPreview
+          ref="contextualSurface.previewRef"
+          :sections="schemaState.data.value"
+          :model-value="entryFormState"
+          :targets="contextualSurface.contextualEditor.targets.value"
+          :hovered-target-id="contextualSurface.contextualEditor.hoveredTargetId.value"
+          :selected-target-id="contextualSurface.contextualEditor.selectedTargetId.value"
+          @hover-target="contextualSurface.handleHoverTarget"
+          @leave-target="contextualSurface.handleLeaveTarget"
+          @select-target="contextualSurface.handleSelectTarget"
+        />
+
+        <EditorContextualHighlightOverlay
+          :rect="contextualSurface.contextualEditor.overlayRect.value"
+          :target="
+            contextualSurface.contextualEditor.selectedTarget.value ??
+            contextualSurface.contextualEditor.hoveredTarget.value
+          "
+          :is-selected="!!contextualSurface.contextualEditor.selectedTargetId.value"
+        />
+
+        <EditorContextualDrawer
+          :open="contextualSurface.contextualEditor.drawerOpen.value"
+          :target="contextualSurface.contextualEditor.selectedTarget.value"
+          :field="contextualSurface.contextualEditor.selectedField.value"
+          :model-value="contextualSurface.contextualEditor.selectedValue.value"
+          :is-saving="entryState.isSaving.value"
+          :is-dirty="contextualSurface.contextualEditor.isDirty.value"
+          @update:model-value="contextualSurface.contextualEditor.updateSelectedValue($event)"
+          @save="contextualSurface.saveContextualField"
+          @close="contextualSurface.closeContextualDrawer"
+          @open-form="contextualSurface.openFullForm"
+        />
+      </div>
+
+      <EditorDynamicForm
+        v-else
+        v-model="entryState.data.value"
+        :sections="schemaState.data.value"
+        :is-saving="entryState.isSaving.value"
+        @submit="saveEntry($event)"
+      />
+    </div>
   </div>
 </template>

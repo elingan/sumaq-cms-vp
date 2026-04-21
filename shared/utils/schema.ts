@@ -53,15 +53,19 @@ function parseSelectOptions(options: unknown): SchemaField['options'] | undefine
 
 export function parseField(input: Record<string, unknown>): SchemaField {
   const fieldId = parseFieldId(input, 'unknown')
+  const editableIn = input.editableIn as SchemaField['editableIn'] | undefined
 
   return {
     id: fieldId,
     key: fieldId,
     label: (input.label as string) ?? fieldId,
     type: (input.type as SchemaField['type']) ?? 'string',
+    fieldId: (input.fieldId as string) ?? undefined,
     required: input.required as boolean | undefined,
     description: input.description as string | undefined,
+    helpText: input.helpText as string | undefined,
     placeholder: input.placeholder as string | undefined,
+    editableIn,
     options: parseSelectOptions(input.options),
     fields: parseFieldsArray(input.fields as unknown[] | undefined),
   }
@@ -95,6 +99,7 @@ export function parseSection(sectionKey: string, sectionData: unknown): SchemaSe
     label: (section.label as string) ?? sectionId,
     description: section.description as string | undefined,
     icon: section.icon as string | undefined,
+    editInline: section.editInline as boolean | undefined,
     fields: parsedFields,
   }
 }

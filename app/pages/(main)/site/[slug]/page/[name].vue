@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { parse } from 'yaml'
 import type { SiteCmsNavigation } from '#shared/types/cms'
-import type { SchemaField, SchemaSection } from '#shared/types/schema'
+import type { FormState, SchemaSection } from '#shared/types/schema'
+import { parseSections } from '#shared/utils/schema'
 
 definePageMeta({ layout: 'site' })
 
@@ -21,44 +22,18 @@ const { data: siteCms, error: siteCmsError } = await useFetch<SiteCmsNavigation>
 
 const siteId = computed(() => siteCms.value?.site.id ?? null)
 const sections = ref<SchemaSection[]>([])
-const formState = ref<Record<string, unknown>>({})
+const formState = ref<FormState>({})
 const loadError = ref<string | null>(null)
 const isLoading = ref(true)
 const isSaving = ref(false)
 const hasLoadedInitialState = ref(false)
-
-function parseSections(raw: Record<string, unknown>): SchemaSection[] {
-  return Object.entries(raw).map(([sectionKey, value]) => {
-    const section = value as Record<string, unknown>
-    const sectionId = (section.id as string) ?? sectionKey
-
-    const toField = (input: Record<string, unknown>): SchemaField => {
-      const fieldId = (input.id as string) ?? (input.key as string)
-      return {
-        id: fieldId,
-        key: fieldId,
-        label: (input.label as string) ?? fieldId,
-        type: input.type as SchemaField['type'],
-        required: input.required as boolean | undefined,
-        description: input.description as string | undefined,
-        placeholder: input.placeholder as string | undefined,
-        options: input.options as SchemaField['options'],
-        fields: Array.isArray(input.fields)
-          ? (input.fields as Record<string, unknown>[]).map((nested) => toField(nested))
-          : undefined,
-      }
-    }
-
-    return {
-      id: sectionId,
-      key: sectionId,
-      label: (section.label as string) ?? sectionId,
-      description: section.description as string | undefined,
-      icon: section.icon as string | undefined,
-      fields: ((section.fields as Record<string, unknown>[]) ?? []).map((field) => toField(field)),
-    }
-  })
-}
+const contextualSurface = useContextualSurface({
+  sections,
+  formState,
+  save: async (content) => {
+    await savePage(content, true)
+  },
+})
 
 async function loadEditorState() {
   if (!siteId.value) {
@@ -73,7 +48,7 @@ async function loadEditorState() {
       $fetch<string>(`/api/sites/${siteId.value}/cms/schema/page/${schemaName.value}`, {
         responseType: 'text',
       }),
-      $fetch<{ data: { content: Record<string, unknown> } }>(
+      $fetch<{ data: { content: FormState } }>(
         `/api/sites/${siteId.value}/data/page/${schemaName.value}`,
       ),
     ])
@@ -88,7 +63,7 @@ async function loadEditorState() {
   }
 }
 
-async function savePage(content: Record<string, unknown>, notify = true) {
+async function savePage(content: FormState, notify = true) {
   if (!siteId.value) {
     return
   }
@@ -176,6 +151,37 @@ useHead(() => ({
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
+
+        <template #right>
+          <div class="flex items-center gap-2">
+            <UBadge
+              v-if="contextualSurface.hasContextualTargets.value"
+              color="primary"
+              variant="subtle"
+            >
+              {{ contextualSurface.contextualEditor.targets.value.length }} bloques editables
+            </UBadge>
+
+            <UButton
+              color="neutral"
+              variant="soft"
+              icon="i-lucide-panel-bottom-open"
+              :disabled="!contextualSurface.hasContextualTargets.value"
+              @click="contextualSurface.contextualEditor.setContextualMode(true)"
+            >
+              Vista previa editable
+            </UButton>
+
+            <UButton
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-table-properties"
+              @click="contextualSurface.contextualEditor.setContextualMode(false)"
+            >
+              Formulario completo
+            </UButton>
+          </div>
+        </template>
       </UDashboardNavbar>
     </template>
 
@@ -208,6 +214,65 @@ useHead(() => ({
             <USkeleton class="h-52 w-full" />
           </div>
         </template>
+
+        <UAlert
+          v-else-if="
+            contextualSurface.contextualEditor.isContextualMode.value &&
+            !contextualSurface.hasContextualTargets.value
+          "
+          icon="i-lucide-info"
+          color="info"
+          variant="subtle"
+          title="Sin bloques editables contextuales"
+          description="Los campos anidados complejos siguen disponibles en el formulario completo."
+        />
+
+        <div
+          v-else-if="contextualSurface.contextualEditor.isContextualMode.value"
+          class="relative space-y-4 pb-40"
+        >
+          <UAlert
+            icon="i-lucide-sparkles"
+            color="primary"
+            variant="subtle"
+            title="Modo contextual activo"
+            description="Pasa el cursor por un bloque editable y haz click para abrir el panel inferior."
+          />
+
+          <EditorContextualPreview
+            ref="contextualSurface.previewRef"
+            :sections="sections"
+            :model-value="formState"
+            :targets="contextualSurface.contextualEditor.targets.value"
+            :hovered-target-id="contextualSurface.contextualEditor.hoveredTargetId.value"
+            :selected-target-id="contextualSurface.contextualEditor.selectedTargetId.value"
+            @hover-target="contextualSurface.handleHoverTarget"
+            @leave-target="contextualSurface.handleLeaveTarget"
+            @select-target="contextualSurface.handleSelectTarget"
+          />
+
+          <EditorContextualHighlightOverlay
+            :rect="contextualSurface.contextualEditor.overlayRect.value"
+            :target="
+              contextualSurface.contextualEditor.selectedTarget.value ??
+              contextualSurface.contextualEditor.hoveredTarget.value
+            "
+            :is-selected="!!contextualSurface.contextualEditor.selectedTargetId.value"
+          />
+
+          <EditorContextualDrawer
+            :open="contextualSurface.contextualEditor.drawerOpen.value"
+            :target="contextualSurface.contextualEditor.selectedTarget.value"
+            :field="contextualSurface.contextualEditor.selectedField.value"
+            :model-value="contextualSurface.contextualEditor.selectedValue.value"
+            :is-saving="isSaving"
+            :is-dirty="contextualSurface.contextualEditor.isDirty.value"
+            @update:model-value="contextualSurface.contextualEditor.updateSelectedValue($event)"
+            @save="contextualSurface.saveContextualField"
+            @close="contextualSurface.closeContextualDrawer"
+            @open-form="contextualSurface.openFullForm"
+          />
+        </div>
 
         <EditorDynamicForm
           v-else

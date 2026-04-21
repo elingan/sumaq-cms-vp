@@ -22,6 +22,7 @@
   "i18n-ally.keystyle": "nested",
   "chat.tools.terminal.autoApprove": {
     "pnpm": true,
-    "vp": true
+    "vp": true,
+    "tee": true
   }
 }

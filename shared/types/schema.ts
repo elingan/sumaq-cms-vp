@@ -28,9 +28,12 @@ export interface SchemaField {
   key: string
   label: string
   type: FieldType
+  fieldId?: string
   required?: boolean
   description?: string
+  helpText?: string
   placeholder?: string
+  editableIn?: 'form' | 'contextual' | 'both'
   options?: string[] | SelectOptionsConfig
   fields?: SchemaField[]
 }
@@ -41,6 +44,7 @@ export interface SchemaSection {
   label: string
   description?: string
   icon?: string
+  editInline?: boolean
   fields: SchemaField[]
 }
 
