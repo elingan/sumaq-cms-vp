@@ -70,6 +70,29 @@ export function useContextualSurface(options: ContextualSurfaceOptions) {
     contextualEditor.clearSelection()
   }
 
+  function handleContextualKeydown(event: KeyboardEvent) {
+    if (!contextualEditor.isContextualMode.value) {
+      return
+    }
+
+    if (event.key === 'Escape' && contextualEditor.drawerOpen.value) {
+      event.preventDefault()
+      closeContextualDrawer()
+      return
+    }
+
+    const isSaveShortcut = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's'
+
+    if (
+      isSaveShortcut &&
+      contextualEditor.drawerOpen.value &&
+      contextualEditor.selectedTargetId.value
+    ) {
+      event.preventDefault()
+      void saveContextualField()
+    }
+  }
+
   watch(
     [() => contextualEditor.selectedTargetId.value, () => contextualEditor.hoveredTargetId.value],
     () => {
@@ -90,11 +113,13 @@ export function useContextualSurface(options: ContextualSurfaceOptions) {
     onMounted(() => {
       window.addEventListener('resize', syncOverlayRect)
       window.addEventListener('scroll', syncOverlayRect, true)
+      window.addEventListener('keydown', handleContextualKeydown)
     })
 
     onBeforeUnmount(() => {
       window.removeEventListener('resize', syncOverlayRect)
       window.removeEventListener('scroll', syncOverlayRect, true)
+      window.removeEventListener('keydown', handleContextualKeydown)
     })
   }
 

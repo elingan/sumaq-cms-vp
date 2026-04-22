@@ -126,38 +126,56 @@
             </template>
 
             <div
-              v-if="nestedTargets(section.id, field.id).length"
+              v-if="nestedTargetGroups(section.id, field.id).length"
               class="border-t border-default/80 pt-3"
             >
               <p class="mb-2 text-xs font-medium uppercase tracking-wide text-muted">
                 Campos anidados
               </p>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  v-for="target in nestedTargets(section.id, field.id)"
-                  :key="target.id"
-                  type="button"
-                  :data-contextual-target="target.id"
-                  class="max-w-full rounded-lg border px-2 py-1 text-left text-xs transition-colors"
-                  :class="[
-                    selectedTargetId === target.id
-                      ? 'border-primary bg-primary/15 text-primary'
-                      : hoveredTargetId === target.id
-                        ? 'border-primary/70 bg-primary/10 text-primary'
-                        : 'border-default bg-default/70 text-default hover:border-primary/50 hover:text-primary',
-                  ]"
-                  @mouseenter.stop="handleHoverNested(target.id)"
-                  @mousemove.stop="handleHoverNested(target.id)"
-                  @mouseleave.stop="emit('leaveTarget')"
-                  @click.stop="handleSelectNested(target.id)"
+              <div class="space-y-3">
+                <div
+                  v-for="group in nestedTargetGroups(section.id, field.id)"
+                  :key="group.key"
+                  class="space-y-2"
                 >
-                  <p class="truncate font-medium">
-                    {{ target.label }}
-                  </p>
-                  <p class="truncate text-muted">
-                    {{ summarizeValue(valueForTarget(target)) }}
-                  </p>
-                </button>
+                  <div class="flex items-center gap-2">
+                    <UBadge color="neutral" variant="subtle" size="sm">
+                      {{ group.label }}
+                    </UBadge>
+                    <span class="text-xs text-muted">{{ group.targets.length }} campo(s)</span>
+                  </div>
+
+                  <div class="flex flex-wrap gap-2">
+                    <button
+                      v-for="target in group.targets"
+                      :key="target.id"
+                      type="button"
+                      :data-contextual-target="target.id"
+                      class="max-w-full rounded-lg border px-2 py-1 text-left text-xs transition-colors"
+                      :class="[
+                        selectedTargetId === target.id
+                          ? 'border-primary bg-primary/15 text-primary'
+                          : hoveredTargetId === target.id
+                            ? 'border-primary/70 bg-primary/10 text-primary'
+                            : 'border-default bg-default/70 text-default hover:border-primary/50 hover:text-primary',
+                      ]"
+                      @mouseenter.stop="handleHoverNested(target.id)"
+                      @mousemove.stop="handleHoverNested(target.id)"
+                      @mouseleave.stop="emit('leaveTarget')"
+                      @click.stop="handleSelectNested(target.id)"
+                    >
+                      <p class="truncate font-medium">
+                        {{ shortTargetLabel(target) }}
+                      </p>
+                      <p class="truncate text-[11px] text-muted/90">
+                        {{ targetBreadcrumb(target) }}
+                      </p>
+                      <p class="truncate text-muted">
+                        {{ summarizeValue(valueForTarget(target)) }}
+                      </p>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -175,6 +193,12 @@ import { getValueAtContextualPath } from '#shared/utils/contextualPath'
 interface HoverPayload {
   targetId: string
   rect: ContextualTargetRect | null
+}
+
+interface NestedTargetGroup {
+  key: string
+  label: string
+  targets: ContextualEditableTarget[]
 }
 
 interface Props {
@@ -249,17 +273,89 @@ function valueForTarget(target: ContextualEditableTarget) {
   return getValueAtContextualPath(props.modelValue, target.valuePath)
 }
 
-function nestedTargets(sectionId: string, fieldId: string) {
-  const prefix = `${sectionId}.${fieldId}.`
+const nestedGroupsByParent = computed<Record<string, NestedTargetGroup[]>>(() => {
+  const groups = new Map<string, Map<string, NestedTargetGroup>>()
 
-  return props.targets.filter((target) => {
-    if (!target.id.startsWith(prefix)) {
-      return false
+  for (const target of props.targets) {
+    if (target.valuePath.length <= 2) {
+      continue
     }
 
-    const suffix = target.id.slice(prefix.length)
-    return suffix.length > 0
-  })
+    const sectionId = target.valuePath[0]
+    const fieldId = target.valuePath[1]
+    const firstNestedSegment = target.valuePath[2]
+
+    if (typeof sectionId !== 'string' || typeof fieldId !== 'string') {
+      continue
+    }
+
+    const parentKey = targetId(sectionId, fieldId)
+    const bucket = groups.get(parentKey) ?? new Map<string, NestedTargetGroup>()
+    groups.set(parentKey, bucket)
+
+    const groupKey =
+      typeof firstNestedSegment === 'number'
+        ? `item:${firstNestedSegment}`
+        : `field:${String(firstNestedSegment)}`
+
+    const groupLabel =
+      typeof firstNestedSegment === 'number'
+        ? `Item ${firstNestedSegment + 1}`
+        : String(firstNestedSegment)
+
+    const group = bucket.get(groupKey) ?? {
+      key: groupKey,
+      label: groupLabel,
+      targets: [],
+    }
+
+    group.targets.push(target)
+    bucket.set(groupKey, group)
+  }
+
+  const byParent: Record<string, NestedTargetGroup[]> = {}
+
+  for (const [parentKey, bucket] of groups.entries()) {
+    byParent[parentKey] = Array.from(bucket.values())
+      .map((group) => ({
+        ...group,
+        targets: group.targets.sort((a, b) =>
+          a.path.localeCompare(b.path, undefined, { numeric: true }),
+        ),
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }))
+  }
+
+  return byParent
+})
+
+function nestedTargetGroups(sectionId: string, fieldId: string) {
+  return nestedGroupsByParent.value[targetId(sectionId, fieldId)] ?? []
+}
+
+function shortTargetLabel(target: ContextualEditableTarget) {
+  const labelParts = target.label
+    .split('·')
+    .map((item) => item.trim())
+    .filter(Boolean)
+
+  if (!labelParts.length) {
+    return target.label
+  }
+
+  return labelParts[labelParts.length - 1]
+}
+
+function targetBreadcrumb(target: ContextualEditableTarget) {
+  return target.valuePath
+    .map((segment) => {
+      if (typeof segment === 'number') {
+        return `[${segment + 1}]`
+      }
+
+      return segment
+    })
+    .join(' > ')
 }
 
 function isMediaUrl(value: unknown) {
