@@ -1,21 +1,18 @@
 import { z } from 'zod'
-import { eq } from 'drizzle-orm'
-import { users } from '#server/db/schema'
+import { requireAdminRole } from '#server/utils/auth'
+import { createClerkUserWithInvite } from '#server/utils/clerk-users'
 import { createAuditLog } from '#server/utils/audit'
-import { issuePasswordLink } from '#server/utils/password-links'
 
 const CreateUserSchema = z.object({
   email: z.string().email(),
-  name: z.string().optional(),
-  role: z.enum(['admin', 'partner', 'owner', 'editor']).default('editor'),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  role: z.enum(['admin', 'partner', 'owner', 'editor']).default('owner'),
+  redirectUrl: z.string().url().optional(),
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-
-  if (session.user.role !== 'admin') {
-    throw createError({ statusCode: 403, message: 'Forbidden' })
-  }
+  const { userId } = await requireAdminRole(event)
 
   const body = await readBody(event)
   const result = CreateUserSchema.safeParse(body)
@@ -27,60 +24,41 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const db = useDrizzle()
-
-  const [existing] = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.email, result.data.email.toLowerCase()))
-    .limit(1)
-
-  if (existing) {
-    throw createError({ statusCode: 409, message: 'Email already in use' })
-  }
-
-  const [user] = await db
-    .insert(users)
-    .values({
-      email: result.data.email.toLowerCase(),
-      password: null,
-      name: result.data.name,
-      role: result.data.role,
-    })
-    .returning({
-      id: users.id,
-      email: users.email,
-      name: users.name,
-      role: users.role,
-      createdAt: users.createdAt,
-    })
-
-  const passwordSetup = await issuePasswordLink({
-    db,
-    userId: user!.id,
-    purpose: 'invite',
-    event,
+  // Create user in Clerk with invitation
+  const { clerkUser, invitation } = await createClerkUserWithInvite(event, result.data.email, {
+    firstName: result.data.firstName,
+    lastName: result.data.lastName,
+    role: result.data.role,
+    redirectUrl: result.data.redirectUrl,
   })
 
-  console.info(`Password setup link for ${user!.email}: ${passwordSetup.link}`)
-
   await createAuditLog(
-    session.user.id,
+    userId,
     'create_user',
-    { targetType: 'user', targetId: user!.id },
-    event,
-  )
-
-  await createAuditLog(
-    session.user.id,
-    'generate_user_password_link',
-    { targetType: 'user', targetId: user!.id, purpose: 'invite' },
+    {
+      targetType: 'user',
+      targetId: clerkUser.id,
+      email: result.data.email,
+      role: result.data.role,
+    },
     event,
   )
 
   return {
-    user,
-    passwordSetupLink: passwordSetup.link,
-    passwordSetupExpiresAt: passwordSetup.expiresAt,
+    user: {
+      id: clerkUser.id,
+      email: clerkUser.emailAddresses[0]?.emailAddress,
+      firstName: clerkUser.firstName,
+      lastName: clerkUser.lastName,
+      role: clerkUser.publicMetadata?.role,
+      createdAt: clerkUser.createdAt,
+    },
+    invitation: {
+      id: invitation.id,
+      emailAddress: (invitation as any).emailAddress,
+      status: invitation.status,
+      expiresAt: (invitation as any).expiresAt,
+      url: (invitation as any).url,
+    },
   }
 })

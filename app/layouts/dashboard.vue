@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
+import { useUser, useClerk } from '#imports'
 
 const { t } = useI18n()
-const { user, clear } = useUserSession()
+const { user } = useUser()
 const route = useRoute()
 const localePath = useLocalePath()
+const { signOut } = useClerk()
 
 const baseItems = computed<NavigationMenuItem[]>(() => [
   { label: t('nav.dashboard'), icon: 'i-lucide-house', to: localePath('/dashboard') },
@@ -12,14 +14,19 @@ const baseItems = computed<NavigationMenuItem[]>(() => [
   { label: t('nav.settings'), icon: 'i-lucide-settings', to: localePath('/settings') },
 ])
 
+const role = computed(() => user.value?.publicMetadata?.role as string | undefined)
+
 const adminItems = computed<NavigationMenuItem[]>(() =>
-  user.value?.role === 'admin'
+  role.value === 'admin'
     ? [
         {
           label: t('nav.admin'),
           icon: 'i-lucide-shield',
           defaultOpen: true,
-          children: [{ label: t('nav.users'), to: localePath('/admin/users') }],
+          children: [
+            { label: t('nav.users'), to: localePath('/admin/users') },
+            { label: t('nav.sites'), to: localePath('/admin/sites') },
+          ],
         },
       ]
     : [],
@@ -30,8 +37,7 @@ const navItems = computed<NavigationMenuItem[]>(() => [...baseItems.value, ...ad
 const pageTitle = computed(() => route.meta.title as string | undefined)
 
 async function logout() {
-  await $fetch('/api/auth/logout', { method: 'POST' })
-  await clear()
+  await signOut()
   await navigateTo('/login')
 }
 
@@ -58,7 +64,9 @@ const { locale, setLocale } = useI18n()
 
         <template #footer="{ collapsed }">
           <UButton
-            :label="collapsed ? undefined : user?.name || user?.email"
+            :label="
+              collapsed ? undefined : user?.firstName || user?.emailAddresses[0]?.emailAddress
+            "
             :icon="collapsed ? 'i-lucide-user' : undefined"
             color="neutral"
             variant="ghost"

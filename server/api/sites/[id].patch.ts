@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { eq, and } from 'drizzle-orm'
 import { sites, siteUsers } from '#server/db/schema'
 import { validateRepositoryAccess } from '#server/utils/github'
+import { getClerkUserWithData } from '#server/utils/auth'
 
 const PatchSiteSchema = z.object({
   name: z.string().min(1).optional(),
@@ -18,7 +19,7 @@ const PatchSiteSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
+  const user = await getClerkUserWithData(event)
   const id = getRouterParam(event, 'id')
 
   if (!id) {
@@ -26,21 +27,21 @@ export default defineEventHandler(async (event) => {
   }
 
   // Require owner+ role
-  if (session.user.role === 'editor') {
+  if (user.role === 'editor') {
     throw createError({ statusCode: 403, message: 'Forbidden' })
   }
 
   const db = useDrizzle()
 
   // Verify access
-  if (session.user.role !== 'admin') {
+  if (user.role !== 'admin') {
     const [membership] = await db
       .select()
       .from(siteUsers)
       .where(
         and(
           eq(siteUsers.siteId, id),
-          eq(siteUsers.userId, session.user.id),
+          eq(siteUsers.userId, user.userId),
           eq(siteUsers.role, 'owner'),
         ),
       )
@@ -87,7 +88,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Site not found' })
   }
 
-  await createAuditLog(session.user.id, 'update_site', { targetType: 'site', targetId: id }, event)
+  await createAuditLog(user.userId, 'update_site', { targetType: 'site', targetId: id }, event)
 
   return updated
 })

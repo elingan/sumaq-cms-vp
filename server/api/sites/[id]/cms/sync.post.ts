@@ -1,3 +1,4 @@
+import { requireUserSession } from '#server/utils/auth'
 import { z } from 'zod'
 import { createAuditLog } from '#server/utils/audit'
 import { syncSiteCmsWorkspace } from '#server/utils/cms'

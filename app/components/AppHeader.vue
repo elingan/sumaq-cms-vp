@@ -23,7 +23,9 @@
 </template>
 
 <script lang="ts" setup>
-const { loggedIn } = useUserSession()
+const { isSignedIn } = useAuth()
+
+const loggedIn = computed(() => isSignedIn.value)
 </script>
 
 <style></style>

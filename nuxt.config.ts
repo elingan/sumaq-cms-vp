@@ -4,7 +4,7 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/ui',
     '@nuxtjs/i18n',
-    'nuxt-auth-utils',
+    '@clerk/nuxt',
     '@nuxt/image',
     '@nuxthub/core',
   ],

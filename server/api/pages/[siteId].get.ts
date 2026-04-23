@@ -1,3 +1,4 @@
+import { requireUserSession } from '#server/utils/auth'
 import { eq, and } from 'drizzle-orm'
 import { pages, siteUsers } from '#server/db/schema'
 

@@ -1,7 +1,16 @@
-export default defineNuxtRouteMiddleware((to) => {
-  const { user } = useUserSession()
+import { useUser } from '#imports'
 
-  if (to.path.startsWith('/admin') && user.value?.role !== 'admin') {
+export default defineNuxtRouteMiddleware((to) => {
+  const { user, isLoaded } = useUser()
+
+  // Wait for Clerk to load
+  if (!isLoaded.value) {
+    return
+  }
+
+  const role = user.value?.publicMetadata?.role as string | undefined
+
+  if (to.path.startsWith('/admin') && role !== 'admin') {
     return navigateTo('/dashboard')
   }
 })

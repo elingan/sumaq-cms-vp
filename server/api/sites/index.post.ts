@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { sites, siteUsers } from '#server/db/schema'
 import { validateRepositoryAccess } from '#server/utils/github'
+import { getClerkUserWithData } from '#server/utils/auth'
 
 const CreateSiteSchema = z.object({
   name: z.string().min(1),
@@ -19,9 +20,9 @@ const CreateSiteSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
+  const user = await getClerkUserWithData(event)
 
-  if (session.user.role !== 'admin' && session.user.role !== 'owner') {
+  if (user.role !== 'admin' && user.role !== 'owner') {
     throw createError({ statusCode: 403, message: 'Forbidden' })
   }
 
@@ -70,12 +71,12 @@ export default defineEventHandler(async (event) => {
   // Associate the creating user as owner
   await db.insert(siteUsers).values({
     siteId: site!.id,
-    userId: session.user.id,
+    userId: user.userId,
     role: 'owner',
   })
 
   await createAuditLog(
-    session.user.id,
+    user.userId,
     'create_site',
     { targetType: 'site', targetId: site!.id },
     event,

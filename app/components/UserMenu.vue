@@ -27,11 +27,21 @@ defineProps<{
   collapsed?: boolean
 }>()
 
-const { user } = useUserSession()
+const { user } = useUser()
+const { signOut } = useClerk()
 
-const displayName = computed(() => user.value?.name || user.value?.email || 'User')
+const displayName = computed(() => {
+  const firstName = user.value?.firstName
+  const lastName = user.value?.lastName
+  const fullName = [firstName, lastName].filter(Boolean).join(' ')
+
+  return fullName || user.value?.emailAddresses[0]?.emailAddress || 'User'
+})
+
 const description = computed(() => {
-  if (user.value?.role === 'admin') return 'Administrator'
+  const role = user.value?.publicMetadata?.role as string | undefined
+
+  if (role === 'admin') return 'Administrator'
   return 'User'
 })
 
@@ -61,7 +71,9 @@ const items = computed<DropdownMenuItem[][]>(() => {
     ],
   ]
 
-  if (user.value?.role === 'admin') {
+  const role = user.value?.publicMetadata?.role as string | undefined
+
+  if (role === 'admin') {
     menuItems.push([
       {
         label: 'Admin',
@@ -75,6 +87,10 @@ const items = computed<DropdownMenuItem[][]>(() => {
     {
       label: 'Log out',
       icon: 'i-lucide-log-out',
+      async onSelect() {
+        await signOut()
+        await navigateTo('/login')
+      },
     },
   ])
 

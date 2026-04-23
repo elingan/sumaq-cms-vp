@@ -195,16 +195,16 @@ mi-proyecto/
 
 **Infraestructura CMS:**
 
-| Capa             | Tecnología                 | Función                            |
-| ---------------- | -------------------------- | ---------------------------------- |
-| **Frontend CMS** | Nuxt 4 + Nuxt UI           | Interfaz de gestión administrativa |
-| **API Layer**    | Nitro Server Routes        | Endpoints REST, lógica de negocio  |
-| **Database**     | Neon PostgreSQL / PGlite   | Almacenamiento de contenido        |
-| **ORM**          | Drizzle ORM                | Queries type-safe                  |
-| **Auth**         | Sessions (nuxt-auth-utils) | Login con email/password           |
-| **Media**        | Vercel Blob                | Almacenamiento de imágenes         |
-| **Git**          | GitHub API                 | Sincronización de archivos         |
-| **Deploy**       | Vercel                     | Hosting estático                   |
+| Capa             | Tecnología               | Función                            |
+| ---------------- | ------------------------ | ---------------------------------- |
+| **Frontend CMS** | Nuxt 4 + Nuxt UI         | Interfaz de gestión administrativa |
+| **API Layer**    | Nitro Server Routes      | Endpoints REST, lógica de negocio  |
+| **Database**     | Neon PostgreSQL / PGlite | Almacenamiento de contenido        |
+| **ORM**          | Drizzle ORM              | Queries type-safe                  |
+| **Auth**         | Clerk                    | Identity + Login con email/SSO     |
+| **Media**        | Vercel Blob              | Almacenamiento de imágenes         |
+| **Git**          | GitHub API               | Sincronización de archivos         |
+| **Deploy**       | Vercel                   | Hosting estático                   |
 
 ---
 
@@ -1395,8 +1395,9 @@ sumaq-sites/
 ### 15.1 Obligatorias
 
 ```bash
-# Sesión (requerida para nuxt-auth-utils)
-NUXT_SESSION_PASSWORD=<32-byte-base64-string>
+# Clerk (autenticación)
+NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<publishable-key-from-clerk>
+CLERK_SECRET_KEY=<secret-key-from-clerk>
 
 # GitHub App (requerida para integración Git)
 GITHUB_APP_ID=<app-id-from-github>

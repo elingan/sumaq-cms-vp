@@ -1,13 +1,15 @@
 import type { H3Event } from 'h3'
 import { and, eq, type InferSelectModel } from 'drizzle-orm'
 import { sites, siteUsers } from '#server/db/schema'
+import { getClerkUserWithData } from './auth'
 
 type SiteRecord = InferSelectModel<typeof sites>
 
 async function assertSiteAccess(event: H3Event, siteId: string) {
-  const session = await requireUserSession(event)
+  const user = await getClerkUserWithData(event)
+  const role = user.role
 
-  if (session.user.role === 'admin') {
+  if (role === 'admin') {
     return
   }
 
@@ -15,7 +17,7 @@ async function assertSiteAccess(event: H3Event, siteId: string) {
   const [membership] = await db
     .select()
     .from(siteUsers)
-    .where(and(eq(siteUsers.siteId, siteId), eq(siteUsers.userId, session.user.id)))
+    .where(and(eq(siteUsers.siteId, siteId), eq(siteUsers.userId, user.userId)))
     .limit(1)
 
   if (!membership) {
@@ -24,9 +26,10 @@ async function assertSiteAccess(event: H3Event, siteId: string) {
 }
 
 async function assertSiteEditAccess(event: H3Event, siteId: string) {
-  const session = await requireUserSession(event)
+  const user = await getClerkUserWithData(event)
+  const role = user.role
 
-  if (session.user.role === 'admin') {
+  if (role === 'admin') {
     return
   }
 
@@ -34,7 +37,7 @@ async function assertSiteEditAccess(event: H3Event, siteId: string) {
   const [membership] = await db
     .select({ role: siteUsers.role })
     .from(siteUsers)
-    .where(and(eq(siteUsers.siteId, siteId), eq(siteUsers.userId, session.user.id)))
+    .where(and(eq(siteUsers.siteId, siteId), eq(siteUsers.userId, user.userId)))
     .limit(1)
 
   if (!membership || membership.role === 'partner') {

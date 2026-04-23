@@ -50,6 +50,10 @@
       ],
       "gallery": "https://api.mcp.github.com",
       "version": "1.0.0"
+    },
+    "Clerk": {
+      "url": "https://mcp.clerk.dev/mcp",
+      "type": "http"
     }
   },
   "inputs": [

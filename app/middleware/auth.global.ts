@@ -1,14 +1,17 @@
-export default defineNuxtRouteMiddleware((to) => {
-  const { loggedIn } = useUserSession()
+import { useAuth } from '#imports'
 
-  if (to.path === '/') {
-    return navigateTo(loggedIn.value ? '/dashboard' : '/login')
+export default defineNuxtRouteMiddleware((to) => {
+  const { isSignedIn, isLoaded } = useAuth()
+
+  // Wait for Clerk to load before checking auth state
+  if (!isLoaded.value) {
+    return
   }
 
-  const protectedPrefixes = ['/dashboard', '/site', '/admin', '/settings', '/profile']
+  const protectedPrefixes = ['/dashboard', '/site', '/admin', '/settings', '/profile', '/billing']
   const isProtected = protectedPrefixes.some((prefix) => to.path.startsWith(prefix))
 
-  if (isProtected && !loggedIn.value) {
+  if (isProtected && !isSignedIn.value) {
     return navigateTo('/login')
   }
 })

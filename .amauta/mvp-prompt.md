@@ -16,7 +16,7 @@ Sumaq CMS es un **Git-based Headless CMS** construido con **Nuxt 4 + Nuxt UI 4**
 | Frontend      | Nuxt 4 + Nuxt UI 4                    |
 | Base de datos | PGlite (dev) / Neon PostgreSQL (prod) |
 | ORM           | Drizzle ORM (PostgreSQL dialect)      |
-| Autenticación | nuxt-auth-utils (sessions)            |
+| Autenticación | Clerk (identity + sessions)           |
 | Git           | GitHub API (Octokit)                  |
 | i18n          | @nuxtjs/i18n                          |
 | Iconos        | @iconify-json/lucide                  |
@@ -25,7 +25,7 @@ Sumaq CMS es un **Git-based Headless CMS** construido con **Nuxt 4 + Nuxt UI 4**
 ### Dependencias ya instaladas
 
 ```
-@nuxt/ui, @nuxthub/core, @nuxtjs/i18n, nuxt-auth-utils, @nuxt/image, @nuxt/eslint, tailwindcss
+@nuxt/ui, @nuxthub/core, @nuxtjs/i18n, @clerk/nuxt, @nuxt/image, @nuxt/eslint, tailwindcss
 ```
 
 ### Estado actual

@@ -1,6 +1,13 @@
+import { useUser } from '#imports'
+
 export function useRole() {
-  const { user } = useUserSession()
-  const role = computed(() => user.value?.role)
+  const { user } = useUser()
+
+  const role = computed(() => {
+    const clerkRole = user.value?.publicMetadata?.role as string | undefined
+    return clerkRole || 'partner'
+  })
+
   const isAdmin = computed(() => role.value === 'admin')
   const isOwner = computed(() => role.value === 'owner')
   const isEditor = computed(() => role.value === 'editor')

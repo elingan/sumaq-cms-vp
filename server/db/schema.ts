@@ -189,34 +189,12 @@ export const auditLogs = sqliteTable('audit_logs', {
     .default(sql`(unixepoch())`),
 })
 
-export const passwordResets = sqliteTable(
-  'password_resets',
-  {
-    id: integer('id').primaryKey({ autoIncrement: true }),
-    userId: text('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    tokenHash: text('token_hash').unique().notNull(),
-    purpose: text('purpose', { enum: PasswordResetPurposeValues }).notNull(),
-    expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
-    usedAt: integer('used_at', { mode: 'timestamp' }),
-    createdAt: integer('created_at', { mode: 'timestamp' })
-      .notNull()
-      .default(sql`(unixepoch())`),
-  },
-  (table) => [
-    index('idx_password_resets_user_id').on(table.userId),
-    index('idx_password_resets_expires_at').on(table.expiresAt),
-  ],
-)
-
 // ─── Relations ───────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({
   siteUsers: many(siteUsers),
   activityLogs: many(activityLogs),
   auditLogs: many(auditLogs),
-  passwordResets: many(passwordResets),
 }))
 
 export const sitesRelations = relations(sites, ({ many }) => ({
@@ -246,8 +224,4 @@ export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
 
 export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
   user: one(users, { fields: [auditLogs.userId], references: [users.id] }),
-}))
-
-export const passwordResetsRelations = relations(passwordResets, ({ one }) => ({
-  user: one(users, { fields: [passwordResets.userId], references: [users.id] }),
 }))

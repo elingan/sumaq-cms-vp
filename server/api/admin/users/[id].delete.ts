@@ -1,12 +1,9 @@
-import { eq } from 'drizzle-orm'
-import { users } from '#server/db/schema'
+import { requireAdminRole } from '#server/utils/auth'
+import { deleteClerkUser, getClerkUserById } from '#server/utils/clerk-users'
+import { createAuditLog } from '#server/utils/audit'
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-
-  if (session.user.role !== 'admin') {
-    throw createError({ statusCode: 403, message: 'Forbidden' })
-  }
+  const { userId } = await requireAdminRole(event)
 
   const id = getRouterParam(event, 'id')
   if (!id) {
@@ -14,19 +11,27 @@ export default defineEventHandler(async (event) => {
   }
 
   // Prevent self-deletion
-  if (id === session.user.id) {
+  if (id === userId) {
     throw createError({ statusCode: 400, message: 'Cannot delete your own account' })
   }
 
-  const db = useDrizzle()
+  // Get user to log their details
+  const userToDelete = await getClerkUserById(event, id)
 
-  const [deleted] = await db.delete(users).where(eq(users.id, id)).returning({ id: users.id })
+  // Delete from Clerk (IRREVERSIBLE)
+  await deleteClerkUser(event, id)
 
-  if (!deleted) {
-    throw createError({ statusCode: 404, message: 'User not found' })
-  }
+  await createAuditLog(
+    userId,
+    'delete_user',
+    {
+      targetType: 'user',
+      targetId: id,
+      email: userToDelete.email,
+      role: userToDelete.role,
+    },
+    event,
+  )
 
-  await createAuditLog(session.user.id, 'delete_user', { targetType: 'user', targetId: id }, event)
-
-  return { ok: true }
+  return { success: true, deletedUser: userToDelete }
 })

@@ -1,20 +1,16 @@
 import { z } from 'zod'
-import { eq } from 'drizzle-orm'
-import { users } from '#server/db/schema'
+import { requireAdminRole } from '#server/utils/auth'
+import { updateClerkUserMetadata } from '#server/utils/clerk-users'
 import { createAuditLog } from '#server/utils/audit'
 
 const PatchUserSchema = z.object({
-  name: z.string().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
   role: z.enum(['admin', 'partner', 'owner', 'editor']).optional(),
-  password: z.string().min(8).optional(),
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-
-  if (session.user.role !== 'admin') {
-    throw createError({ statusCode: 403, message: 'Forbidden' })
-  }
+  const { userId } = await requireAdminRole(event)
 
   const id = getRouterParam(event, 'id')
   if (!id) {
@@ -31,29 +27,23 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const db = useDrizzle()
-
-  const updates: Partial<typeof users.$inferInsert> = {
-    name: result.data.name,
+  // Update user in Clerk
+  const updated = await updateClerkUserMetadata(event, id, {
+    firstName: result.data.firstName,
+    lastName: result.data.lastName,
     role: result.data.role,
-    updatedAt: new Date(),
-  }
+  })
 
-  if (result.data.password) {
-    updates.password = await hashPassword(result.data.password)
-  }
-
-  const [updated] = await db
-    .update(users)
-    .set(updates)
-    .where(eq(users.id, id))
-    .returning({ id: users.id, email: users.email, name: users.name, role: users.role })
-
-  if (!updated) {
-    throw createError({ statusCode: 404, message: 'User not found' })
-  }
-
-  await createAuditLog(session.user.id, 'update_user', { targetType: 'user', targetId: id }, event)
+  await createAuditLog(
+    userId,
+    'update_user',
+    {
+      targetType: 'user',
+      targetId: id,
+      changes: result.data,
+    },
+    event,
+  )
 
   return updated
 })

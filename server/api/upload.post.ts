@@ -1,3 +1,4 @@
+import { requireUserSession } from '#server/utils/auth'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createError, readMultipartFormData } from 'h3'

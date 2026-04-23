@@ -1,3 +1,4 @@
+import { requireUserSession } from '#server/utils/auth'
 import { eq, type InferSelectModel } from 'drizzle-orm'
 import { sites, siteUsers } from '#server/db/schema'
 

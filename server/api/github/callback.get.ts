@@ -1,3 +1,4 @@
+import { requireUserSession } from '#server/utils/auth'
 import { z } from 'zod'
 
 const CallbackQuerySchema = z.object({
