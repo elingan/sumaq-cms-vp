@@ -5,7 +5,7 @@ export default defineConfig({
     '*': 'vp check --fix',
   },
   fmt: {
-    ignorePatterns: ['app-previous-editor/**'],
+    ignorePatterns: ['.agents/skills/**', 'playwright.config.ts', 'e2e/**'],
     singleQuote: true,
     semi: false,
     commaDangle: 'never',
@@ -13,7 +13,7 @@ export default defineConfig({
     arrowParens: 'always',
   },
   lint: {
-    ignorePatterns: ['app-previous-editor/**'],
+    ignorePatterns: ['.agents/skills/**', 'playwright.config.ts', 'e2e/**'],
     options: { typeAware: true, typeCheck: true },
   },
 })
