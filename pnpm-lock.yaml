@@ -18,6 +18,9 @@ importers:
 
   .:
     dependencies:
+      '@clerk/localizations':
+        specifier: ^4.5.3
+        version: 4.5.3
       '@clerk/nuxt':
         specifier: ^2.2.5
         version: 2.2.5(magicast@0.5.2)(vue@3.5.31(typescript@6.0.2))
@@ -266,6 +269,10 @@ packages:
 
   '@clerk/backend@3.2.14':
     resolution: {integrity: sha512-IkePG8vufU+pq8ylQMBJxeyc3ELXxHkrZ0z2lddj8RFq6nwUT03H7u7unKNBERuV4b7FzTqDv8LKyZ4jrVvUqA==}
+    engines: {node: '>=20.9.0'}
+
+  '@clerk/localizations@4.5.3':
+    resolution: {integrity: sha512-bs4MCW7pW8H1hIE99kosqe7B2FyL0XDNR9oA5GuQ7qFZv7lR+ezT1eqkztTDSNXyfJEf9EV0ZZaLOWEh5zrO3g==}
     engines: {node: '>=20.9.0'}
 
   '@clerk/nuxt@2.2.5':
@@ -7497,6 +7504,13 @@ snapshots:
       '@clerk/shared': 4.8.3
       standardwebhooks: 1.0.0
       tslib: 2.8.1
+    transitivePeerDependencies:
+      - react
+      - react-dom
+
+  '@clerk/localizations@4.5.3':
+    dependencies:
+      '@clerk/shared': 4.8.3
     transitivePeerDependencies:
       - react
       - react-dom

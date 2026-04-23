@@ -41,15 +41,7 @@ async function disconnectGitHubApp() {
 
 <template>
   <UPage>
-    <UPageHeader
-      :title="$t('admin.title')"
-      :description="$t('admin.description')"
-      :ui="{
-        root: 'border-none py-4',
-        container: 'max-w-(--ui-container) px-4 sm:px-6 lg:px-8 ',
-        description: 'mt-0',
-      }"
-    />
+    <UPageHeader :title="$t('admin.title')" :description="$t('admin.description')" />
 
     <UPageBody>
       <UPageSection>

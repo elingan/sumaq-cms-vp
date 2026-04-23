@@ -1,5 +1,5 @@
 <template>
-  <UPage class="max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8">
+  <UPage>
     <!-- <UPageHeader
       :title="$t('nav.sites')"
       :description="$t('dashboard.sitesSubtitle')"

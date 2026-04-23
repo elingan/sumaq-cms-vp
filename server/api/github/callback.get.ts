@@ -1,4 +1,4 @@
-import { requireUserSession } from '#server/utils/auth'
+import { requireAdminRole } from '#server/utils/auth'
 import { z } from 'zod'
 
 const CallbackQuerySchema = z.object({
@@ -8,11 +8,7 @@ const CallbackQuerySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-
-  if (session.user.role !== 'admin') {
-    throw createError({ statusCode: 403, message: 'Forbidden' })
-  }
+  const { userId } = await requireAdminRole(event)
 
   const query = getQuery(event)
   const parsed = CallbackQuerySchema.safeParse(query)
@@ -31,14 +27,14 @@ export default defineEventHandler(async (event) => {
   const installationId = Number.parseInt(parsed.data.installation_id, 10)
   const details = await getGitHubInstallationDetails(installationId)
 
-  await saveGlobalGitHubConnection(session.user.id, {
+  await saveGlobalGitHubConnection(userId, {
     installationId,
     accountLogin: details.accountLogin,
     accountType: details.accountType,
   })
 
   await createAuditLog(
-    session.user.id,
+    userId,
     'github_app_connected',
     {
       targetType: 'github_app',

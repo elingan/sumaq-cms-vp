@@ -1,17 +1,13 @@
-import { requireUserSession } from '#server/utils/auth'
+import { requireAdminRole } from '#server/utils/auth'
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-
-  if (session.user.role !== 'admin') {
-    throw createError({ statusCode: 403, message: 'Forbidden' })
-  }
+  const { userId } = await requireAdminRole(event)
 
   const connection = await getGlobalGitHubConnection()
 
   await clearGlobalGitHubConnection()
 
   await createAuditLog(
-    session.user.id,
+    userId,
     'github_app_disconnected',
     {
       targetType: 'github_app',

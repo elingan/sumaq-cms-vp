@@ -16,9 +16,9 @@
       <LocaleSelector />
     </div>
 
-    <UPageCard variant="subtle" class="max-w-sm w-full">
-      <slot />
-    </UPageCard>
+    <slot />
+    <!-- <UPageCard variant="subtle" class="max-w-sm w-full">
+    </UPageCard> -->
 
     <div class="max-w-sm w-full pb-8">
       <p class="text-sm text-muted text-center">

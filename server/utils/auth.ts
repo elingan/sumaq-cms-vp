@@ -6,7 +6,7 @@ import { clerkClient } from '@clerk/nuxt/server'
  * @throws Error with 401 if not authenticated
  */
 export async function getClerkUser(event: any) {
-  const { userId } = event.context.auth ?? {}
+  const { userId } = event.context.auth?.() ?? {}
 
   if (!userId) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
@@ -20,7 +20,7 @@ export async function getClerkUser(event: any) {
  * Useful for accessing email, name, metadata, etc.
  */
 export async function getClerkUserWithData(event: any) {
-  const { userId } = event.context.auth ?? {}
+  const { userId } = event.context.auth?.() ?? {}
 
   if (!userId) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
@@ -43,7 +43,7 @@ export async function getClerkUserWithData(event: any) {
  * Used for role-based authorization checks.
  */
 export async function getUserRole(event: any): Promise<string | undefined> {
-  const { userId } = event.context.auth ?? {}
+  const { userId } = event.context.auth?.() ?? {}
 
   if (!userId) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
@@ -64,7 +64,7 @@ export async function requireAdminRole(event: any) {
     throw createError({ statusCode: 403, message: 'Forbidden: Admin access required' })
   }
 
-  const { userId } = event.context.auth ?? {}
+  const { userId } = event.context.auth?.() ?? {}
   return { userId, role }
 }
 
@@ -82,7 +82,7 @@ export async function requireRole(event: any, requiredRoles: string | string[]) 
     })
   }
 
-  const { userId } = event.context.auth ?? {}
+  const { userId } = event.context.auth?.() ?? {}
   return { userId, role }
 }
 

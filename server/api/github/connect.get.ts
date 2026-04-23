@@ -1,10 +1,7 @@
-import { requireUserSession } from '#server/utils/auth'
-export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
+import { requireAdminRole } from '#server/utils/auth'
 
-  if (session.user.role !== 'admin') {
-    throw createError({ statusCode: 403, message: 'Forbidden' })
-  }
+export default defineEventHandler(async (event) => {
+  const { userId } = await requireAdminRole(event)
 
   const state = createGitHubConnectState()
 
@@ -16,12 +13,7 @@ export default defineEventHandler(async (event) => {
     maxAge: 10 * 60,
   })
 
-  await createAuditLog(
-    session.user.id,
-    'github_app_connect_start',
-    { targetType: 'github_app' },
-    event,
-  )
+  await createAuditLog(userId, 'github_app_connect_start', { targetType: 'github_app' }, event)
 
   return sendRedirect(event, getGitHubInstallUrl(state), 302)
 })

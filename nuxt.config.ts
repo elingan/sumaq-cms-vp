@@ -1,4 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
+import { enGB } from '@clerk/localizations'
+
 export default defineNuxtConfig({
   modules: [
     '@nuxt/eslint',
@@ -42,6 +45,10 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: ['zod'],
     },
+  },
+
+  clerk: {
+    localization: enGB,
   },
 
   eslint: {

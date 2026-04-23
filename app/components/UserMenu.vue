@@ -22,13 +22,14 @@
 
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
+import { useClerk } from '#imports'
 
 defineProps<{
   collapsed?: boolean
 }>()
 
 const { user } = useUser()
-const { signOut } = useClerk()
+const clerk = useClerk()
 
 const displayName = computed(() => {
   const firstName = user.value?.firstName
@@ -88,8 +89,8 @@ const items = computed<DropdownMenuItem[][]>(() => {
       label: 'Log out',
       icon: 'i-lucide-log-out',
       async onSelect() {
-        await signOut()
-        await navigateTo('/login')
+        await clerk.value?.signOut()
+        // await navigateTo('/login')
       },
     },
   ])
