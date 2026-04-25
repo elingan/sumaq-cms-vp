@@ -1,4 +1,4 @@
-import { requireUserSession } from '#server/utils/auth'
+import { getClerkUserWithData } from '#server/utils/auth'
 import { z } from 'zod'
 import { eq, and } from 'drizzle-orm'
 import { sites, siteUsers } from '#server/db/schema'
@@ -10,7 +10,7 @@ const PushFileSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
+  const { userId, role } = await getClerkUserWithData(event)
   const siteId = getRouterParam(event, 'siteId')
 
   if (!siteId) {
@@ -25,12 +25,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Site not found' })
   }
 
-  // Only admin or site owner/editor can push files
-  if (session.user.role !== 'admin') {
+  if (role !== 'admin') {
     const membership = await db
       .select()
       .from(siteUsers)
-      .where(and(eq(siteUsers.siteId, siteId), eq(siteUsers.userId, session.user.id)))
+      .where(and(eq(siteUsers.siteId, siteId), eq(siteUsers.userId, userId)))
       .limit(1)
 
     if (!membership.length || membership[0]!.role === 'partner') {
@@ -51,9 +50,10 @@ export default defineEventHandler(async (event) => {
     data.path,
     data.content,
     data.commitMessage,
+    userId,
   )
 
-  await createAuditLog(session.user.id, 'push_github_file', { siteId, path: data.path }, event)
+  await createAuditLog(userId, 'push_github_file', { siteId, path: data.path }, event)
 
   return { success: true }
 })

@@ -1,17 +1,15 @@
-import { requireUserSession } from '#server/utils/auth'
+import { requireAdminRole } from '#server/utils/auth'
+import { getUserGitHubConnection } from '#server/utils/github'
+
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
+  const { userId } = await requireAdminRole(event)
 
-  if (session.user.role !== 'admin' && session.user.role !== 'owner') {
-    throw createError({ statusCode: 403, message: 'Forbidden' })
-  }
-
-  const connection = await getGlobalGitHubConnection()
+  const connection = await getUserGitHubConnection(userId)
 
   return {
     connected: !!connection,
-    installationId: connection?.connection.installationId ?? null,
-    accountLogin: connection?.connection.accountLogin ?? null,
-    accountType: connection?.connection.accountType ?? null,
+    installationId: connection?.installationId ?? null,
+    accountLogin: connection?.accountLogin ?? null,
+    accountType: connection?.accountType ?? null,
   }
 })

@@ -1,4 +1,4 @@
-import { requireUserSession } from '#server/utils/auth'
+import { requireAdminRole } from '#server/utils/auth'
 import { z } from 'zod'
 
 const QuerySchema = z.object({
@@ -6,11 +6,7 @@ const QuerySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireUserSession(event)
-
-  if (session.user.role !== 'admin' && session.user.role !== 'owner') {
-    throw createError({ statusCode: 403, message: 'Forbidden' })
-  }
+  const { userId } = await requireAdminRole(event)
 
   const query = getQuery(event)
   const parsed = QuerySchema.safeParse(query)
@@ -19,7 +15,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Invalid query params' })
   }
 
-  const repositories = await listInstallationRepositories(parsed.data.prefix ?? 'www-')
+  const repositories = await listInstallationRepositories(parsed.data.prefix ?? 'www-', userId)
 
   return repositories
 })

@@ -1,19 +1,19 @@
 import { requireAdminRole } from '#server/utils/auth'
+import { getUserGitHubConnection, clearUserGitHubConnection } from '#server/utils/github'
+
 export default defineEventHandler(async (event) => {
   const { userId } = await requireAdminRole(event)
 
-  const connection = await getGlobalGitHubConnection()
+  const connection = await getUserGitHubConnection(userId)
 
-  await clearGlobalGitHubConnection()
+  await clearUserGitHubConnection(userId)
 
   await createAuditLog(
     userId,
     'github_app_disconnected',
     {
       targetType: 'github_app',
-      targetId: connection?.connection.installationId
-        ? String(connection.connection.installationId)
-        : null,
+      targetId: connection?.installationId ? String(connection.installationId) : null,
     },
     event,
   )

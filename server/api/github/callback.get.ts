@@ -1,4 +1,5 @@
 import { requireAdminRole } from '#server/utils/auth'
+import { getGitHubInstallationDetails, saveUserGitHubConnection } from '#server/utils/github'
 import { z } from 'zod'
 
 const CallbackQuerySchema = z.object({
@@ -27,7 +28,7 @@ export default defineEventHandler(async (event) => {
   const installationId = Number.parseInt(parsed.data.installation_id, 10)
   const details = await getGitHubInstallationDetails(installationId)
 
-  await saveGlobalGitHubConnection(userId, {
+  await saveUserGitHubConnection(userId, {
     installationId,
     accountLogin: details.accountLogin,
     accountType: details.accountType,

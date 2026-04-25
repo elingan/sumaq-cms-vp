@@ -1,4 +1,6 @@
 import { clerkClient } from '@clerk/nuxt/server'
+import { eq } from 'drizzle-orm'
+import { users } from '#server/db/schema'
 
 /**
  * Get authenticated user from Clerk context.
@@ -39,7 +41,7 @@ export async function getClerkUserWithData(event: any) {
 }
 
 /**
- * Get user role from Clerk public metadata.
+ * Get user role from Clerk public metadata, with fallback to local database.
  * Used for role-based authorization checks.
  */
 export async function getUserRole(event: any): Promise<string | undefined> {
@@ -50,7 +52,20 @@ export async function getUserRole(event: any): Promise<string | undefined> {
   }
 
   const clerkUser = await clerkClient(event).users.getUser(userId)
-  return clerkUser.publicMetadata?.role as string | undefined
+  const clerkRole = clerkUser.publicMetadata?.role as string | undefined
+
+  if (clerkRole) {
+    return clerkRole
+  }
+
+  const db = useDrizzle()
+  const [localUser] = await db
+    .select({ role: users.role })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1)
+
+  return localUser?.role
 }
 
 /**
@@ -60,7 +75,7 @@ export async function getUserRole(event: any): Promise<string | undefined> {
 export async function requireAdminRole(event: any) {
   const role = await getUserRole(event)
 
-  if (role !== 'admin') {
+  if (role !== 'admin' && role !== 'owner') {
     throw createError({ statusCode: 403, message: 'Forbidden: Admin access required' })
   }
 

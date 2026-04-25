@@ -23,11 +23,6 @@ export interface RepoFileChange {
   delete?: boolean
 }
 
-interface GlobalConnection {
-  adminUserId: string
-  connection: GitHubAppConnection
-}
-
 interface AdminGitHubData {
   githubApp?: GitHubAppConnection
   [key: string]: unknown
@@ -110,10 +105,12 @@ async function getInstallationOctokit(installationId: number): Promise<Octokit> 
   return new Octokit({ auth: token })
 }
 
-async function getGlobalConnectionOrTokenOctokit(): Promise<Octokit> {
-  const globalConnection = await getGlobalGitHubConnection()
-  if (globalConnection) {
-    return getInstallationOctokit(globalConnection.connection.installationId)
+async function getInstallationOctokitForUser(userId?: string): Promise<Octokit> {
+  if (userId) {
+    const connection = await getUserGitHubConnection(userId)
+    if (connection) {
+      return getInstallationOctokit(connection.installationId)
+    }
   }
   return getGitHubTokenOctokit()
 }
@@ -161,50 +158,46 @@ export async function getGitHubInstallationDetails(installationId: number) {
   }
 }
 
-export async function getGlobalGitHubConnection(): Promise<GlobalConnection | null> {
+export async function getUserGitHubConnection(userId: string): Promise<GitHubAppConnection | null> {
   const db = useDrizzle()
 
-  const admins = await db
-    .select({ id: users.id, githubData: users.githubData })
+  const [user] = await db
+    .select({ githubData: users.githubData })
     .from(users)
-    .where(eq(users.role, 'admin'))
+    .where(eq(users.id, userId))
+    .limit(1)
 
-  for (const admin of admins) {
-    const githubData = parseGitHubData(admin.githubData)
-    const installationId = parseInstallationId(githubData.githubApp?.installationId)
-    if (!installationId) continue
+  if (!user) return null
 
-    return {
-      adminUserId: admin.id,
-      connection: {
-        installationId,
-        accountLogin: githubData.githubApp?.accountLogin,
-        accountType: githubData.githubApp?.accountType,
-        installedAt: githubData.githubApp?.installedAt ?? new Date().toISOString(),
-      },
-    }
+  const githubData = parseGitHubData(user.githubData)
+  const installationId = parseInstallationId(githubData.githubApp?.installationId)
+  if (!installationId) return null
+
+  return {
+    installationId,
+    accountLogin: githubData.githubApp?.accountLogin,
+    accountType: githubData.githubApp?.accountType,
+    installedAt: githubData.githubApp?.installedAt ?? new Date().toISOString(),
   }
-
-  return null
 }
 
-export async function saveGlobalGitHubConnection(
-  adminUserId: string,
+export async function saveUserGitHubConnection(
+  userId: string,
   connection: Omit<GitHubAppConnection, 'installedAt'> & { installedAt?: string },
 ) {
   const db = useDrizzle()
 
-  const [admin] = await db
+  const [user] = await db
     .select({ githubData: users.githubData })
     .from(users)
-    .where(eq(users.id, adminUserId))
+    .where(eq(users.id, userId))
     .limit(1)
 
-  if (!admin) {
-    throw createError({ statusCode: 404, message: 'Admin user not found' })
+  if (!user) {
+    throw createError({ statusCode: 404, message: 'User not found' })
   }
 
-  const githubData = parseGitHubData(admin.githubData)
+  const githubData = parseGitHubData(user.githubData)
   githubData.githubApp = {
     installationId: connection.installationId,
     accountLogin: connection.accountLogin,
@@ -212,40 +205,53 @@ export async function saveGlobalGitHubConnection(
     installedAt: connection.installedAt ?? new Date().toISOString(),
   }
 
-  await db.update(users).set({ githubData, updatedAt: new Date() }).where(eq(users.id, adminUserId))
+  await db.update(users).set({ githubData, updatedAt: new Date() }).where(eq(users.id, userId))
 }
 
-export async function clearGlobalGitHubConnection() {
-  const globalConnection = await getGlobalGitHubConnection()
-  if (!globalConnection) return
-
+export async function clearUserGitHubConnection(userId: string) {
   const db = useDrizzle()
-  const [admin] = await db
+
+  const [user] = await db
     .select({ githubData: users.githubData })
     .from(users)
-    .where(eq(users.id, globalConnection.adminUserId))
+    .where(eq(users.id, userId))
     .limit(1)
 
-  if (!admin) return
+  if (!user) return
 
-  const githubData = parseGitHubData(admin.githubData)
+  const githubData = parseGitHubData(user.githubData)
   if (!githubData.githubApp) return
 
   delete githubData.githubApp
 
-  await db
-    .update(users)
-    .set({ githubData, updatedAt: new Date() })
-    .where(eq(users.id, globalConnection.adminUserId))
+  await db.update(users).set({ githubData, updatedAt: new Date() }).where(eq(users.id, userId))
 }
 
-export async function listInstallationRepositories(prefix = 'www-'): Promise<GitHubRepository[]> {
-  const globalConnection = await getGlobalGitHubConnection()
-  if (!globalConnection) {
+export async function listInstallationRepositories(
+  prefix = 'www-',
+  userId?: string,
+): Promise<GitHubRepository[]> {
+  let installationId: number | null = null
+
+  if (userId) {
+    const connection = await getUserGitHubConnection(userId)
+    if (connection) {
+      installationId = connection.installationId
+    }
+  }
+
+  if (!installationId) {
+    const fallbackConnection = await getGlobalGitHubConnection()
+    if (fallbackConnection) {
+      installationId = fallbackConnection.connection.installationId
+    }
+  }
+
+  if (!installationId) {
     throw createError({ statusCode: 409, message: 'GitHub App is not connected' })
   }
 
-  const octokit = await getInstallationOctokit(globalConnection.connection.installationId)
+  const octokit = await getInstallationOctokit(installationId)
 
   const repositories: GitHubRepository[] = []
   let page = 1
@@ -273,9 +279,24 @@ export async function listInstallationRepositories(prefix = 'www-'): Promise<Git
   return repositories.sort((a, b) => a.fullName.localeCompare(b.fullName))
 }
 
-export async function listRepositoryBranches(fullName: string): Promise<string[]> {
-  const globalConnection = await getGlobalGitHubConnection()
-  if (!globalConnection) {
+export async function listRepositoryBranches(fullName: string, userId?: string): Promise<string[]> {
+  let installationId: number | null = null
+
+  if (userId) {
+    const connection = await getUserGitHubConnection(userId)
+    if (connection) {
+      installationId = connection.installationId
+    }
+  }
+
+  if (!installationId) {
+    const fallbackConnection = await getGlobalGitHubConnection()
+    if (fallbackConnection) {
+      installationId = fallbackConnection.connection.installationId
+    }
+  }
+
+  if (!installationId) {
     throw createError({ statusCode: 409, message: 'GitHub App is not connected' })
   }
 
@@ -284,7 +305,7 @@ export async function listRepositoryBranches(fullName: string): Promise<string[]
     throw createError({ statusCode: 400, message: 'Invalid repository full name' })
   }
 
-  const octokit = await getInstallationOctokit(globalConnection.connection.installationId)
+  const octokit = await getInstallationOctokit(installationId)
   const branches: string[] = []
   let page = 1
 
@@ -307,14 +328,29 @@ export async function listRepositoryBranches(fullName: string): Promise<string[]
   return branches.sort((a, b) => a.localeCompare(b))
 }
 
-export async function validateRepositoryAccess(repoUrl: string) {
-  const globalConnection = await getGlobalGitHubConnection()
-  if (!globalConnection) {
+export async function validateRepositoryAccess(repoUrl: string, userId?: string) {
+  let installationId: number | null = null
+
+  if (userId) {
+    const connection = await getUserGitHubConnection(userId)
+    if (connection) {
+      installationId = connection.installationId
+    }
+  }
+
+  if (!installationId) {
+    const fallbackConnection = await getGlobalGitHubConnection()
+    if (fallbackConnection) {
+      installationId = fallbackConnection.connection.installationId
+    }
+  }
+
+  if (!installationId) {
     throw createError({ statusCode: 409, message: 'GitHub App is not connected' })
   }
 
   const { owner, repo } = parseGitHubUrl(repoUrl)
-  const octokit = await getInstallationOctokit(globalConnection.connection.installationId)
+  const octokit = await getInstallationOctokit(installationId)
 
   try {
     const { data } = await octokit.request('GET /repos/{owner}/{repo}', { owner, repo })
@@ -335,6 +371,52 @@ export async function validateRepositoryAccess(repoUrl: string) {
   }
 }
 
+interface GlobalConnection {
+  adminUserId: string
+  connection: GitHubAppConnection
+}
+
+export async function getGlobalGitHubConnection(): Promise<GlobalConnection | null> {
+  const db = useDrizzle()
+
+  const admins = await db
+    .select({ id: users.id, githubData: users.githubData })
+    .from(users)
+    .where(eq(users.role, 'admin'))
+
+  for (const admin of admins) {
+    const githubData = parseGitHubData(admin.githubData)
+    const installationId = parseInstallationId(githubData.githubApp?.installationId)
+    if (!installationId) continue
+
+    return {
+      adminUserId: admin.id,
+      connection: {
+        installationId,
+        accountLogin: githubData.githubApp?.accountLogin,
+        accountType: githubData.githubApp?.accountType,
+        installedAt: githubData.githubApp?.installedAt ?? new Date().toISOString(),
+      },
+    }
+  }
+
+  return null
+}
+
+export async function clearGlobalGitHubConnection() {
+  const globalConnection = await getGlobalGitHubConnection()
+  if (!globalConnection) return
+
+  await clearUserGitHubConnection(globalConnection.adminUserId)
+}
+
+export async function saveGlobalGitHubConnection(
+  adminUserId: string,
+  connection: Omit<GitHubAppConnection, 'installedAt'> & { installedAt?: string },
+) {
+  await saveUserGitHubConnection(adminUserId, connection)
+}
+
 /**
  * Parse owner/repo from a full GitHub URL
  * e.g. https://github.com/acme/my-site → { owner: 'acme', repo: 'my-site' }
@@ -353,8 +435,9 @@ export function parseGitHubUrl(url: string): { owner: string; repo: string } {
 export async function listCmsSchemas(
   repoUrl: string,
   branch = 'main',
+  userId?: string,
 ): Promise<Array<{ name: string; path: string; sha: string }>> {
-  const octokit = await getGlobalConnectionOrTokenOctokit()
+  const octokit = await getInstallationOctokitForUser(userId)
   const { owner, repo } = parseGitHubUrl(repoUrl)
 
   try {
@@ -380,8 +463,9 @@ export async function listRepoFilesByPrefix(
   repoUrl: string,
   prefix: string,
   branch = 'main',
+  userId?: string,
 ): Promise<Array<{ name: string; path: string; sha: string }>> {
-  const octokit = await getGlobalConnectionOrTokenOctokit()
+  const octokit = await getInstallationOctokitForUser(userId)
   const { owner, repo } = parseGitHubUrl(repoUrl)
 
   const normalizedPrefix = prefix.replace(/^\/+/, '').replace(/\/+$/, '')
@@ -424,8 +508,9 @@ export async function getRepoFileContent(
   repoUrl: string,
   filePath: string,
   branch = 'main',
+  userId?: string,
 ): Promise<string | null> {
-  const octokit = await getGlobalConnectionOrTokenOctokit()
+  const octokit = await getInstallationOctokitForUser(userId)
   const { owner, repo } = parseGitHubUrl(repoUrl)
 
   try {
@@ -453,11 +538,11 @@ export async function updateRepoFile(
   filePath: string,
   content: string,
   commitMessage: string,
+  userId?: string,
 ): Promise<void> {
-  const octokit = await getGlobalConnectionOrTokenOctokit()
+  const octokit = await getInstallationOctokitForUser(userId)
   const { owner, repo } = parseGitHubUrl(repoUrl)
 
-  // Get current file SHA if it exists (required for updates)
   let sha: string | undefined
   try {
     const { data } = await octokit.rest.repos.getContent({
@@ -489,12 +574,13 @@ export async function syncRepoFiles(
   branch: string,
   changes: RepoFileChange[],
   commitMessage: string,
+  userId?: string,
 ): Promise<{ commitSha: string }> {
   if (!changes.length) {
     throw createError({ statusCode: 400, message: 'No file changes to sync' })
   }
 
-  const octokit = await getGlobalConnectionOrTokenOctokit()
+  const octokit = await getInstallationOctokitForUser(userId)
   const { owner, repo } = parseGitHubUrl(repoUrl)
 
   const refResponse = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
