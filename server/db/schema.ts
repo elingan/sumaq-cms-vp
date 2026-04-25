@@ -53,9 +53,7 @@ type JsonRecord = Record<string, unknown>
 // ─── Tables ──────────────────────────────────────────────────────────────────
 
 export const users = sqliteTable('users', {
-  id: text('id')
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+  id: text('id').primaryKey(),
   email: text('email').unique().notNull(),
   password: text('password'),
   name: text('name'),

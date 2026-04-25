@@ -10,7 +10,6 @@
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
     "prepare": "vp config",
-    "seed": "tsx server/db/seed.ts",
     "cleanup": "nuxt cleanup",
     "nuxt": "nuxt",
     "test:e2e": "playwright test",
@@ -48,7 +47,6 @@
     "@types/sortablejs": "^1.15.9",
     "drizzle-kit": "^0.31.10",
     "eslint": "^10.2.0",
-    "tsx": "^4.21.0",
     "typescript": "^6.0.2",
     "vite-plus": "catalog:",
     "vue-tsc": "^3.2.6"

@@ -33,13 +33,7 @@ npx nuxt db generate
 npx nuxt db migrate
 ```
 
-4. Seed the admin account:
-
-```bash
-vp run seed
-```
-
-5. Start the app:
+4. Start the app:
 
 ```bash
 vp run dev
@@ -78,7 +72,6 @@ vp lint
 npx nuxt db generate
 npx nuxt db migrate
 npx nuxt db drop-all
-vp run seed
 vp run build
 vp preview
 ```

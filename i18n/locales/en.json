@@ -45,7 +45,9 @@
     "invalidEmail": "Invalid email address",
     "passwordMin": "Password must be at least 8 characters",
     "invalidCredentials": "Invalid email or password",
-    "loginError": "An error occurred. Please try again."
+    "loginError": "An error occurred. Please try again.",
+    "createAccount": "Create acoount",
+    "signupDescription": "Enter your details to create a new account."
   },
   "actions": {
     "save": "Save",

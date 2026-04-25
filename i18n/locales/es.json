@@ -45,7 +45,9 @@
     "invalidEmail": "Correo electrónico no válido",
     "passwordMin": "La contraseña debe tener al menos 8 caracteres",
     "invalidCredentials": "Correo o contraseña incorrectos",
-    "loginError": "Ocurrió un error. Por favor inténtalo de nuevo."
+    "loginError": "Ocurrió un error. Por favor inténtalo de nuevo.",
+    "createAccount": "Crear cuenta",
+    "signupDescription": "Ingrese sus datos para crear una nueva cuenta."
   },
   "actions": {
     "save": "Guardar",

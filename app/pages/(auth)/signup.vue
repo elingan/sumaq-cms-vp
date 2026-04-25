@@ -2,8 +2,12 @@
   <div class="flex flex-col items-center justify-center min-h-screen px-4">
     <div class="w-full max-w-md">
       <div class="mb-8 text-center">
-        <h1 class="text-3xl font-bold mb-2">{{ t('auth.createAccount') }}</h1>
-        <p class="text-muted">{{ t('auth.signupDescription') }}</p>
+        <h1 class="text-3xl font-bold mb-2">
+          {{ t('auth.createAccount') }}
+        </h1>
+        <p class="text-muted">
+          {{ t('auth.signupDescription') }}
+        </p>
       </div>
 
       <SignUp />

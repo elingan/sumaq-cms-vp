@@ -52,10 +52,14 @@ export default defineEventHandler(async (event) => {
   const db = useDrizzle()
   const eventType = clerkEvent.type
 
+  function normalizeEmail(value: string | undefined) {
+    return value?.toLowerCase().trim()
+  }
+
   // Handle user.created event
   if (eventType === 'user.created') {
     const { id: clerk_id, email_addresses, first_name, last_name } = clerkEvent.data
-    const email = email_addresses?.[0]?.email_address
+    const email = normalizeEmail(email_addresses?.[0]?.email_address)
 
     if (!email) {
       console.warn(`[Clerk Webhook] user.created: No email found for user ${clerk_id}`)
@@ -63,27 +67,52 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-      // Check if user already exists
-      const existing = await db
+      // Prefer the Clerk user ID as the canonical primary key.
+      const [existingById] = await db
         .select({ id: users.id })
         .from(users)
-        .where(eq(users.email, email.toLowerCase()))
+        .where(eq(users.id, clerk_id))
         .limit(1)
 
-      if (!existing.length) {
-        // Create new user with default role 'owner'
-        await db.insert(users).values({
-          email: email.toLowerCase(),
-          name: [first_name, last_name].filter(Boolean).join(' ') || email,
-          role: 'owner', // Default role for new users
-          githubData: null,
-        })
+      if (existingById) {
+        await db
+          .update(users)
+          .set({
+            email,
+            name: [first_name, last_name].filter(Boolean).join(' ') || email,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, clerk_id))
 
-        console.info(
-          `[Clerk Webhook] user.created: Created local user for ${email} with role 'owner'`,
-        )
+        console.info(`[Clerk Webhook] user.created: User already exists by Clerk ID ${clerk_id}`)
       } else {
-        console.info(`[Clerk Webhook] user.created: User already exists for ${email}`)
+        // Legacy compatibility: if an old local row exists by email, keep it and avoid
+        // creating a duplicate conflicting record. Access checks rely on Clerk IDs.
+        const [existingByEmail] = await db
+          .select({ id: users.id })
+          .from(users)
+          .where(eq(users.email, email))
+          .limit(1)
+
+        if (existingByEmail) {
+          console.warn(
+            `[Clerk Webhook] user.created: Existing local user found by email ${email} with id ${existingByEmail.id}; manual reconciliation required to align with Clerk ID ${clerk_id}`,
+          )
+        } else {
+          // Create new user with default role 'owner'.
+          // User ID must match Clerk user ID for permission checks to remain consistent.
+          await db.insert(users).values({
+            id: clerk_id,
+            email,
+            name: [first_name, last_name].filter(Boolean).join(' ') || email,
+            role: 'owner',
+            githubData: null,
+          })
+
+          console.info(
+            `[Clerk Webhook] user.created: Created local user ${clerk_id} for ${email} with role 'owner'`,
+          )
+        }
       }
     } catch {
       console.error(`[Clerk Webhook] user.created: Error creating user ${email}`)
@@ -97,7 +126,7 @@ export default defineEventHandler(async (event) => {
   // Handle user.updated event
   if (eventType === 'user.updated') {
     const { id: clerk_id, email_addresses, first_name, last_name } = clerkEvent.data
-    const email = email_addresses?.[0]?.email_address
+    const email = normalizeEmail(email_addresses?.[0]?.email_address)
 
     if (!email) {
       console.warn(`[Clerk Webhook] user.updated: No email found for user ${clerk_id}`)
@@ -105,16 +134,46 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-      // Update existing user
-      await db
+      // Update by Clerk ID first.
+      const [updatedById] = await db
         .update(users)
         .set({
+          email,
           name: [first_name, last_name].filter(Boolean).join(' ') || email,
           updatedAt: new Date(),
         })
-        .where(eq(users.email, email.toLowerCase()))
+        .where(eq(users.id, clerk_id))
+        .returning({ id: users.id })
 
-      console.info(`[Clerk Webhook] user.updated: Updated user ${email}`)
+      if (updatedById) {
+        console.info(`[Clerk Webhook] user.updated: Updated user by Clerk ID ${clerk_id}`)
+      } else {
+        // Fallback for legacy records keyed by email.
+        const [updatedByEmail] = await db
+          .update(users)
+          .set({
+            name: [first_name, last_name].filter(Boolean).join(' ') || email,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.email, email))
+          .returning({ id: users.id })
+
+        if (updatedByEmail) {
+          console.warn(
+            `[Clerk Webhook] user.updated: Updated legacy user by email ${email}; id ${updatedByEmail.id} should be reconciled with Clerk ID ${clerk_id}`,
+          )
+        } else {
+          await db.insert(users).values({
+            id: clerk_id,
+            email,
+            name: [first_name, last_name].filter(Boolean).join(' ') || email,
+            role: 'owner',
+            githubData: null,
+          })
+
+          console.info(`[Clerk Webhook] user.updated: Created missing local user for ${clerk_id}`)
+        }
+      }
     } catch {
       console.error(`[Clerk Webhook] user.updated: Error updating user ${email}`)
       // Don't throw error, continue processing
@@ -124,8 +183,8 @@ export default defineEventHandler(async (event) => {
   // Handle user.deleted event
   if (eventType === 'user.deleted') {
     const { id: clerk_id, email_addresses } = clerkEvent.data
-    const email = email_addresses?.[0]?.email_address
-
+    const email = normalizeEmail(email_addresses?.[0]?.email_address)
+    console.log(email)
     if (!email) {
       console.warn(`[Clerk Webhook] user.deleted: No email found for user ${clerk_id}`)
       return { success: true }
