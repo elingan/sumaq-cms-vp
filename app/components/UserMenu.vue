@@ -46,8 +46,18 @@ const description = computed(() => {
   return 'User'
 })
 
+const avatarUrl = computed(() => {
+  const avatarUrl = user.value?.imageUrl
+
+  if (avatarUrl) {
+    return avatarUrl
+  }
+
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName.value)}`
+})
+
 const avatar = computed(() => ({
-  src: `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName.value)}`,
+  src: avatarUrl.value,
   alt: displayName.value,
 }))
 

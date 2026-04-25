@@ -6,7 +6,7 @@ export default defineAppConfig({
     },
     page: {
       slots: {
-        root: 'w-full max-w-(--ui-container) mx-auto',
+        root: 'w-full max-w-(--ui-container) mx-auto px-4 xl:px-0',
       },
     },
     pageHeader: {
