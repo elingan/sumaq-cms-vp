@@ -1,5 +1,5 @@
 import { sql, relations } from 'drizzle-orm'
-import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
@@ -39,14 +39,22 @@ export const PasswordResetPurpose = {
   Reset: 'reset',
 } as const
 
+export const BookingExceptionStatus = {
+  Released: 'released',
+} as const
+
 export type PasswordResetPurposeValue =
   (typeof PasswordResetPurpose)[keyof typeof PasswordResetPurpose]
+
+export type BookingExceptionStatusValue =
+  (typeof BookingExceptionStatus)[keyof typeof BookingExceptionStatus]
 
 export const UserRoleValues = ['admin', 'partner', 'owner', 'editor'] as const
 export const SiteUserRoleValues = ['owner', 'editor', 'partner'] as const
 export const SiteStatusValues = ['active', 'archived'] as const
 export const PageStatusValues = ['draft', 'published'] as const
 export const PasswordResetPurposeValues = ['invite', 'reset'] as const
+export const BookingExceptionStatusValues = ['released'] as const
 
 type JsonRecord = Record<string, unknown>
 
@@ -91,6 +99,103 @@ export const sites = sqliteTable('sites', {
     .notNull()
     .default(sql`(unixepoch())`),
 })
+
+export const locations = sqliteTable(
+  'locations',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: text('name').notNull().unique(),
+    address: text('address'),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [index('idx_locations_name').on(table.name)],
+)
+
+export const rooms = sqliteTable(
+  'rooms',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    locationId: text('location_id')
+      .notNull()
+      .references(() => locations.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [
+    index('idx_rooms_location_id').on(table.locationId),
+    index('idx_rooms_location_name').on(table.locationId, table.name),
+  ],
+)
+
+export const bookings = sqliteTable(
+  'bookings',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    roomId: text('room_id')
+      .notNull()
+      .references(() => rooms.id, { onDelete: 'cascade' }),
+    userId: text('user_id').notNull(),
+    startTime: integer('start_time', { mode: 'timestamp' }).notNull(),
+    endTime: integer('end_time', { mode: 'timestamp' }).notNull(),
+    isRecurring: integer('is_recurring', { mode: 'boolean' }).notNull().default(false),
+    dayOfWeek: integer('day_of_week'),
+    title: text('title'),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [
+    index('idx_bookings_room_time').on(table.roomId, table.startTime, table.endTime),
+    index('idx_bookings_user_created_at').on(table.userId, table.createdAt),
+    index('idx_bookings_recurring_day').on(table.isRecurring, table.dayOfWeek),
+  ],
+)
+
+export const bookingExceptions = sqliteTable(
+  'booking_exceptions',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    bookingId: text('booking_id')
+      .notNull()
+      .references(() => bookings.id, { onDelete: 'cascade' }),
+    exceptionDate: text('exception_date').notNull(),
+    status: text('status', { enum: BookingExceptionStatusValues })
+      .notNull()
+      .default(BookingExceptionStatus.Released),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [
+    index('idx_booking_exceptions_booking_date').on(table.bookingId, table.exceptionDate),
+    index('idx_booking_exceptions_status').on(table.status),
+    uniqueIndex('uniq_booking_exception_booking_date').on(table.bookingId, table.exceptionDate),
+  ],
+)
 
 export const siteUsers = sqliteTable(
   'site_users',
@@ -200,6 +305,24 @@ export const sitesRelations = relations(sites, ({ many }) => ({
   pages: many(pages),
   media: many(media),
   activityLogs: many(activityLogs),
+}))
+
+export const locationsRelations = relations(locations, ({ many }) => ({
+  rooms: many(rooms),
+}))
+
+export const roomsRelations = relations(rooms, ({ one, many }) => ({
+  location: one(locations, { fields: [rooms.locationId], references: [locations.id] }),
+  bookings: many(bookings),
+}))
+
+export const bookingsRelations = relations(bookings, ({ one, many }) => ({
+  room: one(rooms, { fields: [bookings.roomId], references: [rooms.id] }),
+  exceptions: many(bookingExceptions),
+}))
+
+export const bookingExceptionsRelations = relations(bookingExceptions, ({ one }) => ({
+  booking: one(bookings, { fields: [bookingExceptions.bookingId], references: [bookings.id] }),
 }))
 
 export const siteUsersRelations = relations(siteUsers, ({ one }) => ({

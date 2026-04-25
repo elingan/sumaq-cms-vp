@@ -15,6 +15,13 @@
       "when": 1776882501556,
       "tag": "0001_past_network",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1777135492216,
+      "tag": "0002_mean_shockwave",
+      "breakpoints": true
     }
   ]
 }
