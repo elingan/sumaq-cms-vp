@@ -27,6 +27,10 @@
   --color-brand-950: #3d1a14;
 } */
 
+body {
+  @apply bg-accented/50;
+}
+
 /** Scrollbar global (todos los elementos con overflow) **/
 :where() {
   scrollbar-width: thin;
