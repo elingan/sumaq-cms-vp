@@ -1,11 +1,11 @@
 <template>
   <UPage>
     <div class="space-y-8 mt-8 mb-16">
-      <SitesDashboardSection
+      <SiteDashboardSection
         :site-cards="siteCards"
         :can-create-sites="canCreateSites"
         :has-sites="Boolean(sites?.length)"
-        @create-site="showCreateModal = true"
+        @site-created="refreshSites"
       />
       <CalendarDashboardSection
         :locations="locations"
@@ -17,8 +17,6 @@
         <UIcon name="i-lucide-loader-circle" class="animate-spin size-8 text-muted" />
       </div>
     </div>
-
-    <SitesSiteForm v-model:open="showCreateModal" @saved="handleSiteSaved" />
   </UPage>
 </template>
 
@@ -27,9 +25,8 @@ definePageMeta({ layout: 'default', title: 'Dashboard' })
 
 const router = useRouter()
 const { canCreateSites, canCreateBookings } = useRole()
-const showCreateModal = ref(false)
 
-const { data: sites, refresh, pending: pendingSites } = await useFetch('/api/sites')
+const { data: sites, refresh: refreshSites, pending: pendingSites } = await useFetch('/api/sites')
 const { data: locations } = await useFetch('/api/bookings/locations')
 
 const siteCards = computed(() => {
@@ -48,10 +45,6 @@ const siteCards = computed(() => {
 
   return items
 })
-
-function handleSiteSaved() {
-  refresh()
-}
 
 function navigateToBookings() {
   const firstLocationId = locations.value?.[0]?.id
