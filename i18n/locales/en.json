@@ -59,6 +59,7 @@
     "archive": "Archive",
     "cancel": "Cancel",
     "confirm": "Confirm",
+    "view": "View",
     "createCalendar": "Create calendar"
   },
   "status": {
@@ -73,7 +74,12 @@
     "noSitesDescription": "Create your first site to get started.",
     "calendarSubtitle": "All your calendar in one place",
     "noCalendar": "No calendar yet",
-    "noCalendarDescription": "Create your first calendar to get started."
+    "noCalendarDescription": "Create your first calendar to get started.",
+    "bookings": "Bookings",
+    "rooms": "Rooms",
+    "oneRoom": "1 room",
+    "noRooms": "No rooms",
+    "multipleRooms": "{count} rooms"
   },
   "sites": {
     "name": "Site Name",

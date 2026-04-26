@@ -14,6 +14,16 @@ export function useRole() {
   const isPartner = computed(() => role.value === 'partner')
   const canCreateSites = computed(() => isAdmin.value)
   const canManageSites = computed(() => isAdmin.value || isOwner.value)
+  const canCreateBookings = computed(() => isAdmin.value || isOwner.value)
 
-  return { role, isAdmin, isOwner, isEditor, isPartner, canManageSites, canCreateSites }
+  return {
+    role,
+    isAdmin,
+    isOwner,
+    isEditor,
+    isPartner,
+    canManageSites,
+    canCreateSites,
+    canCreateBookings,
+  }
 }
