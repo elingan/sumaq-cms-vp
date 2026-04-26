@@ -1,7 +1,0 @@
-VITE+ - The Unified Toolchain for the Web
-
-[1m[31merror:[39m[0m Formatting issues found
-.data/blob/sites/mini-cms/data/index.json (36ms)
-.data/blob/sites/mini-cms/data/index.json.$meta.json (12ms)
-
-Found formatting issues in 2 files (1906ms, 12 threads). Run `vp check --fix` to fix them.

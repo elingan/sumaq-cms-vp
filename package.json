@@ -9,7 +9,7 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
-    "prepare": "vp config",
+    "prepare": "vp config -c vp.config.ts",
     "cleanup": "nuxt cleanup",
     "nuxt": "nuxt",
     "test:e2e": "playwright test",

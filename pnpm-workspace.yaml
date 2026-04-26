@@ -9,6 +9,7 @@ ignoredBuiltDependencies:
   - unrs-resolver
   - vue-demi
 onlyBuiltDependencies:
+  - '@clerk/shared'
   - sharp
 overrides:
   vite: 'catalog:'
