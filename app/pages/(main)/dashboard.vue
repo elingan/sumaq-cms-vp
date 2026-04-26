@@ -23,9 +23,26 @@
           <UPageCard
             v-for="site in siteCards"
             :key="site.id"
+            :to="site.to"
+            target="_self"
             :title="site.title"
-            :description="site.description"
-            :image="site.imageUrl"
+            :description="site.description ?? ''"
+            :badge="site.status"
+            :badge-color="site.status"
+            reverse
+            variant="soft"
+          >
+            <img
+              src="https://placehold.co/300x200"
+              :alt="site.title"
+              class="w-full h-full object-cover"
+            />
+          </UPageCard>
+          <UButton
+            v-if="canCreateSites"
+            icon="i-lucide-plus"
+            :label="$t('actions.createCalendar')"
+            @click="showCreateModal = true"
           />
         </UPageGrid>
         <UEmpty
@@ -41,7 +58,6 @@
         class="w-full"
       >
         <UEmpty
-          v-if="!calendars?.length"
           title="No Calendar"
           description="No calendar found. Please contact your administrator."
           variant="soft"
@@ -111,14 +127,20 @@ const showCreateModal = ref(false)
 const { data: sites, refresh, pending: pendingSites } = await useFetch('/api/sites')
 
 const siteCards = computed(() => {
-  return sites.value?.map((site) => {
+  const items = sites.value?.map((site) => {
     return {
       id: site.id,
+      to: `/site/${site.slug}`,
+      slug: site.slug,
       title: site.name,
-      description: site.url,
-      imageUrl: site.thumbnail,
+      description: site.description,
+      imageUrl: site.screenshotUrl ?? 'https://placeholder.co/300x200',
+      status: site.status,
+      updatedAt: site.updatedAt,
     }
   })
+
+  return items
 })
 
 const orientation = computed(() =>
