@@ -9,7 +9,25 @@
         description: 'mt-0',
       }"
     /> -->
-    <div class="space-y-8 mb-16">
+
+    <div class="space-y-8 mt-8 mb-16">
+      <UCard
+        :title="$t('nav.sites')"
+        :description="$t('dashboard.sitesSubtitle')"
+        variant="soft"
+        class="w-full"
+      >
+        <UPageGrid>
+          <SitesSiteCard
+            v-for="site in sites"
+            :key="site.id"
+            :site="site"
+            :orientation="orientation"
+            @refresh="refresh"
+          />
+        </UPageGrid>
+      </UCard>
+      <UCard title="calendar" variant="soft" class="w-full"> content here </UCard>
       <UPageHeader :title="$t('nav.sites')" :description="$t('dashboard.sitesSubtitle')">
         <template #links>
           <UButton
