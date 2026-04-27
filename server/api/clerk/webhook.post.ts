@@ -184,18 +184,14 @@ export default defineEventHandler(async (event) => {
   if (eventType === 'user.deleted') {
     const { id: clerk_id, email_addresses } = clerkEvent.data
     const email = normalizeEmail(email_addresses?.[0]?.email_address)
-    console.log(email)
-    if (!email) {
-      console.warn(`[Clerk Webhook] user.deleted: No email found for user ${clerk_id}`)
-      return { success: true }
-    }
 
     try {
-      // Note: We don't actually delete the user to preserve audit trail
-      // In production, you might want to set a soft-delete flag
-      console.info(`[Clerk Webhook] user.deleted: User ${email} deleted in Clerk`)
-    } catch {
-      console.error(`[Clerk Webhook] user.deleted: Error handling user deletion ${email}`)
+      await db.delete(users).where(eq(users.id, clerk_id))
+      console.info(
+        `[Clerk Webhook] user.deleted: User ${clerk_id} (${email || 'unknown email'}) deleted in local DB`,
+      )
+    } catch (error) {
+      console.error(`[Clerk Webhook] user.deleted: Error handling user deletion ${clerk_id}`, error)
       // Don't throw error, continue processing
     }
   }

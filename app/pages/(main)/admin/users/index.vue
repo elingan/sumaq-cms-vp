@@ -31,6 +31,7 @@ const { data: users, refresh } = await useFetch<UserRow[]>('/api/admin/users')
 
 const showCreateModal = ref(false)
 const editingUser = ref<UserRow | null>(null)
+const isSyncing = ref(false)
 const generatedLink = ref<{
   userId: string
   link: string
@@ -116,6 +117,32 @@ async function deleteUser(id: string) {
   await $fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
   await refresh()
 }
+
+async function syncUsers() {
+  isSyncing.value = true
+  try {
+    const result = await $fetch<{ success: boolean; syncedCount: number; errorCount: number }>(
+      '/api/admin/users/sync',
+      { method: 'POST' },
+    )
+    toast.add({
+      title: 'Sincronización Exitosa',
+      description: `Usuarios sincronizados: ${result.syncedCount}. Errores: ${result.errorCount}`,
+      color: 'success',
+      icon: 'i-lucide-check-circle',
+    })
+    await refresh()
+  } catch (error) {
+    toast.add({
+      title: 'Error de Sincronización',
+      description: 'Ocurrió un error al sincronizar con Clerk.',
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    })
+  } finally {
+    isSyncing.value = false
+  }
+}
 </script>
 
 <template>
@@ -127,6 +154,14 @@ async function deleteUser(id: string) {
         </template>
 
         <template #right>
+          <UButton
+            icon="i-lucide-refresh-cw"
+            color="neutral"
+            variant="soft"
+            :loading="isSyncing"
+            label="Sincronizar Usuarios"
+            @click="syncUsers"
+          />
           <UButton icon="i-lucide-plus" :label="t('users.createUser')" @click="openCreateModal" />
         </template>
       </UDashboardNavbar>
