@@ -59,6 +59,7 @@
     "archive": "Archivieren",
     "cancel": "Abbrechen",
     "confirm": "Bestätigen",
+    "view": "Anzeigen",
     "createCalendar": "Kalender erstellen"
   },
   "status": {
@@ -73,7 +74,12 @@
     "noSitesDescription": "Erstelle deine erste Website, um loszulegen.",
     "calendarSubtitle": "Alle deine Kalender an einem Ort",
     "noCalendar": "Noch kein Kalender",
-    "noCalendarDescription": "Erstelle deinen ersten Kalender, um loszulegen."
+    "noCalendarDescription": "Erstelle deinen ersten Kalender, um loszulegen.",
+    "bookings": "Buchungen",
+    "rooms": "Zimmer",
+    "oneRoom": "1 Zimmer",
+    "noRooms": "Keine Zimmer",
+    "multipleRooms": "{count} Zimmer"
   },
   "sites": {
     "name": "Websitename",

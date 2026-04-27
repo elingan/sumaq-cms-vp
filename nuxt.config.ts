@@ -43,7 +43,7 @@ export default defineNuxtConfig({
 
   vite: {
     optimizeDeps: {
-      include: ['zod', '@clerk/localizations', '@clerk/vue'],
+      include: ['zod', '@clerk/localizations'],
     },
   },
 

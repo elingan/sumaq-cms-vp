@@ -91,6 +91,6 @@ useHead(() => ({
       </UCard>
     </div>
 
-    <SiteForm v-model:open="showEditModal" :site="site" @saved="refresh" />
+    <SiteFormCreate v-model:open="showEditModal" :site="site" @saved="refresh" />
   </UDashboardPanel>
 </template>

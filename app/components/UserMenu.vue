@@ -75,6 +75,11 @@ const items = computed<DropdownMenuItem[][]>(() => {
         to: '/billing',
       },
       {
+        label: 'Bookings',
+        icon: 'i-lucide-calendar-days',
+        to: '/bookings',
+      },
+      {
         label: 'Settings',
         icon: 'i-lucide-settings',
         to: '/settings',
