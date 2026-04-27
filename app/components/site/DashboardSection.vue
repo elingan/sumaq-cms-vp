@@ -38,7 +38,7 @@
     />
   </UCard>
 
-  <SitesFormCreate v-model:open="showCreateModal" @saved="handleSiteSaved" />
+  <SiteFormCreate v-model:open="showCreateModal" @saved="handleSiteSaved" />
 </template>
 
 <script setup lang="ts">
