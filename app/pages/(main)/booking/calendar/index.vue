@@ -5,14 +5,7 @@
         :title="$t('bookingCalendar.pageTitle')"
         :description="$t('bookingCalendar.pageDescription')"
       >
-        <template #links>
-          <UButton
-            icon="i-lucide-plus"
-            :label="$t('bookingCalendar.newLocationButton')"
-            color="primary"
-            @click="openCreateLocation"
-          />
-        </template>
+        <template #links />
       </UPageHeader>
 
       <UPageBody>
@@ -20,24 +13,53 @@
           <UIcon name="i-lucide-loader-circle" class="size-6 animate-spin text-muted" />
         </div>
 
-        <div v-else-if="!locations?.length" class="py-12 text-center text-muted">
-          <UIcon name="i-lucide-map-pin-off" class="size-8 mb-3 mx-auto" />
-          <p class="text-sm">
-            {{ $t('bookingCalendar.noLocations') }}
-          </p>
-        </div>
+        <div v-else class="space-y-8">
+          <section class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-medium mb-2">
+                {{ $t('bookingCalendar.locationManagerTitle') }}
+              </h3>
+              <UButton
+                icon="i-lucide-plus"
+                :label="$t('bookingCalendar.newLocationButton')"
+                color="primary"
+                @click="openCreateLocation"
+              />
+            </div>
 
-        <div v-else class="space-y-4">
-          <BookingCalendarLocationManagerCard
-            v-for="location in locations"
-            :key="location.id"
-            :location="location"
-            @edit-location="openEditLocation(location)"
-            @delete-location="deleteLocation(location)"
-            @add-room="openCreateRoom(location.id)"
-            @edit-room="(room) => openEditRoom(location.id, room)"
-            @delete-room="(room) => deleteRoom(location.id, room)"
-          />
+            <div v-if="!locations?.length" class="py-12 text-center text-muted">
+              <UIcon name="i-lucide-map-pin-off" class="size-8 mb-3 mx-auto" />
+              <p class="text-sm">
+                {{ $t('bookingCalendar.noLocations') }}
+              </p>
+            </div>
+
+            <BookingCalendarLocationManagerCard
+              v-for="location in locations"
+              :key="location.id"
+              :location="location"
+              @edit-location="openEditLocation(location)"
+              @delete-location="deleteLocation(location)"
+              @add-room="openCreateRoom(location.id)"
+              @edit-room="(room) => openEditRoom(location.id, room)"
+              @delete-room="(room) => deleteRoom(location.id, room)"
+            />
+          </section>
+
+          <section class="space-y-4 border-t border-default pt-8">
+            <div>
+              <h3 class="text-lg font-medium mb-2">
+                {{ $t('bookingCalendar.teamTitle') }}
+              </h3>
+              <p class="text-sm text-muted">
+                {{ $t('bookingCalendar.teamDescription') }}
+              </p>
+            </div>
+
+            <UCard :ui="{ body: 'p-0' }">
+              <BookingCalendarLocationMembersSection :show-header="false" :bordered="false" />
+            </UCard>
+          </section>
         </div>
       </UPageBody>
     </UPage>

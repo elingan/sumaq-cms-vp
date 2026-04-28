@@ -8,7 +8,16 @@ export default defineNuxtRouteMiddleware((to) => {
     return
   }
 
-  const protectedPrefixes = ['/dashboard', '/site', '/admin', '/settings', '/profile', '/billing']
+  const protectedPrefixes = [
+    '/dashboard',
+    '/site',
+    '/admin',
+    '/settings',
+    '/profile',
+    '/billing',
+    '/booking',
+    '/bookings',
+  ]
   const isProtected = protectedPrefixes.some((prefix) => to.path.startsWith(prefix))
 
   if (isProtected && !isSignedIn.value) {

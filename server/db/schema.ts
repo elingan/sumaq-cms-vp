@@ -43,6 +43,22 @@ export const BookingExceptionStatus = {
   Released: 'released',
 } as const
 
+export const BookingMemberRole = {
+  Admin: 'admin',
+  Member: 'member',
+} as const
+
+export type BookingMemberRoleValue = (typeof BookingMemberRole)[keyof typeof BookingMemberRole]
+
+export const BookingMemberStatus = {
+  Pending: 'pending',
+  Active: 'active',
+  Revoked: 'revoked',
+} as const
+
+export type BookingMemberStatusValue =
+  (typeof BookingMemberStatus)[keyof typeof BookingMemberStatus]
+
 export type PasswordResetPurposeValue =
   (typeof PasswordResetPurpose)[keyof typeof PasswordResetPurpose]
 
@@ -55,6 +71,8 @@ export const SiteStatusValues = ['active', 'archived'] as const
 export const PageStatusValues = ['draft', 'published'] as const
 export const PasswordResetPurposeValues = ['invite', 'reset'] as const
 export const BookingExceptionStatusValues = ['released'] as const
+export const BookingMemberRoleValues = ['admin', 'member'] as const
+export const BookingMemberStatusValues = ['pending', 'active', 'revoked'] as const
 
 type JsonRecord = Record<string, unknown>
 
@@ -214,6 +232,42 @@ export const siteUsers = sqliteTable(
   (table) => [primaryKey({ columns: [table.siteId, table.userId] })],
 )
 
+export const userMembers = sqliteTable(
+  'user_members',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    memberId: text('member_id').references(() => users.id, { onDelete: 'set null' }),
+    invitedEmail: text('invited_email').notNull(),
+    invitationId: text('invitation_id').unique(),
+    role: text('role', { enum: BookingMemberRoleValues })
+      .notNull()
+      .default(BookingMemberRole.Member),
+    status: text('status', { enum: BookingMemberStatusValues })
+      .notNull()
+      .default(BookingMemberStatus.Pending),
+    invitedBy: text('invited_by').references(() => users.id, { onDelete: 'set null' }),
+    acceptedAt: integer('accepted_at', { mode: 'timestamp' }),
+    revokedAt: integer('revoked_at', { mode: 'timestamp' }),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [
+    index('idx_user_members_user_id').on(table.userId),
+    index('idx_user_members_member_id').on(table.memberId),
+    index('idx_user_members_status').on(table.status),
+    uniqueIndex('uniq_user_members_invited_email').on(table.invitedEmail),
+  ],
+)
+
 export const pages = sqliteTable(
   'pages',
   {
@@ -296,6 +350,9 @@ export const auditLogs = sqliteTable('audit_logs', {
 
 export const usersRelations = relations(users, ({ many }) => ({
   siteUsers: many(siteUsers),
+  bookingMembers: many(userMembers, { relationName: 'booking_member_user' }),
+  bookingMemberships: many(userMembers, { relationName: 'booking_member_profile' }),
+  bookingInvitationsSent: many(userMembers, { relationName: 'booking_member_inviter' }),
   activityLogs: many(activityLogs),
   auditLogs: many(auditLogs),
 }))
@@ -328,6 +385,24 @@ export const bookingExceptionsRelations = relations(bookingExceptions, ({ one })
 export const siteUsersRelations = relations(siteUsers, ({ one }) => ({
   site: one(sites, { fields: [siteUsers.siteId], references: [sites.id] }),
   user: one(users, { fields: [siteUsers.userId], references: [users.id] }),
+}))
+
+export const userMembersRelations = relations(userMembers, ({ one }) => ({
+  user: one(users, {
+    fields: [userMembers.userId],
+    references: [users.id],
+    relationName: 'booking_member_user',
+  }),
+  member: one(users, {
+    fields: [userMembers.memberId],
+    references: [users.id],
+    relationName: 'booking_member_profile',
+  }),
+  inviter: one(users, {
+    fields: [userMembers.invitedBy],
+    references: [users.id],
+    relationName: 'booking_member_inviter',
+  }),
 }))
 
 export const pagesRelations = relations(pages, ({ one }) => ({

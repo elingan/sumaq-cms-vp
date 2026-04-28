@@ -1,6 +1,6 @@
 import { Webhook } from 'svix'
-import { eq } from 'drizzle-orm'
-import { users } from '#server/db/schema'
+import { and, eq } from 'drizzle-orm'
+import { BookingMemberStatus, userMembers, users } from '#server/db/schema'
 
 const webhookSecret = process.env.CLERK_WEBHOOK_SECRET || ''
 
@@ -54,6 +54,24 @@ export default defineEventHandler(async (event) => {
 
   function normalizeEmail(value: string | undefined) {
     return value?.toLowerCase().trim()
+  }
+
+  async function activatePendingBookingMemberships(email: string, clerkId: string) {
+    await db
+      .update(userMembers)
+      .set({
+        memberId: clerkId,
+        status: BookingMemberStatus.Active,
+        acceptedAt: new Date(),
+        revokedAt: null,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(userMembers.invitedEmail, email),
+          eq(userMembers.status, BookingMemberStatus.Pending),
+        ),
+      )
   }
 
   // Handle user.created event
@@ -114,6 +132,8 @@ export default defineEventHandler(async (event) => {
           )
         }
       }
+
+      await activatePendingBookingMemberships(email, clerk_id)
     } catch {
       console.error(`[Clerk Webhook] user.created: Error creating user ${email}`)
       throw createError({
@@ -174,6 +194,8 @@ export default defineEventHandler(async (event) => {
           console.info(`[Clerk Webhook] user.updated: Created missing local user for ${clerk_id}`)
         }
       }
+
+      await activatePendingBookingMemberships(email, clerk_id)
     } catch {
       console.error(`[Clerk Webhook] user.updated: Error updating user ${email}`)
       // Don't throw error, continue processing
