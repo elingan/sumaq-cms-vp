@@ -2,13 +2,13 @@
   <div>
     <UPage>
       <UPageHeader
-        :title="t('bookingManager.pageTitle')"
-        :description="t('bookingManager.pageDescription')"
+        :title="$t('bookingCalendar.pageTitle')"
+        :description="$t('bookingCalendar.pageDescription')"
       >
         <template #links>
           <UButton
             icon="i-lucide-plus"
-            :label="t('bookingManager.newLocationButton')"
+            :label="$t('bookingCalendar.newLocationButton')"
             color="primary"
             @click="openCreateLocation"
           />
@@ -23,7 +23,7 @@
         <div v-else-if="!locations?.length" class="py-12 text-center text-muted">
           <UIcon name="i-lucide-map-pin-off" class="size-8 mb-3 mx-auto" />
           <p class="text-sm">
-            {{ t('bookingManager.noLocations') }}
+            {{ $t('bookingCalendar.noLocations') }}
           </p>
         </div>
 
@@ -94,18 +94,18 @@ function openEditLocation(location: Location) {
 }
 
 async function deleteLocation(location: Location) {
-  if (!confirm(t('bookingManager.deleteLocationConfirm', { name: location.name }))) return
+  if (!confirm($t('bookingCalendar.deleteLocationConfirm', { name: location.name }))) return
   try {
     await $fetch(`/api/bookings/locations/${location.id}`, { method: 'DELETE' })
     await refresh()
     toast.add({
-      title: t('bookingManager.locationDeletedToast'),
+      title: $t('bookingCalendar.locationDeletedToast'),
       color: 'success',
       icon: 'i-lucide-check-circle',
     })
   } catch {
     toast.add({
-      title: t('bookingManager.locationDeleteErrorToast'),
+      title: $t('bookingCalendar.locationDeleteErrorToast'),
       color: 'error',
       icon: 'i-lucide-alert-circle',
     })
@@ -130,20 +130,20 @@ function openEditRoom(locationId: string, room: Room) {
 }
 
 async function deleteRoom(locationId: string, room: Room) {
-  if (!confirm(t('bookingManager.deleteRoomConfirm', { name: room.name }))) return
+  if (!confirm($t('bookingCalendar.deleteRoomConfirm', { name: room.name }))) return
   try {
     await $fetch(`/api/bookings/locations/${locationId}/rooms/${room.id}`, {
       method: 'DELETE',
     })
     await refresh()
     toast.add({
-      title: t('bookingManager.roomDeletedToast'),
+      title: $t('bookingCalendar.roomDeletedToast'),
       color: 'success',
       icon: 'i-lucide-check-circle',
     })
   } catch {
     toast.add({
-      title: t('bookingManager.roomDeleteErrorToast'),
+      title: $t('bookingCalendar.roomDeleteErrorToast'),
       color: 'error',
       icon: 'i-lucide-alert-circle',
     })

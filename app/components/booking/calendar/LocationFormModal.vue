@@ -2,24 +2,24 @@
   <UModal
     :open="open"
     :title="
-      isEditing ? t('bookingManager.editLocationTitle') : t('bookingManager.newLocationTitle')
+      isEditing ? $t('bookingCalendar.editLocationTitle') : $t('bookingCalendar.newLocationTitle')
     "
     @update:open="$emit('update:open', $event)"
   >
     <template #body>
       <UForm :state="form" :schema="schema" class="space-y-4" @submit="handleSubmit">
-        <UFormField :label="t('bookingManager.nameLabel')" name="name" required>
+        <UFormField :label="$t('bookingCalendar.nameLabel')" name="name" required>
           <UInput
             v-model="form.name"
-            :placeholder="t('bookingManager.locationNamePlaceholder')"
+            :placeholder="$t('bookingCalendar.locationNamePlaceholder')"
             class="w-full"
           />
         </UFormField>
 
-        <UFormField :label="t('bookingManager.addressLabel')" name="address">
+        <UFormField :label="$t('bookingCalendar.addressLabel')" name="address">
           <UInput
             v-model="form.address"
-            :placeholder="t('bookingManager.locationAddressPlaceholder')"
+            :placeholder="$t('bookingCalendar.locationAddressPlaceholder')"
             class="w-full"
           />
         </UFormField>
@@ -36,8 +36,8 @@
             :loading="isSaving"
             :label="
               isEditing
-                ? t('bookingManager.saveChangesButton')
-                : t('bookingManager.createLocationButton')
+                ? $t('bookingCalendar.saveChangesButton')
+                : $t('bookingCalendar.createLocationButton')
             "
           />
         </div>
@@ -71,7 +71,7 @@ const toast = useToast()
 const isEditing = computed(() => !!props.location)
 
 const schema = z.object({
-  name: z.string().min(1, t('bookingManager.validationNameRequired')),
+  name: z.string().min(1, $t('bookingCalendar.validationNameRequired')),
   address: z.string().optional(),
 })
 
@@ -109,14 +109,14 @@ async function handleSubmit() {
     emit('saved')
     toast.add({
       title: isEditing.value
-        ? t('bookingManager.locationUpdatedToast')
-        : t('bookingManager.locationCreatedToast'),
+        ? $t('bookingCalendar.locationUpdatedToast')
+        : $t('bookingCalendar.locationCreatedToast'),
       color: 'success',
       icon: 'i-lucide-check-circle',
     })
   } catch {
     toast.add({
-      title: t('bookingManager.locationSaveErrorToast'),
+      title: $t('bookingCalendar.locationSaveErrorToast'),
       color: 'error',
       icon: 'i-lucide-alert-circle',
     })

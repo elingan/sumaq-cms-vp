@@ -83,7 +83,7 @@
     "appointmentBooking": "Appoiment Booking",
     "bookingCalendar": "Booking Calendar"
   },
-  "bookingManager": {
+  "bookingCalendar": {
     "pageTitle": "Locations and Rooms",
     "pageDescription": "Manage locations and rooms available for bookings.",
     "newLocationButton": "+ New Location",

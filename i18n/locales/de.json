@@ -83,7 +83,7 @@
     "appointmentBooking": "Terminbuchung",
     "bookingCalendar": "Buchungskalender"
   },
-  "bookingManager": {
+  "bookingCalendar": {
     "pageTitle": "Standorte und Räume",
     "pageDescription": "Verwalte Standorte und Räume für Buchungen.",
     "newLocationButton": "+ Neuer Standort",

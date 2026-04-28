@@ -83,7 +83,7 @@
     "appointmentBooking": "Reserva de cita",
     "bookingCalendar": "Calendario de reservas"
   },
-  "bookingManager": {
+  "bookingCalendar": {
     "pageTitle": "Sedes y Salas",
     "pageDescription": "Gestiona las sedes y salas disponibles para reservas.",
     "newLocationButton": "+ Nueva Sede",

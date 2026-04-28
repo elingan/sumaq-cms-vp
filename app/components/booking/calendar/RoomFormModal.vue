@@ -1,15 +1,15 @@
 <template>
   <UModal
     :open="open"
-    :title="isEditing ? t('bookingManager.editRoomTitle') : t('bookingManager.newRoomTitle')"
+    :title="isEditing ? $t('bookingCalendar.editRoomTitle') : $t('bookingCalendar.newRoomTitle')"
     @update:open="$emit('update:open', $event)"
   >
     <template #body>
       <UForm :state="form" :schema="schema" class="space-y-4" @submit="handleSubmit">
-        <UFormField :label="t('bookingManager.roomNameLabel')" name="name" required>
+        <UFormField :label="$t('bookingCalendar.roomNameLabel')" name="name" required>
           <UInput
             v-model="form.name"
-            :placeholder="t('bookingManager.roomNamePlaceholder')"
+            :placeholder="$t('bookingCalendar.roomNamePlaceholder')"
             class="w-full"
           />
         </UFormField>
@@ -26,8 +26,8 @@
             :loading="isSaving"
             :label="
               isEditing
-                ? t('bookingManager.saveChangesButton')
-                : t('bookingManager.createRoomButton')
+                ? $t('bookingCalendar.saveChangesButton')
+                : $t('bookingCalendar.createRoomButton')
             "
           />
         </div>
@@ -61,7 +61,7 @@ const toast = useToast()
 const isEditing = computed(() => !!props.room)
 
 const schema = z.object({
-  name: z.string().min(1, t('bookingManager.validationNameRequired')),
+  name: z.string().min(1, $t('bookingCalendar.validationNameRequired')),
 })
 
 const form = reactive({
@@ -96,14 +96,14 @@ async function handleSubmit() {
     emit('saved')
     toast.add({
       title: isEditing.value
-        ? t('bookingManager.roomUpdatedToast')
-        : t('bookingManager.roomCreatedToast'),
+        ? $t('bookingCalendar.roomUpdatedToast')
+        : $t('bookingCalendar.roomCreatedToast'),
       color: 'success',
       icon: 'i-lucide-check-circle',
     })
   } catch {
     toast.add({
-      title: t('bookingManager.roomSaveErrorToast'),
+      title: $t('bookingCalendar.roomSaveErrorToast'),
       color: 'error',
       icon: 'i-lucide-alert-circle',
     })

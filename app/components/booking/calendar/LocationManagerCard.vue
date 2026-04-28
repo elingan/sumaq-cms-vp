@@ -5,7 +5,7 @@
         <div class="flex items-center gap-2 min-w-0">
           <UIcon name="i-lucide-map-pin" class="text-primary size-4 shrink-0" />
           <span class="font-semibold text-foreground truncate">
-            {{ t('bookingManager.locationPrefix') }}: {{ location.name }}
+            {{ $t('bookingCalendar.locationPrefix') }}: {{ location.name }}
           </span>
           <span v-if="location.address" class="text-sm text-muted truncate hidden sm:block">
             — {{ location.address }}
@@ -35,13 +35,13 @@
     <div class="divide-y divide-default">
       <div class="px-4 py-2">
         <p class="text-sm text-muted">
-          {{ t('bookingManager.roomsAvailable') }}
+          {{ $t('bookingCalendar.roomsAvailable') }}
         </p>
       </div>
 
       <div v-if="location.rooms.length === 0" class="px-4 py-3">
         <p class="text-sm text-muted italic">
-          {{ t('bookingManager.noRoomsRegistered') }}
+          {{ $t('bookingCalendar.noRoomsRegistered') }}
         </p>
       </div>
 
@@ -81,7 +81,7 @@
         color="primary"
         variant="soft"
         icon="i-lucide-plus"
-        :label="t('bookingManager.newRoomButton')"
+        :label="$t('bookingCalendar.newRoomButton')"
         @click="$emit('add-room')"
       />
     </template>
