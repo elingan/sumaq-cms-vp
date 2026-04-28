@@ -7,7 +7,13 @@
         :has-sites="Boolean(sites?.length)"
         @site-created="refreshSites"
       />
-      <CalendarDashboardSection
+      <BookingCalendarDashboardSection
+        :locations="locations"
+        :can-create-bookings="canCreateBookings"
+        @create-booking="navigateToBookings"
+        @view-location="navigateToLocation"
+      />
+      <BookingAppoimentDashboardSection
         :locations="locations"
         :can-create-bookings="canCreateBookings"
         @create-booking="navigateToBookings"

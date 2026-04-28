@@ -31,7 +31,7 @@
       </div>
     </UCard>
 
-    <CalendarBookingGrid
+    <BookingCalendarBookingGrid
       :rooms="bookingData?.rooms || []"
       :bookings="bookingData?.bookings || []"
       :selected-date="selectedDate"
@@ -39,7 +39,7 @@
       @select-booked="openBooked"
     />
 
-    <CalendarBookingModal
+    <BookingCalendarBookingModal
       v-model:open="isModalOpen"
       :mode="modalMode"
       :rooms="bookingData?.rooms || []"

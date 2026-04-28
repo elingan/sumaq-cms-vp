@@ -20,12 +20,12 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <UCard :title="$t('nav.calendar')" :description="$t('dashboard.calendarSubtitle')" class="w-full">
+  <UCard>
     <template #header>
       <div class="flex items-center justify-between w-full">
         <div>
           <h2 class="text-lg font-semibold text-foreground">
-            {{ $t('nav.calendar') }}
+            {{ $t('dashboard.bookingCalendar') }}
           </h2>
           <p class="text-sm text-muted">
             {{ $t('dashboard.calendarSubtitle') }}
@@ -42,7 +42,7 @@ const emit = defineEmits<{
     </template>
 
     <UPageGrid v-if="locations.length">
-      <CalendarLocationCard
+      <BookingCalendarLocationCard
         v-for="location in locations"
         :key="location.id"
         :location="location"
