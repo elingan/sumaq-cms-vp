@@ -1,7 +1,8 @@
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { locations } from '#server/db/schema'
-import { requireAdminRole } from '#server/utils/auth'
+import { getClerkUser } from '#server/utils/auth'
+import { requirePermission } from '#server/utils/permissions'
 import { createAuditLog } from '#server/utils/audit'
 
 const UpdateLocationSchema = z.object({
@@ -10,7 +11,8 @@ const UpdateLocationSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const { userId } = await requireAdminRole(event)
+  const userId = await getClerkUser(event)
+  await requirePermission(userId, 'admin', 'manage_locations')
 
   const { locationId } = getRouterParams(event)
 

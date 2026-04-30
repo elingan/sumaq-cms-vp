@@ -20,6 +20,20 @@ export const SiteUserRole = {
 
 export type SiteUserRoleValue = (typeof SiteUserRole)[keyof typeof SiteUserRole]
 
+export const LocationMemberRole = {
+  Owner: 'owner',
+  Manager: 'manager',
+} as const
+
+export type LocationMemberRoleValue = (typeof LocationMemberRole)[keyof typeof LocationMemberRole]
+
+export const RoomMemberRole = {
+  Owner: 'owner',
+  Manager: 'manager',
+} as const
+
+export type RoomMemberRoleValue = (typeof RoomMemberRole)[keyof typeof RoomMemberRole]
+
 export const SiteStatus = {
   Active: 'active',
   Archived: 'archived',
@@ -67,6 +81,8 @@ export type BookingExceptionStatusValue =
 
 export const UserRoleValues = ['admin', 'partner', 'owner', 'editor'] as const
 export const SiteUserRoleValues = ['owner', 'editor', 'partner'] as const
+export const LocationMemberRoleValues = ['owner', 'manager'] as const
+export const RoomMemberRoleValues = ['owner', 'manager'] as const
 export const SiteStatusValues = ['active', 'archived'] as const
 export const PageStatusValues = ['draft', 'published'] as const
 export const PasswordResetPurposeValues = ['invite', 'reset'] as const
@@ -346,6 +362,48 @@ export const auditLogs = sqliteTable('audit_logs', {
     .default(sql`(unixepoch())`),
 })
 
+export const locationMembers = sqliteTable(
+  'location_members',
+  {
+    locationId: text('location_id')
+      .notNull()
+      .references(() => locations.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    role: text('role', { enum: LocationMemberRoleValues }).notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [
+    primaryKey({ columns: [table.locationId, table.userId] }),
+    index('idx_location_members_location_id').on(table.locationId),
+    index('idx_location_members_user_id').on(table.userId),
+  ],
+)
+
+export const roomMembers = sqliteTable(
+  'room_members',
+  {
+    roomId: text('room_id')
+      .notNull()
+      .references(() => rooms.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    role: text('role', { enum: RoomMemberRoleValues }).notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [
+    primaryKey({ columns: [table.roomId, table.userId] }),
+    index('idx_room_members_room_id').on(table.roomId),
+    index('idx_room_members_user_id').on(table.userId),
+  ],
+)
+
 // ─── Relations ───────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -353,6 +411,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   bookingMembers: many(userMembers, { relationName: 'booking_member_user' }),
   bookingMemberships: many(userMembers, { relationName: 'booking_member_profile' }),
   bookingInvitationsSent: many(userMembers, { relationName: 'booking_member_inviter' }),
+  locationMembers: many(locationMembers),
+  roomMembers: many(roomMembers),
   activityLogs: many(activityLogs),
   auditLogs: many(auditLogs),
 }))
@@ -366,11 +426,13 @@ export const sitesRelations = relations(sites, ({ many }) => ({
 
 export const locationsRelations = relations(locations, ({ many }) => ({
   rooms: many(rooms),
+  members: many(locationMembers),
 }))
 
 export const roomsRelations = relations(rooms, ({ one, many }) => ({
   location: one(locations, { fields: [rooms.locationId], references: [locations.id] }),
   bookings: many(bookings),
+  members: many(roomMembers),
 }))
 
 export const bookingsRelations = relations(bookings, ({ one, many }) => ({
@@ -403,6 +465,19 @@ export const userMembersRelations = relations(userMembers, ({ one }) => ({
     references: [users.id],
     relationName: 'booking_member_inviter',
   }),
+}))
+
+export const locationMembersRelations = relations(locationMembers, ({ one }) => ({
+  location: one(locations, {
+    fields: [locationMembers.locationId],
+    references: [locations.id],
+  }),
+  user: one(users, { fields: [locationMembers.userId], references: [users.id] }),
+}))
+
+export const roomMembersRelations = relations(roomMembers, ({ one }) => ({
+  room: one(rooms, { fields: [roomMembers.roomId], references: [rooms.id] }),
+  user: one(users, { fields: [roomMembers.userId], references: [users.id] }),
 }))
 
 export const pagesRelations = relations(pages, ({ one }) => ({

@@ -1,5 +1,12 @@
 import { useUser } from '#imports'
 
+/**
+ * Provides reactive role flags derived from Clerk public metadata.
+ *
+ * Global role flags (isAdmin, isOwner, etc.) come from Clerk publicMetadata.role.
+ * For fine-grained capability checks (per site, per module), use the
+ * capabilities endpoint: GET /api/auth/capabilities?module=cms&siteId=...
+ */
 export function useRole() {
   const { user } = useUser()
 
@@ -12,9 +19,15 @@ export function useRole() {
   const isOwner = computed(() => role.value === 'owner')
   const isEditor = computed(() => role.value === 'editor')
   const isPartner = computed(() => role.value === 'partner')
+
+  // Admin-only capabilities
   const canCreateSites = computed(() => isAdmin.value)
   const canManageSites = computed(() => isAdmin.value || isOwner.value)
   const canCreateBookings = computed(() => isAdmin.value || isOwner.value)
+  const canManageLocations = computed(() => isAdmin.value)
+  const canManageRooms = computed(() => isAdmin.value)
+  const canManageMembers = computed(() => isAdmin.value)
+  const canSyncUsers = computed(() => isAdmin.value)
 
   return {
     role,
@@ -22,8 +35,29 @@ export function useRole() {
     isOwner,
     isEditor,
     isPartner,
-    canManageSites,
     canCreateSites,
+    canManageSites,
     canCreateBookings,
+    canManageLocations,
+    canManageRooms,
+    canManageMembers,
+    canSyncUsers,
   }
+}
+
+/**
+ * Fetch server-side capabilities for a given module and context.
+ * Use this when you need authoritative permission checks (e.g. CMS site roles).
+ *
+ * @example
+ * const { capabilities } = await useCapabilities('cms', { siteId: '...' })
+ * if (capabilities.value?.edit_site) { ... }
+ */
+export async function useCapabilities(
+  module: 'cms' | 'calendar' | 'appointments' | 'admin',
+  context: { siteId?: string; locationId?: string; roomId?: string } = {},
+) {
+  const query = { module, ...context }
+  const { data: capabilities, refresh } = await useFetch('/api/auth/capabilities', { query })
+  return { capabilities: computed(() => capabilities.value?.capabilities ?? null), refresh }
 }

@@ -1,9 +1,13 @@
-import { requireAdminRole } from '#server/utils/auth'
+import { requirePermission } from '#server/utils/permissions'
+import { getClerkUser } from '#server/utils/auth'
 import { deleteClerkUser, getClerkUserById } from '#server/utils/clerk-users'
 import { createAuditLog } from '#server/utils/audit'
 
 export default defineEventHandler(async (event) => {
-  const { userId } = await requireAdminRole(event)
+  const userId = await getClerkUser(event)
+
+  // Check permission using centralized evaluator
+  await requirePermission(userId, 'admin', 'delete_user')
 
   const id = getRouterParam(event, 'id')
   if (!id) {

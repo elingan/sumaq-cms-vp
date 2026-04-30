@@ -1,7 +1,8 @@
 import { z } from 'zod'
-import { requireAdminRole } from '#server/utils/auth'
+import { requirePermission } from '#server/utils/permissions'
+import { getClerkUser } from '#server/utils/auth'
 import { updateClerkUserMetadata } from '#server/utils/clerk-users'
-import { createAuditLog } from '#server/utils/audit'
+import { createAuditLog, auditUserRoleChange } from '#server/utils/audit'
 
 const PatchUserSchema = z.object({
   firstName: z.string().optional(),
@@ -10,7 +11,10 @@ const PatchUserSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const { userId } = await requireAdminRole(event)
+  const userId = await getClerkUser(event)
+
+  // Check permission using centralized evaluator
+  await requirePermission(userId, 'admin', 'update_user')
 
   const id = getRouterParam(event, 'id')
   if (!id) {
@@ -25,6 +29,13 @@ export default defineEventHandler(async (event) => {
       statusCode: 400,
       message: result.error.issues[0]?.message ?? 'Invalid input',
     })
+  }
+
+  // If role is being changed, audit it specifically
+  if (result.data.role) {
+    // Note: This audits via local DB; Clerk change is captured by webhook
+    // We're recording the admin-initiated request here
+    await auditUserRoleChange(id, undefined, result.data.role, 'admin_api')
   }
 
   // Update user in Clerk

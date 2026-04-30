@@ -1,9 +1,13 @@
 import { eq } from 'drizzle-orm'
 import { userMembers, users } from '#server/db/schema'
-import { requireAdminRole } from '#server/utils/auth'
+import { requirePermission } from '#server/utils/permissions'
+import { getClerkUser } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminRole(event)
+  const userId = await getClerkUser(event)
+
+  // Check permission using centralized evaluator
+  await requirePermission(userId, 'admin', 'manage_bookings')
 
   const db = useDrizzle()
 

@@ -1,9 +1,11 @@
 import { sites, siteUsers } from '#server/db/schema'
-import { requireAdminRole } from '#server/utils/auth'
+import { getClerkUser } from '#server/utils/auth'
+import { requirePermission } from '#server/utils/permissions'
 import { sql } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminRole(event)
+  const userId = await getClerkUser(event)
+  await requirePermission(userId, 'admin', 'list_sites')
 
   const db = useDrizzle()
 

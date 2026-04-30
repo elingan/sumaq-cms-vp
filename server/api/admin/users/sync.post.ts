@@ -1,11 +1,13 @@
 import { eq } from 'drizzle-orm'
 import { users } from '#server/db/schema'
-import { requireAdminRole } from '#server/utils/auth'
+import { getClerkUser } from '#server/utils/auth'
+import { requirePermission } from '#server/utils/permissions'
 import { listAllUsers } from '#server/utils/clerk-users'
 import { createAuditLog } from '#server/utils/audit'
 
 export default defineEventHandler(async (event) => {
-  const { userId: adminId } = await requireAdminRole(event)
+  const adminId = await getClerkUser(event)
+  await requirePermission(adminId, 'admin', 'sync_users')
 
   const clerkUsers = await listAllUsers(event)
   const db = useDrizzle()

@@ -2,14 +2,16 @@ import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { BookingMemberRoleValues, BookingMemberStatus, userMembers } from '#server/db/schema'
 import { createAuditLog } from '#server/utils/audit'
-import { requireAdminRole } from '#server/utils/auth'
+import { getClerkUser } from '#server/utils/auth'
+import { requirePermission } from '#server/utils/permissions'
 
 const UpdateMemberRoleSchema = z.object({
   role: z.enum(BookingMemberRoleValues),
 })
 
 export default defineEventHandler(async (event) => {
-  const { userId } = await requireAdminRole(event)
+  const userId = await getClerkUser(event)
+  await requirePermission(userId, 'admin', 'manage_bookings')
 
   const memberRowId = getRouterParam(event, 'memberRowId')
 

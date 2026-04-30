@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { requireAdminRole } from '#server/utils/auth'
+import { requirePermission } from '#server/utils/permissions'
+import { getClerkUser } from '#server/utils/auth'
 import { createClerkUserWithInvite } from '#server/utils/clerk-users'
 import { createAuditLog } from '#server/utils/audit'
 
@@ -12,7 +13,10 @@ const CreateUserSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const { userId } = await requireAdminRole(event)
+  const userId = await getClerkUser(event)
+
+  // Check permission using centralized evaluator
+  await requirePermission(userId, 'admin', 'create_user')
 
   const body = await readBody(event)
   const result = CreateUserSchema.safeParse(body)

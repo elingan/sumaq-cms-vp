@@ -1,4 +1,12 @@
 import { clerkClient } from '@clerk/nuxt/server'
+import { UserRole, type UserRoleValue } from '#shared/types/roles'
+
+/**
+ * Validate user role against allowed enum values
+ */
+export function isValidUserRole(role: any): role is UserRoleValue {
+  return Object.values(UserRole).includes(role)
+}
 
 /**
  * List all users from Clerk and augment with local data
@@ -39,6 +47,15 @@ export async function createClerkUserWithInvite(
 ) {
   const clerk = clerkClient(event)
 
+  // Validate role if provided
+  const roleToUse = options.role || UserRole.Owner
+  if (!isValidUserRole(roleToUse)) {
+    throw createError({
+      statusCode: 400,
+      message: `Invalid role: ${roleToUse}. Must be one of: ${Object.values(UserRole).join(', ')}`,
+    })
+  }
+
   try {
     // Create user in Clerk
     const newUser = await clerk.users.createUser({
@@ -46,7 +63,7 @@ export async function createClerkUserWithInvite(
       firstName: options.firstName,
       lastName: options.lastName,
       publicMetadata: {
-        role: options.role || 'owner',
+        role: roleToUse,
       },
     })
 
@@ -54,7 +71,7 @@ export async function createClerkUserWithInvite(
     const invitation = await clerk.invitations.createInvitation({
       emailAddress: email,
       publicMetadata: {
-        role: options.role || 'owner',
+        role: roleToUse,
       },
       redirectUrl: options.redirectUrl,
     })
@@ -90,6 +107,14 @@ export async function updateClerkUserMetadata(
   } = {},
 ) {
   const clerk = clerkClient(event)
+
+  // Validate role if provided
+  if (options.role && !isValidUserRole(options.role)) {
+    throw createError({
+      statusCode: 400,
+      message: `Invalid role: ${String(options.role)}. Must be one of: ${Object.values(UserRole).join(', ')}`,
+    })
+  }
 
   try {
     const updates: any = {}

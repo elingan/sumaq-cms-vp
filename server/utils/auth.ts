@@ -3,18 +3,19 @@ import { eq } from 'drizzle-orm'
 import { users } from '#server/db/schema'
 
 /**
- * Get authenticated user from Clerk context.
+ * Get authenticated user ID from Clerk context.
  * Replaces deprecated requireUserSession() from nuxt-auth-utils.
  * @throws Error with 401 if not authenticated
+ * @returns userId string
  */
-export async function getClerkUser(event: any) {
+export async function getClerkUser(event: any): Promise<string> {
   const { userId } = event.context.auth?.() ?? {}
 
   if (!userId) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
   }
 
-  return { userId }
+  return userId
 }
 
 /**
@@ -107,7 +108,7 @@ export async function requireRole(event: any, requiredRoles: string | string[]) 
  * @deprecated Use getClerkUserWithData or getClerkUser instead
  */
 export async function requireUserSession(event: any) {
-  const { userId } = await getClerkUser(event)
+  const userId = await getClerkUser(event)
   const role = await getUserRole(event)
 
   // Return in session-like format for easier migration
