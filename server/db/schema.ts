@@ -404,6 +404,30 @@ export const roomMembers = sqliteTable(
   ],
 )
 
+export const onboardingResponses = sqliteTable(
+  'onboarding_responses',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    userId: text('user_id')
+      .notNull()
+      .unique()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    content: text('content', { mode: 'json' })
+      .$type<JsonRecord>()
+      .notNull()
+      .default(sql`'{}'`),
+    completedSections: text('completed_sections', { mode: 'json' })
+      .$type<number[]>()
+      .notNull()
+      .default(sql`'[]'`),
+    isComplete: integer('is_complete', { mode: 'boolean' }).notNull().default(false),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [index('idx_onboarding_responses_user_id').on(table.userId)],
+)
+
 // ─── Relations ───────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -415,6 +439,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   roomMembers: many(roomMembers),
   activityLogs: many(activityLogs),
   auditLogs: many(auditLogs),
+  onboardingResponses: many(onboardingResponses),
 }))
 
 export const sitesRelations = relations(sites, ({ many }) => ({
@@ -491,6 +516,13 @@ export const mediaRelations = relations(media, ({ one }) => ({
 export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
   user: one(users, { fields: [activityLogs.userId], references: [users.id] }),
   site: one(sites, { fields: [activityLogs.siteId], references: [sites.id] }),
+}))
+
+export const onboardingResponsesRelations = relations(onboardingResponses, ({ one }) => ({
+  user: one(users, {
+    fields: [onboardingResponses.userId],
+    references: [users.id],
+  }),
 }))
 
 export const auditLogsRelations = relations(auditLogs, ({ one }) => ({

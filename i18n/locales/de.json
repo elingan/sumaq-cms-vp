@@ -259,5 +259,213 @@
     "reconnectGitHubApp": "GitHub App neu verbinden",
     "disconnectGitHubApp": "GitHub App trennen",
     "githubDisconnectError": "Die GitHub App konnte nicht getrennt werden."
+  },
+  "onboarding": {
+    "step": "Schritt",
+    "back": "Zurück",
+    "next": "Weiter",
+    "finish": "Abschließen",
+    "add": "Hinzufügen",
+    "addLink": "Link hinzufügen",
+    "addMore": "Mehr hinzufügen",
+    "browseFiles": "Dateien auswählen",
+    "dropFiles": "Dateien hier ablegen oder klicken zum Auswählen",
+    "listening": "Höre zu",
+    "aiSuggestion": "KI-Vorschlag",
+    "apply": "Übernehmen",
+    "polish": "Mit KI verbessern",
+    "dictate": "Diktieren",
+    "completeTitle": "Onboarding abgeschlossen!",
+    "completeDescription": "Deine Daten wurden erfolgreich gespeichert. Das Team wird deine Informationen prüfen und deine professionelle Website erstellen.",
+    "goToDashboard": "Zum Dashboard",
+    "reviewResponses": "Meine Antworten ansehen",
+    "sections": {
+      "0": {
+        "title": "Persönliche Vorstellung",
+        "description": "Erzähle deine Geschichte und was dich motiviert hat, Therapeut zu werden."
+      },
+      "1": {
+        "title": "Spezialisierung & Ansatz",
+        "description": "Definiere deinen therapeutischen Ansatz und die Erkrankungen, die du behandelst."
+      },
+      "2": {
+        "title": "Ideales Patientenprofil",
+        "description": "Beschreibe, wem du am besten helfen kannst."
+      },
+      "3": {
+        "title": "Erste Sitzung",
+        "description": "Beschreibe, wie eine erste Sitzung bei dir abläuft."
+      },
+      "4": {
+        "title": "Modalität & Dauer",
+        "description": "Wie und wie oft bietest du Therapie an?"
+      },
+      "5": {
+        "title": "Standort & Format",
+        "description": "Praktische Infos, wo und wie man dich findet."
+      },
+      "6": {
+        "title": "Finanzielle Aspekte",
+        "description": "Kosten, Versicherungen und Zahlungsmethoden."
+      },
+      "7": {
+        "title": "Kontakt & Notfälle",
+        "description": "Wichtige Kontaktinformationen und Notfallsituationen."
+      },
+      "8": {
+        "title": "Visuelle Identität & Werte",
+        "description": "Definiere Ton, Atmosphäre und Werte deiner Praxis."
+      },
+      "9": {
+        "title": "Referenzen & Inspiration",
+        "description": "Teile Referenzen, die deinen Stil widerspiegeln."
+      },
+      "10": {
+        "title": "Dateien",
+        "description": "Lade deinen Lebenslauf, professionelle Fotos und Logo hoch."
+      }
+    },
+    "fields": {
+      "history": {
+        "label": "Deine Geschichte",
+        "placeholder": "Bsp: Schon in jungen Jahren faszinierte es mich, den menschlichen Geist zu verstehen. Nach jahrelanger Ausbildung in klinischer Psychologie entdeckte ich meine Berufung darin, Menschen in Zeiten des Wandels zu begleiten..."
+      },
+      "motivation": {
+        "label": "Deine Motivation",
+        "placeholder": "Bsp: Was mich jeden Tag antreibt, ist die Transformation meiner Patienten zu sehen. Ich glaube an das Potenzial jedes Menschen, zu heilen und zu wachsen..."
+      },
+      "therapeuticApproach": {
+        "label": "Therapeutischer Ansatz",
+        "placeholder": "Bsp: Kognitive Verhaltenstherapie integriert mit Achtsamkeit und humanistischem Ansatz"
+      },
+      "methods": {
+        "label": "Methoden & Techniken",
+        "placeholder": "Bsp: EMDR, bewusste Atmung, kognitive Umstrukturierung"
+      },
+      "targetConditions": {
+        "label": "Behandelte Erkrankungen",
+        "placeholder": "Bsp: Angstzustände, Depression, Trauma, posttraumatischer Stress"
+      },
+      "idealPatientDescription": {
+        "label": "Ideales Patientenprofil",
+        "placeholder": "Bsp: Erwachsene zwischen 25 und 55 Jahren, die Selbsterkenntnis suchen, Angstzustände bewältigen oder emotionale Blockaden überwinden möchten..."
+      },
+      "ageRange": { "label": "Altersgruppe" },
+      "concerns": {
+        "label": "Häufigste Anliegen",
+        "placeholder": "Bsp: Generalisierte Angst, Trauer, Partnerschaftsprobleme"
+      },
+      "firstSessionDescription": {
+        "label": "Wie läuft die erste Sitzung ab?",
+        "placeholder": "Bsp: Die erste Sitzung ist ein sicherer Raum zum Kennenlernen. Wir beginnen mit einem offenen Gespräch, in dem wir deine Geschichte und die Gründe für die Therapie erkunden..."
+      },
+      "preparationGuide": {
+        "label": "Vorbereitungshinweise",
+        "placeholder": "Bsp: Du musst nichts Besonderes vorbereiten. Trage bequeme Kleidung und notiere dir, wenn du möchtest, einige Themen, die du besprechen möchtest..."
+      },
+      "expectedOutcome": {
+        "label": "Was kann der Patient erwarten?",
+        "placeholder": "Bsp: Am Ende der ersten Sitzung wirst du ein klareres Verständnis dafür haben, woran du arbeiten möchtest und wie wir es gemeinsam angehen können..."
+      },
+      "modality": { "label": "Therapie-Modalität" },
+      "sessionDuration": { "label": "Sitzungsdauer (Minuten)", "placeholder": "50" },
+      "frequency": { "label": "Übliche Frequenz" },
+      "address": { "label": "Praxisadresse", "placeholder": "Bsp: Musterstraße 123, 10115 Berlin" },
+      "onlinePlatform": {
+        "label": "Online-Plattform",
+        "placeholder": "Bsp: Zoom, Google Meet, Doxy.me"
+      },
+      "languages": { "label": "Beratungssprachen", "placeholder": "Bsp: Englisch, Französisch" },
+      "accessibility": { "label": "Barrierefreiheit" },
+      "costPerSession": { "label": "Kosten pro Sitzung (€)", "placeholder": "80" },
+      "slidingScale": { "label": "Ich biete einkommensabhängige Staffelung an" },
+      "insuranceAccepted": {
+        "label": "Akzeptierte Krankenkassen",
+        "placeholder": "Bsp: AOK, TK, Barmer"
+      },
+      "healthFunds": {
+        "label": "Gesundheitsfonds / Versorgungswerke",
+        "placeholder": "Bsp: Beihilfe, Heilfürsorge"
+      },
+      "contactEmail": { "label": "Kontakt-E-Mail", "placeholder": "beispiel{'@'}email.de" },
+      "contactPhone": { "label": "Kontakt-Telefon", "placeholder": "+49 300 000000" },
+      "waitlistPolicy": {
+        "label": "Wartelisten-Management",
+        "placeholder": "Bsp: Ich habe derzeit sofortige Verfügbarkeit. Falls es eine Warteliste gibt, benachrichtige ich dich mindestens eine Woche im Voraus..."
+      },
+      "emergencyProtocol": {
+        "label": "Notfallprotokoll",
+        "placeholder": "Bsp: Dies ist kein Notfalldienst. Wenn du in einer Krise bist oder Suizidgedanken hast, kontaktiere bitte den Notruf 112 oder gehe zur nächsten Notaufnahme..."
+      },
+      "toneOfVoice": { "label": "Tonfall" },
+      "officeAtmosphere": {
+        "label": "Praxisatmosphäre",
+        "placeholder": "Bsp: Meine Praxis ist ein heller und ruhiger Raum im Stadtzentrum. Gemütlich, dekoriert mit Pflanzen und warmen Farbtönen, die zur Ruhe einladen..."
+      },
+      "coreValues": {
+        "label": "Kernwerte deiner Praxis",
+        "placeholder": "Bsp: Vertraulichkeit, Respekt, Empathie, Urteilsfreiheit, Professionalität"
+      },
+      "inspirationLinks": { "label": "Inspirations-Links", "placeholder": "https://beispiel.de" },
+      "whatINot": {
+        "label": "Was du NICHT bist / tust",
+        "placeholder": "Bsp: Ich bin kein Therapeut, der schnelle Ratschläge oder magische Lösungen gibt. Ich stelle keine Online-Diagnosen und verschreibe keine Rezepte..."
+      },
+      "competitorLinks": {
+        "label": "Webseiten von Kollegen",
+        "placeholder": "https://beispiel-kollege.de"
+      },
+      "cvFile": { "label": "Lebenslauf (PDF)" },
+      "photos": { "label": "Professionelle Fotos" },
+      "logoFile": { "label": "Praxis-Logo" }
+    },
+    "hints": {
+      "preparationGuide": "Was sollte der Patient vor der ersten Sitzung wissen?",
+      "expectedOutcome": "Beschreibe die erwarteten Ergebnisse der ersten Sitzung",
+      "onlinePlatform": "Welche Plattform nutzt du für Online-Sitzungen?",
+      "costPerSession": "Preis in deiner lokalen Währung",
+      "insuranceAccepted": "Liste der Versicherungen, mit denen du arbeitest",
+      "healthFunds": "Gesundheitsfonds oder Versorgungswerke, mit denen du kooperierst",
+      "inspirationLinks": "Webseiten von Kollegen oder Kliniken, die dich inspirieren",
+      "whatINot": "Beschreibe, was dich auszeichnet oder was du NICHT anbietest",
+      "competitorLinks": "Optionale Referenzen von anderen Fachleuten",
+      "cvFile": "PDF-Format, max. 10 MB",
+      "photos": "JPG-, PNG- oder WebP-Bilder, max. 10 MB pro Bild",
+      "logoFile": "PNG- oder SVG-Bild, max. 5 MB"
+    },
+    "options": {
+      "ageRange": {
+        "children": "Kinder (0-12)",
+        "teenagers": "Jugendliche (13-17)",
+        "young_adults": "Junge Erwachsene (18-25)",
+        "adults": "Erwachsene (26-45)",
+        "middle_adults": "Mittleres Alter (46-65)",
+        "seniors": "Senioren (65+)"
+      },
+      "modality": { "in_person": "Vor Ort", "online": "Online", "hybrid": "Hybrid" },
+      "frequency": {
+        "weekly": "Wöchentlich",
+        "biweekly": "Zweiwöchentlich",
+        "monthly": "Monatlich",
+        "flexible": "Flexibel"
+      },
+      "toneOfVoice": {
+        "warm": "Warm",
+        "professional": "Professionell",
+        "empathetic": "Empathisch",
+        "direct": "Direkt",
+        "inspiring": "Inspirierend",
+        "serene": "Gelassen"
+      },
+      "accessibility": {
+        "wheelchair": "Rollstuhlgerecht",
+        "elevator": "Aufzug",
+        "ground_floor": "Erdgeschoss",
+        "accessible_bathroom": "Barrierefreies Bad",
+        "near_transit": "ÖPNV-Nähe",
+        "parking": "Parkplätze"
+      },
+      "slidingScale": { "yes": "Ja, ich biete einkommensabhängige Staffelung an" }
+    }
   }
 }

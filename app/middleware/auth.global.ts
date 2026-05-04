@@ -17,6 +17,7 @@ export default defineNuxtRouteMiddleware((to) => {
     '/billing',
     '/booking',
     '/bookings',
+    '/onboarding',
   ]
   const isProtected = protectedPrefixes.some((prefix) => to.path.startsWith(prefix))
 

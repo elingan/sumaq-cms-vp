@@ -259,5 +259,210 @@
     "reconnectGitHubApp": "Reconectar GitHub App",
     "disconnectGitHubApp": "Desconectar GitHub App",
     "githubDisconnectError": "No se pudo desconectar la GitHub App."
+  },
+  "onboarding": {
+    "step": "Paso",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "finish": "Finalizar",
+    "add": "Agregar",
+    "addLink": "Agregar enlace",
+    "addMore": "Agregar más",
+    "browseFiles": "Seleccionar archivos",
+    "dropFiles": "Arrastra archivos aquí o haz clic para seleccionar",
+    "listening": "Escuchando",
+    "aiSuggestion": "Sugerencia IA",
+    "apply": "Aplicar",
+    "polish": "Pulir con IA",
+    "dictate": "Dictar",
+    "completeTitle": "¡Onboarding completado!",
+    "completeDescription": "Tu información ha sido guardada exitosamente. El equipo revisará tus datos y generará tu sitio web profesional.",
+    "goToDashboard": "Ir al Dashboard",
+    "reviewResponses": "Ver mis respuestas",
+    "sections": {
+      "0": {
+        "title": "Presentación personal",
+        "description": "Cuéntanos tu historia y qué te motivó a ser terapeuta."
+      },
+      "1": {
+        "title": "Especialidad y enfoque",
+        "description": "Define tu enfoque terapéutico y las condiciones que tratas."
+      },
+      "2": {
+        "title": "Perfil del paciente ideal",
+        "description": "Describe a quién puedes ayudar mejor."
+      },
+      "3": {
+        "title": "Primera sesión",
+        "description": "Describe cómo es una primera sesión contigo."
+      },
+      "4": {
+        "title": "Modalidad y duración",
+        "description": "¿Cómo y con qué frecuencia ofreces terapia?"
+      },
+      "5": {
+        "title": "Ubicación y formato",
+        "description": "Información práctica sobre dónde y cómo te encuentran."
+      },
+      "6": { "title": "Aspectos financieros", "description": "Costes, seguros y formas de pago." },
+      "7": {
+        "title": "Contacto y emergencias",
+        "description": "Información esencial para contacto y situaciones urgentes."
+      },
+      "8": {
+        "title": "Identidad visual y valores",
+        "description": "Define el tono, la atmósfera y los valores de tu práctica."
+      },
+      "9": {
+        "title": "Referencias e inspiración",
+        "description": "Comparte referencias que reflejen tu estilo."
+      },
+      "10": { "title": "Archivos", "description": "Sube tu CV, fotos profesionales y logo." }
+    },
+    "fields": {
+      "history": {
+        "label": "Tu historia",
+        "placeholder": "Ej: Desde joven me fascinó comprender la mente humana. Tras años de formación en psicología clínica, descubrí mi vocación en acompañar a personas en momentos de cambio..."
+      },
+      "motivation": {
+        "label": "Tu motivación",
+        "placeholder": "Ej: Lo que me impulsa cada día es ver la transformación de mis pacientes. Creo en el potencial de cada persona para sanar y crecer..."
+      },
+      "therapeuticApproach": {
+        "label": "Enfoque terapéutico",
+        "placeholder": "Ej: Terapia Cognitivo-Conductual integrada con Mindfulness y enfoque humanista"
+      },
+      "methods": {
+        "label": "Métodos y técnicas",
+        "placeholder": "Ej: EMDR, respiración consciente, reestructuración cognitiva"
+      },
+      "targetConditions": {
+        "label": "Condiciones que tratas",
+        "placeholder": "Ej: Ansiedad, depresión, trauma, estrés postraumático"
+      },
+      "idealPatientDescription": {
+        "label": "Descripción del paciente ideal",
+        "placeholder": "Ej: Personas adultas entre 25 y 55 años que buscan comprenderse mejor, manejar la ansiedad o superar bloqueos emocionales. Profesionales que sienten que su vida personal o laboral no fluye como desearían..."
+      },
+      "ageRange": { "label": "Rango de edad" },
+      "concerns": {
+        "label": "Principales motivos de consulta",
+        "placeholder": "Ej: Ansiedad generalizada, duelo, crisis de pareja"
+      },
+      "firstSessionDescription": {
+        "label": "¿Cómo es la primera sesión?",
+        "placeholder": "Ej: La primera sesión es un espacio seguro para conocernos. Comenzamos con una entrevista abierta donde exploramos tu historia y los motivos que te traen a terapia. No hay prisa; el ritmo lo marcas tú..."
+      },
+      "preparationGuide": {
+        "label": "Guía de preparación",
+        "placeholder": "Ej: No necesitas preparar nada especial. Ven con ropa cómoda y, si lo deseas, puedes anotar algunos temas que quieras tratar. Lo más importante es venir con la disposición de explorar..."
+      },
+      "expectedOutcome": {
+        "label": "¿Qué puede esperar el paciente?",
+        "placeholder": "Ej: Al final de la primera sesión, tendrás una comprensión más clara de lo que quieres trabajar y de cómo podemos abordarlo juntos. Te llevarás algunas reflexiones y, si así lo decides, acordaremos un plan de trabajo..."
+      },
+      "modality": { "label": "Modalidad de terapia" },
+      "sessionDuration": { "label": "Duración de la sesión (minutos)", "placeholder": "50" },
+      "frequency": { "label": "Frecuencia habitual" },
+      "address": {
+        "label": "Dirección del consultorio",
+        "placeholder": "Ej: Calle Mayor 123, 28013 Madrid"
+      },
+      "onlinePlatform": {
+        "label": "Plataforma online",
+        "placeholder": "Ej: Zoom, Google Meet, Doxy.me"
+      },
+      "languages": { "label": "Idiomas de atención", "placeholder": "Ej: inglés, francés" },
+      "accessibility": { "label": "Accesibilidad" },
+      "costPerSession": { "label": "Coste por sesión ($)", "placeholder": "80" },
+      "slidingScale": { "label": "Ofrezco tarifa ajustable según ingresos" },
+      "insuranceAccepted": {
+        "label": "Seguros médicos aceptados",
+        "placeholder": "Ej: Sanitas, Adeslas, Cigna"
+      },
+      "healthFunds": {
+        "label": "Cajas de salud / Mutuas",
+        "placeholder": "Ej: MUGEJU, ISFAS, MUFACE"
+      },
+      "contactEmail": { "label": "Email de contacto", "placeholder": "ejemplo{'@'}correo.com" },
+      "contactPhone": { "label": "Teléfono de contacto", "placeholder": "+34 600 000 000" },
+      "waitlistPolicy": {
+        "label": "Gestión de lista de espera",
+        "placeholder": "Ej: Actualmente tengo disponibilidad inmediata. En caso de haber lista de espera, te avisaré con al menos una semana de antelación cuando se libere un cupo..."
+      },
+      "emergencyProtocol": {
+        "label": "Protocolo de emergencia",
+        "placeholder": "Ej: Este no es un servicio de urgencias. Si estás en crisis o tienes pensamientos suicidas, por favor contacta con el teléfono de emergencias 112 o acude al servicio de urgencias más cercano..."
+      },
+      "toneOfVoice": { "label": "Tono de voz" },
+      "officeAtmosphere": {
+        "label": "Atmósfera del consultorio",
+        "placeholder": "Ej: Mi consultorio es un espacio luminoso y tranquilo en el centro de la ciudad. Confortable, decorado con plantas y tonos cálidos que invitan a la calma. Un lugar donde puedes sentirte seguro para explorar tus emociones..."
+      },
+      "coreValues": {
+        "label": "Valores fundamentales de tu práctica",
+        "placeholder": "Ej: Confidencialidad, respeto, empatía, no juicio, profesionalidad"
+      },
+      "inspirationLinks": { "label": "Links de inspiración", "placeholder": "https://ejemplo.com" },
+      "whatINot": {
+        "label": "Lo que NO eres / NO haces",
+        "placeholder": "Ej: No soy un terapeuta que da consejos rápidos ni soluciones mágicas. No hago diagnósticos online ni doy recetas. Mi enfoque no es directivo ni confrontacional..."
+      },
+      "competitorLinks": {
+        "label": "Webs de colegas/comparables",
+        "placeholder": "https://ejemplo-colega.com"
+      },
+      "cvFile": { "label": "CV / Currículum (PDF)" },
+      "photos": { "label": "Fotos profesionales" },
+      "logoFile": { "label": "Logo de tu consulta" }
+    },
+    "hints": {
+      "preparationGuide": "¿Qué debe saber el paciente antes de su primera sesión?",
+      "expectedOutcome": "Describe los resultados esperados de la primera sesión",
+      "onlinePlatform": "¿Qué plataforma usas para sesiones online?",
+      "costPerSession": "Precio en tu moneda local",
+      "insuranceAccepted": "Lista de seguros con los que trabajas",
+      "healthFunds": "Cajas o mutuas con las que colaboras",
+      "inspirationLinks": "Webs de colegas o clínicas que te inspiren",
+      "whatINot": "Describe lo que te diferencia o lo que NO ofreces",
+      "competitorLinks": "Referencias opcionales de otros profesionales",
+      "cvFile": "Formato PDF, máximo 10MB",
+      "photos": "Imágenes JPG, PNG o WebP, máximo 10MB cada una",
+      "logoFile": "Imagen en formato PNG o SVG, máximo 5MB"
+    },
+    "options": {
+      "ageRange": {
+        "children": "Niños (0-12)",
+        "teenagers": "Adolescentes (13-17)",
+        "young_adults": "Jóvenes adultos (18-25)",
+        "adults": "Adultos (26-45)",
+        "middle_adults": "Adultos medios (46-65)",
+        "seniors": "Adultos mayores (65+)"
+      },
+      "modality": { "in_person": "Presencial", "online": "Online", "hybrid": "Híbrido" },
+      "frequency": {
+        "weekly": "Semanal",
+        "biweekly": "Quincenal",
+        "monthly": "Mensual",
+        "flexible": "Flexible"
+      },
+      "toneOfVoice": {
+        "warm": "Cercano",
+        "professional": "Profesional",
+        "empathetic": "Empático",
+        "direct": "Directo",
+        "inspiring": "Inspirador",
+        "serene": "Sereno"
+      },
+      "accessibility": {
+        "wheelchair": "Silla de ruedas",
+        "elevator": "Ascensor",
+        "ground_floor": "Planta baja",
+        "accessible_bathroom": "Baño adaptado",
+        "near_transit": "Transporte público",
+        "parking": "Parking"
+      },
+      "slidingScale": { "yes": "Sí, ofrezco tarifa ajustable según ingresos" }
+    }
   }
 }

@@ -259,5 +259,207 @@
     "reconnectGitHubApp": "Reconnect GitHub App",
     "disconnectGitHubApp": "Disconnect GitHub App",
     "githubDisconnectError": "Could not disconnect the GitHub App."
+  },
+  "onboarding": {
+    "step": "Step",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "add": "Add",
+    "addLink": "Add link",
+    "addMore": "Add more",
+    "browseFiles": "Browse files",
+    "dropFiles": "Drop files here or click to browse",
+    "listening": "Listening",
+    "aiSuggestion": "AI Suggestion",
+    "apply": "Apply",
+    "polish": "Polish with AI",
+    "dictate": "Dictate",
+    "completeTitle": "Onboarding complete!",
+    "completeDescription": "Your information has been saved successfully. The team will review your data and generate your professional website.",
+    "goToDashboard": "Go to Dashboard",
+    "reviewResponses": "Review my responses",
+    "sections": {
+      "0": {
+        "title": "Personal Introduction",
+        "description": "Tell us your story and what motivated you to become a therapist."
+      },
+      "1": {
+        "title": "Specialty & Approach",
+        "description": "Define your therapeutic approach and the conditions you treat."
+      },
+      "2": { "title": "Ideal Patient Profile", "description": "Describe who you can help best." },
+      "3": {
+        "title": "First Session",
+        "description": "Describe what a first session with you is like."
+      },
+      "4": {
+        "title": "Modality & Duration",
+        "description": "How and how often do you offer therapy?"
+      },
+      "5": {
+        "title": "Location & Format",
+        "description": "Practical info about where and how to find you."
+      },
+      "6": { "title": "Financial Aspects", "description": "Fees, insurance, and payment methods." },
+      "7": {
+        "title": "Contact & Emergencies",
+        "description": "Essential contact info and urgent situations."
+      },
+      "8": {
+        "title": "Visual Identity & Values",
+        "description": "Define the tone, atmosphere, and values of your practice."
+      },
+      "9": {
+        "title": "References & Inspiration",
+        "description": "Share references that reflect your style."
+      },
+      "10": { "title": "Files", "description": "Upload your CV, professional photos, and logo." }
+    },
+    "fields": {
+      "history": {
+        "label": "Your story",
+        "placeholder": "Ex: From a young age I was fascinated by understanding the human mind. After years of training in clinical psychology, I discovered my calling in guiding people through times of change..."
+      },
+      "motivation": {
+        "label": "Your motivation",
+        "placeholder": "Ex: What drives me every day is seeing the transformation in my patients. I believe in the potential of each person to heal and grow..."
+      },
+      "therapeuticApproach": {
+        "label": "Therapeutic approach",
+        "placeholder": "Ex: Cognitive-Behavioral Therapy integrated with Mindfulness and a humanistic approach"
+      },
+      "methods": {
+        "label": "Methods & techniques",
+        "placeholder": "Ex: EMDR, conscious breathing, cognitive restructuring"
+      },
+      "targetConditions": {
+        "label": "Conditions you treat",
+        "placeholder": "Ex: Anxiety, depression, trauma, post-traumatic stress"
+      },
+      "idealPatientDescription": {
+        "label": "Ideal patient description",
+        "placeholder": "Ex: Adults aged 25-55 seeking self-understanding, anxiety management, or overcoming emotional blocks. Professionals who feel their personal or professional life isn't flowing as they'd like..."
+      },
+      "ageRange": { "label": "Age range" },
+      "concerns": {
+        "label": "Main presenting concerns",
+        "placeholder": "Ex: Generalized anxiety, grief, relationship issues"
+      },
+      "firstSessionDescription": {
+        "label": "What is the first session like?",
+        "placeholder": "Ex: The first session is a safe space to get to know each other. We start with an open interview exploring your history and reasons for seeking therapy. There's no rush; you set the pace..."
+      },
+      "preparationGuide": {
+        "label": "Preparation guide",
+        "placeholder": "Ex: You don't need to prepare anything special. Wear comfortable clothes and, if you wish, jot down a few topics you'd like to discuss. The most important thing is to come with the willingness to explore..."
+      },
+      "expectedOutcome": {
+        "label": "What can the patient expect?",
+        "placeholder": "Ex: By the end of the first session, you'll have a clearer understanding of what you want to work on and how we can address it together..."
+      },
+      "modality": { "label": "Therapy modality" },
+      "sessionDuration": { "label": "Session duration (minutes)", "placeholder": "50" },
+      "frequency": { "label": "Typical frequency" },
+      "address": {
+        "label": "Office address",
+        "placeholder": "Ex: 123 Main Street, London SW1A 1AA"
+      },
+      "onlinePlatform": {
+        "label": "Online platform",
+        "placeholder": "Ex: Zoom, Google Meet, Doxy.me"
+      },
+      "languages": { "label": "Consultation languages", "placeholder": "Ex: Spanish, French" },
+      "accessibility": { "label": "Accessibility" },
+      "costPerSession": { "label": "Cost per session ($)", "placeholder": "80" },
+      "slidingScale": { "label": "I offer sliding scale based on income" },
+      "insuranceAccepted": {
+        "label": "Accepted health insurance",
+        "placeholder": "Ex: Aetna, Cigna, Blue Cross"
+      },
+      "healthFunds": {
+        "label": "Health funds / Mutual societies",
+        "placeholder": "Ex: Veterans Affairs, Workers' Compensation"
+      },
+      "contactEmail": { "label": "Contact email", "placeholder": "example{'@'}email.com" },
+      "contactPhone": { "label": "Contact phone", "placeholder": "+44 7000 000000" },
+      "waitlistPolicy": {
+        "label": "Waitlist management",
+        "placeholder": "Ex: I currently have immediate availability. If there is a waitlist, I'll notify you at least one week in advance when a slot opens..."
+      },
+      "emergencyProtocol": {
+        "label": "Emergency protocol",
+        "placeholder": "Ex: This is not an emergency service. If you are in crisis or having suicidal thoughts, please contact emergency services at 999 or go to the nearest emergency room..."
+      },
+      "toneOfVoice": { "label": "Tone of voice" },
+      "officeAtmosphere": {
+        "label": "Office atmosphere",
+        "placeholder": "Ex: My office is a bright and calm space in the city center. Comfortable, decorated with plants and warm tones that invite tranquility..."
+      },
+      "coreValues": {
+        "label": "Core values of your practice",
+        "placeholder": "Ex: Confidentiality, respect, empathy, non-judgment, professionalism"
+      },
+      "inspirationLinks": { "label": "Inspiration links", "placeholder": "https://example.com" },
+      "whatINot": {
+        "label": "What you ARE NOT / do NOT do",
+        "placeholder": "Ex: I am not a therapist who gives quick advice or magic solutions. I do not do online diagnoses or write prescriptions..."
+      },
+      "competitorLinks": {
+        "label": "Colleague/comparable websites",
+        "placeholder": "https://example-colleague.com"
+      },
+      "cvFile": { "label": "CV / Résumé (PDF)" },
+      "photos": { "label": "Professional photos" },
+      "logoFile": { "label": "Practice logo" }
+    },
+    "hints": {
+      "preparationGuide": "What should the patient know before their first session?",
+      "expectedOutcome": "Describe the expected outcomes of the first session",
+      "onlinePlatform": "Which platform do you use for online sessions?",
+      "costPerSession": "Price in your local currency",
+      "insuranceAccepted": "List of insurance providers you work with",
+      "healthFunds": "Health funds or mutual societies you collaborate with",
+      "inspirationLinks": "Websites of colleagues or clinics that inspire you",
+      "whatINot": "Describe what sets you apart or what you do NOT offer",
+      "competitorLinks": "Optional references from other professionals",
+      "cvFile": "PDF format, max 10MB",
+      "photos": "JPG, PNG or WebP images, max 10MB each",
+      "logoFile": "PNG or SVG image, max 5MB"
+    },
+    "options": {
+      "ageRange": {
+        "children": "Children (0-12)",
+        "teenagers": "Teenagers (13-17)",
+        "young_adults": "Young adults (18-25)",
+        "adults": "Adults (26-45)",
+        "middle_adults": "Middle-aged adults (46-65)",
+        "seniors": "Seniors (65+)"
+      },
+      "modality": { "in_person": "In-person", "online": "Online", "hybrid": "Hybrid" },
+      "frequency": {
+        "weekly": "Weekly",
+        "biweekly": "Biweekly",
+        "monthly": "Monthly",
+        "flexible": "Flexible"
+      },
+      "toneOfVoice": {
+        "warm": "Warm",
+        "professional": "Professional",
+        "empathetic": "Empathetic",
+        "direct": "Direct",
+        "inspiring": "Inspiring",
+        "serene": "Serene"
+      },
+      "accessibility": {
+        "wheelchair": "Wheelchair access",
+        "elevator": "Elevator",
+        "ground_floor": "Ground floor",
+        "accessible_bathroom": "Accessible bathroom",
+        "near_transit": "Near public transit",
+        "parking": "Parking"
+      },
+      "slidingScale": { "yes": "Yes, I offer income-based sliding scale" }
+    }
   }
 }
