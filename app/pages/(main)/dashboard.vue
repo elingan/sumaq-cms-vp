@@ -10,13 +10,13 @@
       <BookingCalendarDashboardSection
         :locations="locations"
         :can-create-bookings="canCreateBookings"
-        @create-booking="navigateToBookings"
+        @create-booking="navigateToCalendar"
         @view-location="navigateToLocation"
       />
       <BookingAppoimentDashboardSection
         :locations="locations"
         :can-create-bookings="canCreateBookings"
-        @create-booking="navigateToBookings"
+        @create-appointment="navigateToAppointment"
         @view-location="navigateToLocation"
       />
       <div v-if="pendingSites" class="flex justify-center">
@@ -52,14 +52,12 @@ const siteCards = computed(() => {
   return items
 })
 
-function navigateToBookings() {
-  const firstLocationId = locations.value?.[0]?.id
+function navigateToCalendar() {
+  router.push('/calendar')
+}
 
-  if (firstLocationId) {
-    router.push(`/bookings/${firstLocationId}`)
-  } else {
-    router.push('/bookings')
-  }
+function navigateToAppointment() {
+  router.push('/appointment')
 }
 
 function navigateToLocation(locationId: string) {

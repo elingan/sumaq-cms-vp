@@ -85,7 +85,7 @@ export default defineEventHandler(async (event) => {
         publicMetadata: {
           role: result.data.role,
         },
-        redirectUrl: new URL('/booking/calendar', getRequestURL(event)).toString(),
+        redirectUrl: new URL('/calendar', getRequestURL(event)).toString(),
       })
 
       invitationId = invitation.id

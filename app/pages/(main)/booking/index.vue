@@ -3,8 +3,8 @@
     <ULink to="/dashboard" class="text-sm text-muted">
       {{ $t('nav.dashboard') }}
     </ULink>
-    <ULink to="/booking/calendar" class="text-sm text-muted"> Booking Calendar </ULink>
-    <ULink to="/booking/appoitment" class="text-sm text-muted"> Booking Appoitment </ULink>
+    <ULink to="/calendar" class="text-sm text-muted"> Booking Calendar </ULink>
+    <ULink to="/appointment" class="text-sm text-muted"> Booking Appoitment </ULink>
   </div>
 </template>
 

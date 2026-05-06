@@ -92,7 +92,7 @@ interface Location {
   rooms: Room[]
 }
 
-const { t } = useI18n()
+useI18n()
 const toast = useToast()
 
 const {

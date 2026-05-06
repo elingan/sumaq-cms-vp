@@ -15,6 +15,8 @@ export default defineNuxtRouteMiddleware((to) => {
     '/settings',
     '/profile',
     '/billing',
+    '/calendar',
+    '/appointment',
     '/booking',
     '/bookings',
   ]

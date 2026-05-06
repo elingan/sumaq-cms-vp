@@ -14,48 +14,44 @@ withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  (e: 'create-booking'): void
+  (e: 'create-appointment'): void
   (e: 'view-location', locationId: string): void
 }>()
 </script>
 
 <template>
-  <UCard
-    :title="$t('dashboard.appointmentBooking')"
-    :description="$t('dashboard.calendarSubtitle')"
-    class="w-full"
-  >
-    <!-- <template #header>
+  <UCard>
+    <template #header>
       <div class="flex items-center justify-between w-full">
         <div>
           <h2 class="text-lg font-semibold text-foreground">
-            {{ $t('nav.calendar') }}
+            {{ $t('dashboard.appointmentBooking') }}
           </h2>
           <p class="text-sm text-muted">
-            {{ $t('dashboard.calendarSubtitle') }}
+            {{ $t('dashboard.appointmentSubtitle') }}
           </p>
         </div>
         <UButton
           v-if="canCreateBookings"
           icon="i-lucide-plus"
-          :label="$t('actions.createCalendar')"
+          :label="$t('actions.createAppointment')"
           color="primary"
-          @click="emit('create-booking')"
+          @click="emit('create-appointment')"
         />
       </div>
-    </template> -->
+    </template>
 
     <UEmpty
-      :title="$t('dashboard.noCalendar')"
-      :description="$t('dashboard.noCalendarDescription')"
+      :title="$t('dashboard.noAppointments')"
+      :description="$t('dashboard.noAppointmentsDescription')"
       variant="soft"
     >
       <template #default>
         <UButton
           v-if="canCreateBookings"
           icon="i-lucide-arrow-right"
-          :label="$t('actions.createCalendar')"
-          @click="emit('create-booking')"
+          :label="$t('actions.createAppointment')"
+          @click="emit('create-appointment')"
         />
       </template>
     </UEmpty>

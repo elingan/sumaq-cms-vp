@@ -1,5 +1,24 @@
 <template>
-  <UCard :title="$t('nav.sites')" :description="$t('dashboard.sitesSubtitle')" class="w-full">
+  <UCard>
+    <template #header>
+      <div class="flex items-center justify-between w-full">
+        <div>
+          <h2 class="text-lg font-semibold text-foreground">
+            {{ $t('dashboard.sites') }}
+          </h2>
+          <p class="text-sm text-muted">
+            {{ $t('dashboard.sitesSubtitle') }}
+          </p>
+        </div>
+        <UButton
+          v-if="canCreateSites"
+          icon="i-lucide-plus"
+          :label="$t('actions.createSite')"
+          @click="showCreateModal = true"
+        />
+      </div>
+    </template>
+
     <UPageGrid>
       <UPageCard
         v-for="site in siteCards"
@@ -21,13 +40,6 @@
           class="w-full object-cover rounded-lg"
         />
       </UPageCard>
-
-      <UButton
-        v-if="canCreateSites"
-        icon="i-lucide-plus"
-        :label="$t('actions.createCalendar')"
-        @click="showCreateModal = true"
-      />
     </UPageGrid>
 
     <UEmpty
