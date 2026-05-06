@@ -1,21 +1,27 @@
 import { clerkClient } from '@clerk/nuxt/server'
 import { UserRole, type UserRoleValue } from '#shared/types/roles'
+import type { H3Event } from 'h3'
+
+type Clerk = ReturnType<typeof clerkClient>
+type ClerkUser = Awaited<ReturnType<Clerk['users']['getUser']>>
+type ClerkUserList = Awaited<ReturnType<Clerk['users']['getUserList']>>
+type UpdateUserParams = Parameters<Clerk['users']['updateUser']>[1]
 
 /**
  * Validate user role against allowed enum values
  */
-export function isValidUserRole(role: any): role is UserRoleValue {
-  return Object.values(UserRole).includes(role)
+export function isValidUserRole(role: unknown): role is UserRoleValue {
+  return typeof role === 'string' && (Object.values(UserRole) as string[]).includes(role)
 }
 
 /**
  * List all users from Clerk and augment with local data
  */
-export async function listAllUsers(event: any) {
+export async function listAllUsers(event: H3Event) {
   const clerk = clerkClient(event)
 
   // Get all users from Clerk (paginate if needed)
-  const clerkUsers = await clerk.users.getUserList({ limit: 500 })
+  const clerkUsers: ClerkUserList = await clerk.users.getUserList({ limit: 500 })
 
   // Map to our format
   return clerkUsers.data.map((clerkUser) => ({
@@ -36,7 +42,7 @@ export async function listAllUsers(event: any) {
  * Create a user in Clerk with invite
  */
 export async function createClerkUserWithInvite(
-  event: any,
+  event: H3Event,
   email: string,
   options: {
     firstName?: string
@@ -45,10 +51,10 @@ export async function createClerkUserWithInvite(
     redirectUrl?: string
   } = {},
 ) {
-  const clerk = clerkClient(event)
+  const clerk: Clerk = clerkClient(event)
 
   // Validate role if provided
-  const roleToUse = options.role || UserRole.Owner
+  const roleToUse = options.role || UserRole.User
   if (!isValidUserRole(roleToUse)) {
     throw createError({
       statusCode: 400,
@@ -58,7 +64,7 @@ export async function createClerkUserWithInvite(
 
   try {
     // Create user in Clerk
-    const newUser = await clerk.users.createUser({
+    const newUser: ClerkUser = await clerk.users.createUser({
       emailAddress: [email],
       firstName: options.firstName,
       lastName: options.lastName,
@@ -80,8 +86,9 @@ export async function createClerkUserWithInvite(
       clerkUser: newUser,
       invitation,
     }
-  } catch (error: any) {
-    if (error.message?.includes('already exists')) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    if (message.includes('already exists')) {
       throw createError({
         statusCode: 409,
         message: 'Email already exists in Clerk',
@@ -89,7 +96,7 @@ export async function createClerkUserWithInvite(
     }
     throw createError({
       statusCode: 500,
-      message: `Failed to create user: ${error.message}`,
+      message: `Failed to create user: ${message}`,
     })
   }
 }
@@ -98,7 +105,7 @@ export async function createClerkUserWithInvite(
  * Update user metadata (role) in Clerk
  */
 export async function updateClerkUserMetadata(
-  event: any,
+  event: H3Event,
   userId: string,
   options: {
     firstName?: string
@@ -106,7 +113,7 @@ export async function updateClerkUserMetadata(
     role?: string
   } = {},
 ) {
-  const clerk = clerkClient(event)
+  const clerk: Clerk = clerkClient(event)
 
   // Validate role if provided
   if (options.role && !isValidUserRole(options.role)) {
@@ -117,7 +124,7 @@ export async function updateClerkUserMetadata(
   }
 
   try {
-    const updates: any = {}
+    const updates: UpdateUserParams = {}
 
     if (options.firstName) updates.firstName = options.firstName
     if (options.lastName) updates.lastName = options.lastName
@@ -138,10 +145,11 @@ export async function updateClerkUserMetadata(
       lastName: updated.lastName,
       role: updated.publicMetadata?.role as string | undefined,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
     throw createError({
       statusCode: 500,
-      message: `Failed to update user: ${error.message}`,
+      message: `Failed to update user: ${message}`,
     })
   }
 }
@@ -150,8 +158,8 @@ export async function updateClerkUserMetadata(
  * Delete user from Clerk
  * Note: Local user record will remain for audit trail (webhook won't delete)
  */
-export async function deleteClerkUser(event: any, userId: string) {
-  const clerk = clerkClient(event)
+export async function deleteClerkUser(event: H3Event, userId: string) {
+  const clerk: Clerk = clerkClient(event)
 
   try {
     await clerk.users.deleteUser(userId)
@@ -160,10 +168,11 @@ export async function deleteClerkUser(event: any, userId: string) {
     // Webhook will log the deletion when it arrives
 
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
     throw createError({
       statusCode: 500,
-      message: `Failed to delete user: ${error.message}`,
+      message: `Failed to delete user: ${message}`,
     })
   }
 }
@@ -171,8 +180,8 @@ export async function deleteClerkUser(event: any, userId: string) {
 /**
  * Get user by ID from Clerk
  */
-export async function getClerkUserById(event: any, userId: string) {
-  const clerk = clerkClient(event)
+export async function getClerkUserById(event: H3Event, userId: string) {
+  const clerk: Clerk = clerkClient(event)
 
   try {
     const clerkUser = await clerk.users.getUser(userId)
@@ -189,8 +198,9 @@ export async function getClerkUserById(event: any, userId: string) {
       locked: clerkUser.locked,
       lastSignInAt: clerkUser.lastSignInAt,
     }
-  } catch (error: any) {
-    if (error.message?.includes('not found')) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    if (message.includes('not found')) {
       throw createError({
         statusCode: 404,
         message: 'User not found',
@@ -198,7 +208,7 @@ export async function getClerkUserById(event: any, userId: string) {
     }
     throw createError({
       statusCode: 500,
-      message: `Failed to fetch user: ${error.message}`,
+      message: `Failed to fetch user: ${message}`,
     })
   }
 }

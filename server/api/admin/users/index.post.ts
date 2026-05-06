@@ -8,7 +8,7 @@ const CreateUserSchema = z.object({
   email: z.string().email(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
-  role: z.enum(['admin', 'partner', 'owner', 'editor']).default('owner'),
+  role: z.enum(['admin', 'user']).default('user'),
   redirectUrl: z.string().url().optional(),
 })
 
@@ -48,6 +48,12 @@ export default defineEventHandler(async (event) => {
     event,
   )
 
+  const invitationExtended = invitation as unknown as {
+    emailAddress?: string
+    expiresAt?: unknown
+    url?: string
+  }
+
   return {
     user: {
       id: clerkUser.id,
@@ -59,10 +65,10 @@ export default defineEventHandler(async (event) => {
     },
     invitation: {
       id: invitation.id,
-      emailAddress: (invitation as any).emailAddress,
+      emailAddress: invitationExtended.emailAddress,
       status: invitation.status,
-      expiresAt: (invitation as any).expiresAt,
-      url: (invitation as any).url,
+      expiresAt: invitationExtended.expiresAt,
+      url: invitationExtended.url,
     },
   }
 })

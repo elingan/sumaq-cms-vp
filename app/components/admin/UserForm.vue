@@ -36,13 +36,13 @@ const isEdit = computed(() => !!props.user)
 const createSchema = z.object({
   email: z.email(t('auth.invalidEmail')),
   name: z.string().optional(),
-  role: z.enum(['admin', 'partner', 'owner', 'editor']),
+  role: z.enum(['admin', 'user']),
 })
 
 const editSchema = z.object({
   email: z.string().optional(),
   name: z.string().optional(),
-  role: z.enum(['admin', 'partner', 'owner', 'editor']),
+  role: z.enum(['admin', 'user']),
 })
 
 type CreateSchema = z.output<typeof createSchema>
@@ -52,10 +52,10 @@ type SubmitSchema = CreateSchema | EditSchema
 const state = reactive({
   email: '',
   name: '',
-  role: 'editor' as UserRole,
+  role: 'user' as UserRole,
 })
 
-const roleOptions: UserRole[] = ['admin', 'partner', 'owner', 'editor']
+const roleOptions: UserRole[] = ['admin', 'user']
 const loading = ref(false)
 const error = ref<string | null>(null)
 

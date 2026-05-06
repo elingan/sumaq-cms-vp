@@ -85,7 +85,8 @@
     "noRooms": "Sin salas",
     "multipleRooms": "{count} salas",
     "appointmentBooking": "Reserva de cita",
-    "bookingCalendar": "Calendario de reservas"
+    "bookingCalendar": "Calendario de reservas",
+    "sites": "Sitios"
   },
   "appointments": {
     "pageTitle": "Citas",

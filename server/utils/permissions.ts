@@ -19,7 +19,7 @@ export interface PermissionContext {
   appointmentId?: string
   userId?: string // Target user ID (for user management actions)
   // Additional context
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface PermissionDecision {
@@ -37,7 +37,8 @@ async function getUserGlobalRole(userId: string): Promise<UserRoleValue | null> 
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
-  return (user?.role as UserRoleValue) || null
+  if (!user?.role) return null
+  return user.role === UserRole.Admin ? UserRole.Admin : UserRole.User
 }
 
 /**
@@ -200,7 +201,7 @@ export async function canPerform(
       default:
         return { allowed: false, reason: `Unknown module: ${String(module)}` }
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[Permissions] Error evaluating ${module}/${action}:`, error)
     return { allowed: false, reason: 'Permission evaluation error' }
   }

@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const isAdmin = session.user.role === 'admin' || session.user.role === 'owner'
+  const isAdmin = session.user.role === 'admin'
 
   if (!isAdmin && booking.userId !== session.user.id) {
     throw createError({

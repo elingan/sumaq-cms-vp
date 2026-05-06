@@ -5,9 +5,7 @@ import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from 'driz
 
 export const UserRole = {
   Admin: 'admin',
-  Partner: 'partner',
-  Owner: 'owner',
-  Editor: 'editor',
+  User: 'user',
 } as const
 
 export type UserRoleValue = (typeof UserRole)[keyof typeof UserRole]
@@ -19,20 +17,6 @@ export const SiteUserRole = {
 } as const
 
 export type SiteUserRoleValue = (typeof SiteUserRole)[keyof typeof SiteUserRole]
-
-export const LocationMemberRole = {
-  Owner: 'owner',
-  Manager: 'manager',
-} as const
-
-export type LocationMemberRoleValue = (typeof LocationMemberRole)[keyof typeof LocationMemberRole]
-
-export const RoomMemberRole = {
-  Owner: 'owner',
-  Manager: 'manager',
-} as const
-
-export type RoomMemberRoleValue = (typeof RoomMemberRole)[keyof typeof RoomMemberRole]
 
 export const SiteStatus = {
   Active: 'active',
@@ -57,38 +41,18 @@ export const BookingExceptionStatus = {
   Released: 'released',
 } as const
 
-export const BookingMemberRole = {
-  Admin: 'admin',
-  Member: 'member',
-} as const
-
-export type BookingMemberRoleValue = (typeof BookingMemberRole)[keyof typeof BookingMemberRole]
-
-export const BookingMemberStatus = {
-  Pending: 'pending',
-  Active: 'active',
-  Revoked: 'revoked',
-} as const
-
-export type BookingMemberStatusValue =
-  (typeof BookingMemberStatus)[keyof typeof BookingMemberStatus]
-
 export type PasswordResetPurposeValue =
   (typeof PasswordResetPurpose)[keyof typeof PasswordResetPurpose]
 
 export type BookingExceptionStatusValue =
   (typeof BookingExceptionStatus)[keyof typeof BookingExceptionStatus]
 
-export const UserRoleValues = ['admin', 'partner', 'owner', 'editor'] as const
+export const UserRoleValues = ['admin', 'user'] as const
 export const SiteUserRoleValues = ['owner', 'editor', 'partner'] as const
-export const LocationMemberRoleValues = ['owner', 'manager'] as const
-export const RoomMemberRoleValues = ['owner', 'manager'] as const
 export const SiteStatusValues = ['active', 'archived'] as const
 export const PageStatusValues = ['draft', 'published'] as const
 export const PasswordResetPurposeValues = ['invite', 'reset'] as const
 export const BookingExceptionStatusValues = ['released'] as const
-export const BookingMemberRoleValues = ['admin', 'member'] as const
-export const BookingMemberStatusValues = ['pending', 'active', 'revoked'] as const
 
 type JsonRecord = Record<string, unknown>
 
@@ -99,7 +63,7 @@ export const users = sqliteTable('users', {
   email: text('email').unique().notNull(),
   password: text('password'),
   name: text('name'),
-  role: text('role', { enum: UserRoleValues }).notNull().default(UserRole.Editor),
+  role: text('role', { enum: UserRoleValues }).notNull().default(UserRole.User),
   githubData: text('github_data', { mode: 'json' }).$type<JsonRecord | null>(),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
@@ -248,42 +212,6 @@ export const siteUsers = sqliteTable(
   (table) => [primaryKey({ columns: [table.siteId, table.userId] })],
 )
 
-export const userMembers = sqliteTable(
-  'user_members',
-  {
-    id: text('id')
-      .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
-    userId: text('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    memberId: text('member_id').references(() => users.id, { onDelete: 'set null' }),
-    invitedEmail: text('invited_email').notNull(),
-    invitationId: text('invitation_id').unique(),
-    role: text('role', { enum: BookingMemberRoleValues })
-      .notNull()
-      .default(BookingMemberRole.Member),
-    status: text('status', { enum: BookingMemberStatusValues })
-      .notNull()
-      .default(BookingMemberStatus.Pending),
-    invitedBy: text('invited_by').references(() => users.id, { onDelete: 'set null' }),
-    acceptedAt: integer('accepted_at', { mode: 'timestamp' }),
-    revokedAt: integer('revoked_at', { mode: 'timestamp' }),
-    createdAt: integer('created_at', { mode: 'timestamp' })
-      .notNull()
-      .default(sql`(unixepoch())`),
-    updatedAt: integer('updated_at', { mode: 'timestamp' })
-      .notNull()
-      .default(sql`(unixepoch())`),
-  },
-  (table) => [
-    index('idx_user_members_user_id').on(table.userId),
-    index('idx_user_members_member_id').on(table.memberId),
-    index('idx_user_members_status').on(table.status),
-    uniqueIndex('uniq_user_members_invited_email').on(table.invitedEmail),
-  ],
-)
-
 export const pages = sqliteTable(
   'pages',
   {
@@ -362,57 +290,10 @@ export const auditLogs = sqliteTable('audit_logs', {
     .default(sql`(unixepoch())`),
 })
 
-export const locationMembers = sqliteTable(
-  'location_members',
-  {
-    locationId: text('location_id')
-      .notNull()
-      .references(() => locations.id, { onDelete: 'cascade' }),
-    userId: text('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    role: text('role', { enum: LocationMemberRoleValues }).notNull(),
-    createdAt: integer('created_at', { mode: 'timestamp' })
-      .notNull()
-      .default(sql`(unixepoch())`),
-  },
-  (table) => [
-    primaryKey({ columns: [table.locationId, table.userId] }),
-    index('idx_location_members_location_id').on(table.locationId),
-    index('idx_location_members_user_id').on(table.userId),
-  ],
-)
-
-export const roomMembers = sqliteTable(
-  'room_members',
-  {
-    roomId: text('room_id')
-      .notNull()
-      .references(() => rooms.id, { onDelete: 'cascade' }),
-    userId: text('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    role: text('role', { enum: RoomMemberRoleValues }).notNull(),
-    createdAt: integer('created_at', { mode: 'timestamp' })
-      .notNull()
-      .default(sql`(unixepoch())`),
-  },
-  (table) => [
-    primaryKey({ columns: [table.roomId, table.userId] }),
-    index('idx_room_members_room_id').on(table.roomId),
-    index('idx_room_members_user_id').on(table.userId),
-  ],
-)
-
 // ─── Relations ───────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({
   siteUsers: many(siteUsers),
-  bookingMembers: many(userMembers, { relationName: 'booking_member_user' }),
-  bookingMemberships: many(userMembers, { relationName: 'booking_member_profile' }),
-  bookingInvitationsSent: many(userMembers, { relationName: 'booking_member_inviter' }),
-  locationMembers: many(locationMembers),
-  roomMembers: many(roomMembers),
   activityLogs: many(activityLogs),
   auditLogs: many(auditLogs),
 }))
@@ -426,13 +307,11 @@ export const sitesRelations = relations(sites, ({ many }) => ({
 
 export const locationsRelations = relations(locations, ({ many }) => ({
   rooms: many(rooms),
-  members: many(locationMembers),
 }))
 
 export const roomsRelations = relations(rooms, ({ one, many }) => ({
   location: one(locations, { fields: [rooms.locationId], references: [locations.id] }),
   bookings: many(bookings),
-  members: many(roomMembers),
 }))
 
 export const bookingsRelations = relations(bookings, ({ one, many }) => ({
@@ -447,37 +326,6 @@ export const bookingExceptionsRelations = relations(bookingExceptions, ({ one })
 export const siteUsersRelations = relations(siteUsers, ({ one }) => ({
   site: one(sites, { fields: [siteUsers.siteId], references: [sites.id] }),
   user: one(users, { fields: [siteUsers.userId], references: [users.id] }),
-}))
-
-export const userMembersRelations = relations(userMembers, ({ one }) => ({
-  user: one(users, {
-    fields: [userMembers.userId],
-    references: [users.id],
-    relationName: 'booking_member_user',
-  }),
-  member: one(users, {
-    fields: [userMembers.memberId],
-    references: [users.id],
-    relationName: 'booking_member_profile',
-  }),
-  inviter: one(users, {
-    fields: [userMembers.invitedBy],
-    references: [users.id],
-    relationName: 'booking_member_inviter',
-  }),
-}))
-
-export const locationMembersRelations = relations(locationMembers, ({ one }) => ({
-  location: one(locations, {
-    fields: [locationMembers.locationId],
-    references: [locations.id],
-  }),
-  user: one(users, { fields: [locationMembers.userId], references: [users.id] }),
-}))
-
-export const roomMembersRelations = relations(roomMembers, ({ one }) => ({
-  room: one(rooms, { fields: [roomMembers.roomId], references: [rooms.id] }),
-  user: one(users, { fields: [roomMembers.userId], references: [users.id] }),
 }))
 
 export const pagesRelations = relations(pages, ({ one }) => ({

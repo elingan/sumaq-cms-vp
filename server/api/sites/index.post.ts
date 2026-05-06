@@ -22,7 +22,7 @@ const CreateSiteSchema = z.object({
 export default defineEventHandler(async (event) => {
   const user = await getClerkUserWithData(event)
 
-  if (user.role !== 'admin' && user.role !== 'owner') {
+  if (user.role !== 'admin') {
     throw createError({ statusCode: 403, message: 'Forbidden' })
   }
 

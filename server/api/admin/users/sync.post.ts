@@ -22,10 +22,10 @@ export default defineEventHandler(async (event) => {
       continue
     }
 
-    const validRoles = ['admin', 'partner', 'owner', 'editor']
+    const validRoles = ['admin', 'user']
     const role = validRoles.includes(clerkUser.role as string)
-      ? (clerkUser.role as 'admin' | 'partner' | 'owner' | 'editor')
-      : 'editor'
+      ? (clerkUser.role as 'admin' | 'user')
+      : 'user'
 
     try {
       const [existing] = await db

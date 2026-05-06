@@ -45,21 +45,6 @@
               @delete-room="(room) => deleteRoom(location.id, room)"
             />
           </section>
-
-          <section class="space-y-4 border-t border-default pt-8">
-            <div>
-              <h3 class="text-lg font-medium mb-2">
-                {{ $t('bookingCalendar.teamTitle') }}
-              </h3>
-              <p class="text-sm text-muted">
-                {{ $t('bookingCalendar.teamDescription') }}
-              </p>
-            </div>
-
-            <UCard :ui="{ body: 'p-0' }">
-              <BookingCalendarLocationMembersSection :show-header="false" :bordered="false" />
-            </UCard>
-          </section>
         </div>
       </UPageBody>
     </UPage>

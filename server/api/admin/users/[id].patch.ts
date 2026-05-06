@@ -7,7 +7,7 @@ import { createAuditLog, auditUserRoleChange } from '#server/utils/audit'
 const PatchUserSchema = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),
-  role: z.enum(['admin', 'partner', 'owner', 'editor']).optional(),
+  role: z.enum(['admin', 'user']).optional(),
 })
 
 export default defineEventHandler(async (event) => {

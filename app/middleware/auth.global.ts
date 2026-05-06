@@ -1,10 +1,11 @@
-import { useAuth } from '#imports'
+import { useAuth, useUser } from '#imports'
 
 export default defineNuxtRouteMiddleware((to) => {
   const { isSignedIn, isLoaded } = useAuth()
+  const { user, isLoaded: isUserLoaded } = useUser()
 
   // Wait for Clerk to load before checking auth state
-  if (!isLoaded.value) {
+  if (!isLoaded.value || !isUserLoaded.value) {
     return
   }
 
@@ -24,5 +25,14 @@ export default defineNuxtRouteMiddleware((to) => {
 
   if (isProtected && !isSignedIn.value) {
     return navigateTo('/login')
+  }
+
+  if (isProtected && isSignedIn.value) {
+    const role = user.value?.publicMetadata?.role as string | undefined
+    const isAdmin = role === 'admin'
+
+    if (!isAdmin && !to.path.startsWith('/dashboard')) {
+      return navigateTo('/dashboard')
+    }
   }
 })

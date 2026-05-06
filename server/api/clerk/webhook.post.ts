@@ -1,6 +1,6 @@
 import { Webhook } from 'svix'
-import { and, eq } from 'drizzle-orm'
-import { BookingMemberStatus, userMembers, users } from '#server/db/schema'
+import { eq } from 'drizzle-orm'
+import { users } from '#server/db/schema'
 import { auditUserRoleChange, auditUserDeleted, auditUserSynced } from '#server/utils/audit'
 import { UserRole, type UserRoleValue } from '#shared/types/roles'
 
@@ -62,22 +62,8 @@ export default defineEventHandler(async (event) => {
     return value?.toLowerCase().trim()
   }
 
-  async function activatePendingBookingMemberships(email: string, clerkId: string) {
-    await db
-      .update(userMembers)
-      .set({
-        memberId: clerkId,
-        status: BookingMemberStatus.Active,
-        acceptedAt: new Date(),
-        revokedAt: null,
-        updatedAt: new Date(),
-      })
-      .where(
-        and(
-          eq(userMembers.invitedEmail, email),
-          eq(userMembers.status, BookingMemberStatus.Pending),
-        ),
-      )
+  function normalizeGlobalRole(value: string | undefined): UserRoleValue {
+    return value === UserRole.Admin ? UserRole.Admin : UserRole.User
   }
 
   // Handle user.created event
@@ -108,7 +94,7 @@ export default defineEventHandler(async (event) => {
       if (existingById) {
         // User already exists; update with new email/name/role from Clerk
         // User already exists; update with new email/name/role from Clerk
-        const roleToSync: UserRoleValue = (clerkRole as UserRoleValue) || existingById.role
+        const roleToSync: UserRoleValue = normalizeGlobalRole(clerkRole)
         await db
           .update(users)
           .set({
@@ -136,8 +122,8 @@ export default defineEventHandler(async (event) => {
             `[Clerk Webhook] user.created: Existing local user found by email ${email} with id ${existingByEmail.id}; manual reconciliation required to align with Clerk ID ${clerk_id}`,
           )
         } else {
-          // Create new user with role from Clerk or default 'owner'
-          const roleToSync: UserRoleValue = (clerkRole as UserRoleValue) || UserRole.Owner
+          // Create new user with role from Clerk or default 'user'
+          const roleToSync: UserRoleValue = normalizeGlobalRole(clerkRole)
           await db.insert(users).values({
             id: clerk_id,
             email,
@@ -152,8 +138,6 @@ export default defineEventHandler(async (event) => {
           await auditUserSynced(clerk_id, email, 'created', { role: roleToSync })
         }
       }
-
-      await activatePendingBookingMemberships(email, clerk_id)
     } catch (error) {
       console.error(`[Clerk Webhook] user.created: Error creating user ${email}`, error)
       throw createError({
@@ -190,7 +174,7 @@ export default defineEventHandler(async (event) => {
 
       if (currentUser) {
         // Update by Clerk ID
-        const roleToSync: UserRoleValue = (clerkRole as UserRoleValue) || currentUser.role
+        const roleToSync: UserRoleValue = normalizeGlobalRole(clerkRole)
         const updatedUser = await db
           .update(users)
           .set({
@@ -204,8 +188,8 @@ export default defineEventHandler(async (event) => {
 
         if (updatedUser && updatedUser.length > 0) {
           // Audit role change if it occurred
-          if (clerkRole && clerkRole !== currentUser.role) {
-            await auditUserRoleChange(clerk_id, currentUser.role, clerkRole, 'clerk_webhook')
+          if (currentUser.role !== roleToSync) {
+            await auditUserRoleChange(clerk_id, currentUser.role, roleToSync, 'clerk_webhook')
           }
           console.info(
             `[Clerk Webhook] user.updated: Updated user by Clerk ID ${clerk_id} (role: ${currentUser.role} -> ${roleToSync})`,
@@ -220,7 +204,7 @@ export default defineEventHandler(async (event) => {
           .limit(1)
 
         if (updatedByEmail) {
-          const roleToSync: UserRoleValue = (clerkRole as UserRoleValue) || updatedByEmail.role
+          const roleToSync: UserRoleValue = normalizeGlobalRole(clerkRole)
           await db
             .update(users)
             .set({
@@ -230,11 +214,11 @@ export default defineEventHandler(async (event) => {
             })
             .where(eq(users.email, email))
 
-          if (clerkRole && clerkRole !== updatedByEmail.role) {
+          if (updatedByEmail.role !== roleToSync) {
             await auditUserRoleChange(
               updatedByEmail.id,
               updatedByEmail.role,
-              clerkRole,
+              roleToSync,
               'clerk_webhook',
             )
           }
@@ -243,7 +227,7 @@ export default defineEventHandler(async (event) => {
           )
         } else {
           // Create missing user
-          const roleToSync: UserRoleValue = (clerkRole as UserRoleValue) || UserRole.Owner
+          const roleToSync: UserRoleValue = normalizeGlobalRole(clerkRole)
           await db.insert(users).values({
             id: clerk_id,
             email,
@@ -256,8 +240,6 @@ export default defineEventHandler(async (event) => {
           await auditUserSynced(clerk_id, email, 'created', { role: roleToSync })
         }
       }
-
-      await activatePendingBookingMemberships(email, clerk_id)
     } catch (error) {
       console.error(`[Clerk Webhook] user.updated: Error updating user ${email}`, error)
       // Don't throw error, continue processing

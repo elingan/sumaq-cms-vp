@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { eq, and } from 'drizzle-orm'
-import { sites, siteUsers } from '#server/db/schema'
+import { eq } from 'drizzle-orm'
+import { sites } from '#server/db/schema'
 import { validateRepositoryAccess } from '#server/utils/github'
 import { getClerkUserWithData } from '#server/utils/auth'
 
@@ -26,31 +26,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Missing site id' })
   }
 
-  // Require owner+ role
-  if (user.role === 'editor') {
+  if (user.role !== 'admin') {
     throw createError({ statusCode: 403, message: 'Forbidden' })
   }
 
   const db = useDrizzle()
-
-  // Verify access
-  if (user.role !== 'admin') {
-    const [membership] = await db
-      .select()
-      .from(siteUsers)
-      .where(
-        and(
-          eq(siteUsers.siteId, id),
-          eq(siteUsers.userId, user.userId),
-          eq(siteUsers.role, 'owner'),
-        ),
-      )
-      .limit(1)
-
-    if (!membership) {
-      throw createError({ statusCode: 403, message: 'Forbidden' })
-    }
-  }
 
   const body = await readBody(event)
   const result = PatchSiteSchema.safeParse(body)

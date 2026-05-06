@@ -55,7 +55,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Bookings must be between 08:00 and 20:00' })
   }
 
-  const isAdmin = session.user.role === 'admin' || session.user.role === 'owner'
+  const isAdmin = session.user.role === 'admin'
 
   if (data.isRecurring && !isAdmin) {
     throw createError({

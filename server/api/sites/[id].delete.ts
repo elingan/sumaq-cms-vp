@@ -1,5 +1,5 @@
-import { eq, and } from 'drizzle-orm'
-import { sites, siteUsers } from '#server/db/schema'
+import { eq } from 'drizzle-orm'
+import { sites } from '#server/db/schema'
 import { getClerkUserWithData } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
@@ -10,30 +10,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Missing site id' })
   }
 
-  if (user.role === 'editor') {
+  if (user.role !== 'admin') {
     throw createError({ statusCode: 403, message: 'Forbidden' })
   }
 
   const db = useDrizzle()
-
-  // Verify owner access for non-admins
-  if (user.role !== 'admin') {
-    const [membership] = await db
-      .select()
-      .from(siteUsers)
-      .where(
-        and(
-          eq(siteUsers.siteId, id),
-          eq(siteUsers.userId, user.userId),
-          eq(siteUsers.role, 'owner'),
-        ),
-      )
-      .limit(1)
-
-    if (!membership) {
-      throw createError({ statusCode: 403, message: 'Forbidden' })
-    }
-  }
 
   // Soft delete — set status to archived
   const [archived] = await db

@@ -85,7 +85,8 @@
     "noRooms": "No rooms",
     "multipleRooms": "{count} rooms",
     "appointmentBooking": "Appoiment Booking",
-    "bookingCalendar": "Booking Calendar"
+    "bookingCalendar": "Booking Calendar",
+    "sites": "Sites"
   },
   "appointments": {
     "pageTitle": "Appointments",
