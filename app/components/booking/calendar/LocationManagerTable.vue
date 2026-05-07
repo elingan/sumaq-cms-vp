@@ -14,11 +14,15 @@
 
     <div class="overflow-x-auto">
       <UTable
-        :data="pagedLocations"
-        :columns="locationColumns"
+        :data="tableRows"
+        :columns="tableColumns"
         :loading="loading"
         :empty="t('bookingCalendar.noLocations')"
-        :expanded-options="{ getRowCanExpand: () => true }"
+        :get-sub-rows="(row) => (row.kind === 'location' ? row.children : [])"
+        :expanded-options="{
+          getRowCanExpand: (row) =>
+            row.original.kind === 'location' ? row.original.children.length > 0 : false,
+        }"
         :ui="{ th: 'whitespace-nowrap' }"
       >
         <template #loading>
@@ -30,125 +34,70 @@
           </div>
         </template>
 
-        <template #expander-cell="{ row }">
-          <UTooltip :text="row.getIsExpanded() ? t('actions.collapse') : t('actions.expand')">
+        <template #locationName-cell="{ row }">
+          <div
+            class="flex items-center gap-2 min-w-0"
+            :style="{
+              paddingLeft: row.original.kind === 'location' ? `${row.depth}rem` : undefined,
+            }"
+          >
             <UButton
               size="xs"
               color="neutral"
-              variant="ghost"
-              :icon="row.getIsExpanded() ? 'i-lucide-chevron-down' : 'i-lucide-chevron-right'"
+              variant="outline"
+              :icon="row.getIsExpanded() ? 'i-lucide-minus' : 'i-lucide-plus'"
+              :disabled="!row.getCanExpand()"
+              :class="row.getCanExpand() ? 'p-0 rounded-sm' : 'invisible p-0 rounded-sm'"
+              :ui="{ leadingIcon: 'size-4' }"
               @click.stop="row.toggleExpanded()"
             />
-          </UTooltip>
-        </template>
-
-        <template #name-cell="{ row }">
-          <div class="flex items-center gap-2 min-w-0">
-            <UIcon name="i-lucide-map-pin" class="text-primary size-4 shrink-0" />
+            <UIcon
+              name="i-lucide-map-pin"
+              class="text-primary size-4 shrink-0"
+              :class="row.original.kind === 'location' ? '' : 'invisible'"
+            />
             <span class="text-sm font-medium text-foreground truncate">
-              {{ row.original.name }}
+              {{ row.original.kind === 'location' ? row.original.locationName : '' }}
             </span>
           </div>
         </template>
 
         <template #address-cell="{ row }">
           <span class="text-sm text-muted truncate">
-            {{ row.original.address || '—' }}
+            {{ row.original.kind === 'location' ? row.original.address || '—' : '—' }}
           </span>
+        </template>
+
+        <template #roomName-cell="{ row }">
+          <div
+            class="flex items-center gap-2 min-w-0"
+            :style="{ paddingLeft: row.original.kind === 'room' ? `${row.depth}rem` : undefined }"
+          >
+            <UIcon
+              name="i-lucide-door-open"
+              class="text-muted size-3.5 shrink-0"
+              :class="row.original.kind === 'room' ? '' : 'invisible'"
+            />
+            <span class="text-sm text-foreground truncate">
+              {{
+                row.original.kind === 'location'
+                  ? roomsCountLabel(row.original.children.length)
+                  : row.original.roomName
+              }}
+            </span>
+          </div>
         </template>
 
         <template #actions-cell="{ row }">
           <div class="flex justify-end gap-1">
-            <UTooltip :text="`${t('actions.edit')}: ${row.original.name}`">
+            <UDropdownMenu :items="actionItems(row.original)">
               <UButton
                 size="xs"
                 color="neutral"
                 variant="ghost"
-                icon="i-lucide-pencil"
-                @click="handleEditLocation(row.original)"
+                icon="i-lucide-ellipsis-vertical"
               />
-            </UTooltip>
-            <UTooltip :text="`${t('actions.delete')}: ${row.original.name}`">
-              <UButton
-                size="xs"
-                color="error"
-                variant="ghost"
-                icon="i-lucide-trash-2"
-                @click="requestDeleteLocation(row.original)"
-              />
-            </UTooltip>
-          </div>
-        </template>
-
-        <template #expanded="{ row }">
-          <div class="space-y-3 bg-accented/20">
-            <div
-              v-if="row.original.rooms.length === 0"
-              class="flex items-center justify-between gap-3"
-            >
-              <p class="text-sm text-muted italic">
-                {{ t('bookingCalendar.noRoomsRegistered') }}
-              </p>
-              <UButton
-                size="xs"
-                color="primary"
-                variant="soft"
-                icon="i-lucide-plus"
-                :label="t('bookingCalendar.newRoomButton')"
-                @click="handleCreateRoom(row.original.id)"
-              />
-            </div>
-
-            <div v-else class="overflow-x-auto">
-              <UTable
-                :data="row.original.rooms"
-                :columns="roomColumns"
-                :empty="t('bookingCalendar.noRoomsRegistered')"
-                :ui="{ thead: 'hidden', separator: 'hidden' }"
-              >
-                <template #name-cell="{ row: roomRow }">
-                  <div class="flex items-center gap-2 min-w-0">
-                    <UIcon name="i-lucide-door-open" class="size-3.5 text-muted shrink-0" />
-                    <span class="text-sm text-foreground truncate">
-                      {{ roomRow.original.name }}
-                    </span>
-                  </div>
-                </template>
-
-                <template #actions-cell="{ row: roomRow }">
-                  <div class="flex justify-end gap-1">
-                    <UTooltip :text="`${t('actions.edit')}: ${roomRow.original.name}`">
-                      <UButton
-                        size="xs"
-                        color="neutral"
-                        variant="ghost"
-                        icon="i-lucide-pencil"
-                        @click="handleEditRoom(row.original.id, roomRow.original)"
-                      />
-                    </UTooltip>
-                    <UTooltip :text="`${t('actions.delete')}: ${roomRow.original.name}`">
-                      <UButton
-                        size="xs"
-                        color="error"
-                        variant="ghost"
-                        icon="i-lucide-trash-2"
-                        @click="requestDeleteRoom(row.original.id, roomRow.original)"
-                      />
-                    </UTooltip>
-                  </div>
-                </template>
-              </UTable>
-              <div class="flex items-center justify-between gap-3 p-4 border-t border-accented">
-                <UButton
-                  size="xs"
-                  color="primary"
-                  variant="soft"
-                  icon="i-lucide-plus"
-                  :label="t('bookingCalendar.newRoomButton')"
-                  @click="handleCreateRoom(row.original.id)"
-                />
-              </div>
-            </div>
+            </UDropdownMenu>
           </div>
         </template>
       </UTable>
@@ -252,6 +201,28 @@ interface Location {
   rooms: Room[]
 }
 
+type LocationRow = {
+  kind: 'location'
+  id: string
+  locationName: string
+  roomName: string
+  address: string | null
+  location: Location
+  children: RoomRow[]
+}
+
+type RoomRow = {
+  kind: 'room'
+  id: string
+  locationName: string
+  roomName: string
+  address: null
+  locationId: string
+  room: Room
+}
+
+type TableRow = LocationRow | RoomRow
+
 type EditRoomPayload = {
   locationId: string
   room: Room
@@ -311,6 +282,26 @@ const pagedLocations = computed(() => {
   return filteredLocations.value.slice(start, start + pageSize)
 })
 
+const tableRows = computed<TableRow[]>(() => {
+  return pagedLocations.value.map((location) => ({
+    kind: 'location',
+    id: location.id,
+    locationName: location.name,
+    roomName: '',
+    address: location.address,
+    location,
+    children: location.rooms.map((room) => ({
+      kind: 'room',
+      id: `${location.id}:${room.id}`,
+      locationName: '',
+      roomName: room.name,
+      address: null,
+      locationId: location.id,
+      room,
+    })),
+  }))
+})
+
 watch(
   () => search.value,
   () => {
@@ -336,17 +327,18 @@ const filteredCountLabel = computed(() => {
   })
 })
 
-const locationColumns = computed<TableColumn<Location>[]>(() => [
-  { id: 'expander', header: '', meta: { class: { th: 'w-8', td: 'w-8' } } },
-  { accessorKey: 'name', header: t('bookingCalendar.nameLabel') },
+const tableColumns = computed<TableColumn<TableRow>[]>(() => [
+  { accessorKey: 'locationName', header: t('bookingCalendar.nameLabel') },
+  { accessorKey: 'roomName', header: t('bookingCalendar.roomNameLabel') },
   { accessorKey: 'address', header: t('bookingCalendar.addressLabel') },
   { id: 'actions', header: '', meta: { class: { th: 'w-20', td: 'w-20' } } },
 ])
 
-const roomColumns = computed<TableColumn<Room>[]>(() => [
-  { accessorKey: 'name', header: '' },
-  { id: 'actions', header: '', meta: { class: { th: 'w-20', td: 'w-20' } } },
-])
+function roomsCountLabel(count: number) {
+  if (count === 0) return t('dashboard.noRooms')
+  if (count === 1) return t('dashboard.oneRoom')
+  return t('dashboard.multipleRooms', { count })
+}
 
 function assertPermission(allowed: boolean) {
   if (allowed) return true
@@ -390,6 +382,51 @@ function handleCreateRoom(locationId: string) {
 function handleEditRoom(locationId: string, room: Room) {
   if (!assertPermission(canManageRooms.value)) return
   emit('edit-room', { locationId, room })
+}
+
+function actionItems(row: TableRow) {
+  if (row.kind === 'location') {
+    return [
+      [
+        {
+          label: t('actions.edit'),
+          icon: 'i-lucide-pencil',
+          onSelect: () => handleEditLocation(row.location),
+        },
+        {
+          label: t('bookingCalendar.newRoomButton'),
+          icon: 'i-lucide-plus',
+          onSelect: () => handleCreateRoom(row.location.id),
+        },
+      ],
+      [
+        {
+          label: t('actions.delete'),
+          icon: 'i-lucide-trash-2',
+          color: 'error' as const,
+          onSelect: () => requestDeleteLocation(row.location),
+        },
+      ],
+    ]
+  }
+
+  return [
+    [
+      {
+        label: t('actions.edit'),
+        icon: 'i-lucide-pencil',
+        onSelect: () => handleEditRoom(row.locationId, row.room),
+      },
+    ],
+    [
+      {
+        label: t('actions.delete'),
+        icon: 'i-lucide-trash-2',
+        color: 'error' as const,
+        onSelect: () => requestDeleteRoom(row.locationId, row.room),
+      },
+    ],
+  ]
 }
 
 const deleteLocationModalOpen = ref(false)

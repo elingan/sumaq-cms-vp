@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick, ref } from 'vue'
+import type { VNode } from 'vue'
 
 import LocationManagerTable from '../../app/components/booking/calendar/LocationManagerTable.vue'
 import { __role, __toastAdd } from '../mocks/imports'
@@ -8,6 +9,11 @@ import { __role, __toastAdd } from '../mocks/imports'
 const fetchMock = vi.hoisted(() => vi.fn())
 
 vi.mock('ofetch', () => ({ $fetch: fetchMock }))
+
+type MenuItemLike = {
+  label?: unknown
+  onSelect?: unknown
+}
 
 const UIconStub = defineComponent({
   name: 'UIcon',
@@ -118,6 +124,59 @@ const UModalStub = defineComponent({
   },
 })
 
+const UDropdownMenuStub = defineComponent({
+  name: 'UDropdownMenu',
+  props: {
+    items: { type: Array, required: false, default: () => [] },
+  },
+  setup(props, { slots }) {
+    const open = ref(false)
+
+    function flatten(items: unknown): MenuItemLike[] {
+      if (!Array.isArray(items)) return []
+      return items.flatMap((item) => {
+        if (Array.isArray(item)) return flatten(item)
+        if (item && typeof item === 'object' && 'label' in item) {
+          const obj = item as Record<string, unknown>
+          return [{ label: obj.label, onSelect: obj.onSelect }]
+        }
+        return []
+      })
+    }
+
+    return () => {
+      const menuItems = open.value
+        ? h(
+            'div',
+            { 'data-dropdown-open': 'true' },
+            flatten(props.items).map((item) =>
+              (() => {
+                const label = typeof item.label === 'string' ? item.label : ''
+                const attrs: Record<string, unknown> = {}
+                attrs['data-menu-item'] = label
+                attrs['onClick'] = (e: Event) => {
+                  e.stopPropagation()
+                  if (typeof item.onSelect === 'function') {
+                    ;(item.onSelect as (e: Event) => void)(e)
+                  }
+                  open.value = false
+                }
+                return h('button', attrs, label)
+              })(),
+            ),
+          )
+        : null
+
+      const rootAttrs: Record<string, unknown> = {}
+      rootAttrs['data-dropdown'] = 'true'
+      rootAttrs['onClick'] = () => {
+        open.value = !open.value
+      }
+      return h('div', rootAttrs, [slots.default?.({ open: open.value }), menuItems])
+    }
+  },
+})
+
 const UTableStub = defineComponent({
   name: 'UTable',
   props: {
@@ -136,15 +195,28 @@ const UTableStub = defineComponent({
       return JSON.stringify(item)
     }
 
-    function makeRow(item: unknown) {
+    function getChildren(item: unknown) {
+      if (!item || typeof item !== 'object') return []
+      if ('children' in item) {
+        const children = (item as { children?: unknown }).children
+        return Array.isArray(children) ? children : []
+      }
+      return []
+    }
+
+    function makeRow(item: unknown, depth: number) {
       const id = rowId(item)
+      const children = getChildren(item)
       return {
         id,
         original: item,
+        depth,
+        getCanExpand: () => children.length > 0,
         getIsExpanded: () => Boolean(expanded.value[id]),
         toggleExpanded: () => {
           expanded.value = { ...expanded.value, [id]: !expanded.value[id] }
         },
+        getSubRows: () => children,
       }
     }
 
@@ -174,8 +246,8 @@ const UTableStub = defineComponent({
         return h('div', attrs, slots.empty?.() ?? props.empty ?? '')
       }
 
-      const rows = props.data.flatMap((item) => {
-        const row = makeRow(item)
+      function renderRow(item: unknown, depth: number): VNode[] {
+        const row = makeRow(item, depth)
         const cells = (props.columns as unknown[]).map((col) => {
           const id = colId(col)
           const slot = id ? slots[`${id}-cell`] : undefined
@@ -185,22 +257,14 @@ const UTableStub = defineComponent({
 
         const baseRowAttrs: Record<string, unknown> = {}
         baseRowAttrs['data-row'] = row.id
+        baseRowAttrs['data-depth'] = String(depth)
         const baseRow = h('tr', baseRowAttrs, cells)
-        const expandedRow = row.getIsExpanded()
-          ? (() => {
-              const expandedAttrs: Record<string, unknown> = {}
-              expandedAttrs['data-expanded-for'] = row.id
-              const cell = h(
-                'td',
-                { colspan: (props.columns as unknown[]).length },
-                slots.expanded?.({ row }),
-              )
-              return h('tr', expandedAttrs, [cell])
-            })()
-          : null
+        const children = row.getIsExpanded() ? row.getSubRows() : []
+        const childRows = children.flatMap((child) => renderRow(child, depth + 1))
+        return [baseRow, ...childRows]
+      }
 
-        return expandedRow ? [baseRow, expandedRow] : [baseRow]
-      })
+      const rows = (props.data as unknown[]).flatMap((item) => renderRow(item, 0))
 
       const tableAttrs: Record<string, unknown> = {}
       tableAttrs['data-table'] = 'true'
@@ -236,6 +300,7 @@ function mountWithModel(locations: TestLocation[], loading = false) {
         UIcon: UIconStub,
         UTooltip: UTooltipStub,
         UButton: UButtonStub,
+        UDropdownMenu: UDropdownMenuStub,
         UInput: UInputStub,
         UPagination: UPaginationStub,
         UModal: UModalStub,
@@ -257,7 +322,7 @@ describe('LocationManagerTable', () => {
     expect(wrapper.text()).toContain('Sede Central')
     expect(wrapper.text()).toContain('Calle 1')
 
-    await wrapper.find('button[data-icon="i-lucide-chevron-right"]').trigger('click')
+    await wrapper.find('button[data-icon="i-lucide-plus"]').trigger('click')
     await nextTick()
 
     expect(wrapper.text()).toContain('Sala A')
@@ -268,16 +333,19 @@ describe('LocationManagerTable', () => {
       { id: 'l1', name: 'Sede Central', address: 'Calle 1', rooms: [{ id: 'r1', name: 'Sala A' }] },
     ])
 
-    await wrapper.find('button[data-icon="i-lucide-pencil"]').trigger('click')
+    await wrapper.find('[data-dropdown="true"]').trigger('click')
+    await wrapper.find('button[data-menu-item="actions.edit"]').trigger('click')
     expect(wrapper.emitted('edit-location')?.[0]?.[0]).toMatchObject({ id: 'l1' })
 
-    await wrapper.find('button[data-icon="i-lucide-chevron-right"]').trigger('click')
-    await nextTick()
-
-    await wrapper.find('button[data-label="bookingCalendar.newRoomButton"]').trigger('click')
+    await wrapper.find('[data-dropdown="true"]').trigger('click')
+    await wrapper.find('button[data-menu-item="bookingCalendar.newRoomButton"]').trigger('click')
     expect(wrapper.emitted('create-room')?.[0]?.[0]).toBe('l1')
 
-    await wrapper.findAll('button[data-icon="i-lucide-pencil"]')[1]!.trigger('click')
+    await wrapper.find('button[data-icon="i-lucide-plus"]').trigger('click')
+    await nextTick()
+
+    await wrapper.findAll('[data-dropdown="true"]')[1]!.trigger('click')
+    await wrapper.find('button[data-menu-item="actions.edit"]').trigger('click')
     expect(wrapper.emitted('edit-room')?.[0]?.[0]).toMatchObject({
       locationId: 'l1',
       room: { id: 'r1' },
@@ -292,7 +360,8 @@ describe('LocationManagerTable', () => {
       { id: 'l2', name: 'Sede Norte', address: null, rooms: [] },
     ])
 
-    await wrapper.find('button[data-icon="i-lucide-trash-2"]').trigger('click')
+    await wrapper.find('[data-dropdown="true"]').trigger('click')
+    await wrapper.find('button[data-menu-item="actions.delete"]').trigger('click')
     expect(wrapper.find('[data-modal="bookingCalendar.deleteLocationTitle"]').exists()).toBe(true)
 
     await wrapper.find('button[data-label="actions.delete"]').trigger('click')
@@ -311,10 +380,11 @@ describe('LocationManagerTable', () => {
       { id: 'l1', name: 'Sede Central', address: 'Calle 1', rooms: [{ id: 'r1', name: 'Sala A' }] },
     ])
 
-    await wrapper.find('button[data-icon="i-lucide-chevron-right"]').trigger('click')
+    await wrapper.find('button[data-icon="i-lucide-plus"]').trigger('click')
     await nextTick()
 
-    await wrapper.findAll('button[data-icon="i-lucide-trash-2"]')[1]!.trigger('click')
+    await wrapper.findAll('[data-dropdown="true"]')[1]!.trigger('click')
+    await wrapper.find('button[data-menu-item="actions.delete"]').trigger('click')
     expect(wrapper.find('[data-modal="bookingCalendar.deleteRoomTitle"]').exists()).toBe(true)
 
     await wrapper.find('button[data-label="actions.delete"]').trigger('click')
@@ -331,7 +401,8 @@ describe('LocationManagerTable', () => {
       { id: 'l1', name: 'Sede Central', address: null, rooms: [] },
     ])
 
-    await wrapper.find('button[data-icon="i-lucide-pencil"]').trigger('click')
+    await wrapper.find('[data-dropdown="true"]').trigger('click')
+    await wrapper.find('button[data-menu-item="actions.edit"]').trigger('click')
     expect(wrapper.emitted('edit-location')).toBeUndefined()
     expect(__toastAdd).toHaveBeenCalled()
   })
