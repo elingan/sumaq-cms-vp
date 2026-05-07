@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { rooms } from '#server/db/schema'
+import { locationRooms } from '#server/db/schema'
 import { getClerkUser } from '#server/utils/auth'
 import { requirePermission } from '#server/utils/permissions'
 import { createAuditLog } from '#server/utils/audit'
@@ -38,30 +38,35 @@ export default defineEventHandler(async (event) => {
     }
 
     const [room] = await db
-      .update(rooms)
+      .update(locationRooms)
       .set({ name: result.data.name, updatedAt: new Date() })
-      .where(and(eq(rooms.id, roomId), eq(rooms.locationId, locationId)))
+      .where(and(eq(locationRooms.id, roomId), eq(locationRooms.locationId, locationId)))
       .returning()
 
     if (!room) {
       throw createError({ statusCode: 404, message: 'Room not found' })
     }
 
-    await createAuditLog(userId, 'update', { table: 'rooms', id: roomId, locationId }, event)
+    await createAuditLog(
+      userId,
+      'update',
+      { table: 'location_rooms', id: roomId, locationId },
+      event,
+    )
 
     return room
   }
 
   const [deleted] = await db
-    .delete(rooms)
-    .where(and(eq(rooms.id, roomId), eq(rooms.locationId, locationId)))
-    .returning({ id: rooms.id })
+    .delete(locationRooms)
+    .where(and(eq(locationRooms.id, roomId), eq(locationRooms.locationId, locationId)))
+    .returning({ id: locationRooms.id })
 
   if (!deleted) {
     throw createError({ statusCode: 404, message: 'Room not found' })
   }
 
-  await createAuditLog(userId, 'delete', { table: 'rooms', id: roomId, locationId }, event)
+  await createAuditLog(userId, 'delete', { table: 'location_rooms', id: roomId, locationId }, event)
 
   return { success: true }
 })

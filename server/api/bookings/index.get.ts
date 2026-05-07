@@ -1,7 +1,7 @@
 import { and, eq, gte, inArray, lte } from 'drizzle-orm'
 import { endOfDay, parseISO, startOfDay } from 'date-fns'
 import { z } from 'zod'
-import { bookingExceptions, bookings, locations, rooms } from '#server/db/schema'
+import { bookingExceptions, bookings, locations, locationRooms } from '#server/db/schema'
 import { requireUserSession } from '#server/utils/auth'
 import { getResolvedBookingsForRange } from '#server/utils/bookings'
 
@@ -43,13 +43,13 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Location not found' })
   }
 
-  const locationRooms = await db
+  const roomsForLocation = await db
     .select()
-    .from(rooms)
-    .where(eq(rooms.locationId, locationId))
-    .orderBy(rooms.name)
+    .from(locationRooms)
+    .where(eq(locationRooms.locationId, locationId))
+    .orderBy(locationRooms.name)
 
-  const roomIds = locationRooms.map((room) => room.id)
+  const roomIds = roomsForLocation.map((room) => room.id)
 
   const resolvedBookings = await getResolvedBookingsForRange(db, {
     roomIds,
@@ -83,7 +83,7 @@ export default defineEventHandler(async (event) => {
 
   return {
     location,
-    rooms: locationRooms,
+    rooms: roomsForLocation,
     bookings: resolvedBookings,
     exceptions,
   }

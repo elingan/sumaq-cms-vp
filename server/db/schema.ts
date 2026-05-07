@@ -116,8 +116,8 @@ export const locations = sqliteTable(
   (table) => [index('idx_locations_name').on(table.name)],
 )
 
-export const rooms = sqliteTable(
-  'rooms',
+export const locationRooms = sqliteTable(
+  'location_rooms',
   {
     id: text('id')
       .primaryKey()
@@ -134,8 +134,8 @@ export const rooms = sqliteTable(
       .default(sql`(unixepoch())`),
   },
   (table) => [
-    index('idx_rooms_location_id').on(table.locationId),
-    index('idx_rooms_location_name').on(table.locationId, table.name),
+    index('idx_location_rooms_location_id').on(table.locationId),
+    index('idx_location_rooms_location_name').on(table.locationId, table.name),
   ],
 )
 
@@ -147,7 +147,7 @@ export const bookings = sqliteTable(
       .$defaultFn(() => crypto.randomUUID()),
     roomId: text('room_id')
       .notNull()
-      .references(() => rooms.id, { onDelete: 'cascade' }),
+      .references(() => locationRooms.id, { onDelete: 'cascade' }),
     userId: text('user_id').notNull(),
     startTime: integer('start_time', { mode: 'timestamp' }).notNull(),
     endTime: integer('end_time', { mode: 'timestamp' }).notNull(),
@@ -165,6 +165,49 @@ export const bookings = sqliteTable(
     index('idx_bookings_room_time').on(table.roomId, table.startTime, table.endTime),
     index('idx_bookings_user_created_at').on(table.userId, table.createdAt),
     index('idx_bookings_recurring_day').on(table.isRecurring, table.dayOfWeek),
+  ],
+)
+
+export const teams = sqliteTable(
+  'teams',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: text('name').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [index('idx_teams_name').on(table.name)],
+)
+
+export const teamMembers = sqliteTable(
+  'team_members',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    teamId: text('team_id')
+      .notNull()
+      .references(() => teams.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [
+    index('idx_team_members_team_id').on(table.teamId),
+    index('idx_team_members_user_id').on(table.userId),
+    uniqueIndex('uniq_team_members_team_user').on(table.teamId, table.userId),
   ],
 )
 
@@ -294,6 +337,7 @@ export const auditLogs = sqliteTable('audit_logs', {
 
 export const usersRelations = relations(users, ({ many }) => ({
   siteUsers: many(siteUsers),
+  teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),
   auditLogs: many(auditLogs),
 }))
@@ -306,17 +350,26 @@ export const sitesRelations = relations(sites, ({ many }) => ({
 }))
 
 export const locationsRelations = relations(locations, ({ many }) => ({
-  rooms: many(rooms),
+  rooms: many(locationRooms),
 }))
 
-export const roomsRelations = relations(rooms, ({ one, many }) => ({
-  location: one(locations, { fields: [rooms.locationId], references: [locations.id] }),
+export const locationRoomsRelations = relations(locationRooms, ({ one, many }) => ({
+  location: one(locations, { fields: [locationRooms.locationId], references: [locations.id] }),
   bookings: many(bookings),
 }))
 
 export const bookingsRelations = relations(bookings, ({ one, many }) => ({
-  room: one(rooms, { fields: [bookings.roomId], references: [rooms.id] }),
+  room: one(locationRooms, { fields: [bookings.roomId], references: [locationRooms.id] }),
   exceptions: many(bookingExceptions),
+}))
+
+export const teamsRelations = relations(teams, ({ many }) => ({
+  members: many(teamMembers),
+}))
+
+export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
+  team: one(teams, { fields: [teamMembers.teamId], references: [teams.id] }),
+  user: one(users, { fields: [teamMembers.userId], references: [users.id] }),
 }))
 
 export const bookingExceptionsRelations = relations(bookingExceptions, ({ one }) => ({

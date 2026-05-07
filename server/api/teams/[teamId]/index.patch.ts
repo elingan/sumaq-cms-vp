@@ -1,25 +1,25 @@
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { locationRooms } from '#server/db/schema'
+import { teams } from '#server/db/schema'
+import { createAuditLog } from '#server/utils/audit'
 import { getClerkUser } from '#server/utils/auth'
 import { requirePermission } from '#server/utils/permissions'
-import { createAuditLog } from '#server/utils/audit'
 
-const UpdateRoomSchema = z.object({
-  name: z.string().min(1),
+const UpdateTeamSchema = z.object({
+  name: z.string().min(1).max(255),
 })
 
 export default defineEventHandler(async (event) => {
   const userId = await getClerkUser(event)
-  await requirePermission(userId, 'admin', 'manage_rooms')
+  await requirePermission(userId, 'admin', 'manage_teams')
 
-  const { roomId } = getRouterParams(event)
-  if (!roomId) {
+  const { teamId } = getRouterParams(event)
+  if (!teamId) {
     throw createError({ statusCode: 400, message: 'Missing route params' })
   }
 
   const body = await readBody(event)
-  const result = UpdateRoomSchema.safeParse(body)
+  const result = UpdateTeamSchema.safeParse(body)
 
   if (!result.success) {
     throw createError({
@@ -29,17 +29,17 @@ export default defineEventHandler(async (event) => {
   }
 
   const db = useDrizzle()
-  const [room] = await db
-    .update(locationRooms)
+  const [team] = await db
+    .update(teams)
     .set({ name: result.data.name, updatedAt: new Date() })
-    .where(eq(locationRooms.id, roomId))
+    .where(eq(teams.id, teamId))
     .returning()
 
-  if (!room) {
-    throw createError({ statusCode: 404, message: 'Room not found' })
+  if (!team) {
+    throw createError({ statusCode: 404, message: 'Team not found' })
   }
 
-  await createAuditLog(userId, 'update', { table: 'location_rooms', id: roomId }, event)
+  await createAuditLog(userId, 'update', { table: 'teams', id: teamId }, event)
 
-  return room
+  return team
 })

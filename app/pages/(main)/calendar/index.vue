@@ -34,6 +34,18 @@
               @edit-room="({ locationId, room }) => openEditRoom(locationId, room)"
             />
           </UCard>
+
+          <UCard v-if="canManageTeams" :ui="{ body: 'p-0 sm:p-0' }">
+            <template #header>
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-medium">
+                  {{ $t('bookingCalendar.teamTitle') }}
+                </h3>
+              </div>
+            </template>
+
+            <BookingCalendarTeamManagerTable v-model:teams="teamsModel" :loading="teamsPending" />
+          </UCard>
         </div>
       </UPageBody>
     </UPage>
@@ -68,7 +80,7 @@ interface Location {
 
 useI18n()
 const toast = useToast()
-const { canManageLocations, canManageRooms } = useRole()
+const { canManageLocations, canManageRooms, canManageTeams } = useRole()
 
 const {
   data: locations,
@@ -82,6 +94,54 @@ const locationsModel = computed<Location[]>({
   },
   set(value) {
     locations.value = value
+  },
+})
+
+interface TeamUser {
+  id: string
+  email: string
+  name: string | null
+  role: string | null
+}
+
+interface TeamMember {
+  id: string
+  userId: string
+  user: TeamUser
+}
+
+interface Team {
+  id: string
+  name: string
+  members: TeamMember[]
+}
+
+const {
+  data: teams,
+  pending: teamsPending,
+  refresh: refreshTeams,
+} = useFetch<Team[]>('/api/teams', {
+  query: { add: 'members' },
+  immediate: false,
+  default: () => [],
+})
+
+watch(
+  () => canManageTeams.value,
+  (allowed) => {
+    if (allowed) {
+      void refreshTeams()
+    }
+  },
+  { immediate: true },
+)
+
+const teamsModel = computed<Team[]>({
+  get() {
+    return teams.value ?? []
+  },
+  set(value) {
+    teams.value = value
   },
 })
 

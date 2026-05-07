@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm'
-import { locations, rooms } from '#server/db/schema'
+import { locations, locationRooms } from '#server/db/schema'
 import { requireUserSession } from '#server/utils/auth'
 
 export default defineEventHandler(async (event) => {
@@ -17,13 +17,13 @@ export default defineEventHandler(async (event) => {
         createdAt: locations.createdAt,
         updatedAt: locations.updatedAt,
         room: {
-          id: rooms.id,
-          name: rooms.name,
+          id: locationRooms.id,
+          name: locationRooms.name,
         },
       })
       .from(locations)
-      .leftJoin(rooms, eq(rooms.locationId, locations.id))
-      .orderBy(locations.name, rooms.name)
+      .leftJoin(locationRooms, eq(locationRooms.locationId, locations.id))
+      .orderBy(locations.name, locationRooms.name)
 
     const map = new Map<
       string,

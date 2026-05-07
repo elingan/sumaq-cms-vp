@@ -1,5 +1,5 @@
 import { and, eq } from 'drizzle-orm'
-import { locations, rooms } from '#server/db/schema'
+import { locations, locationRooms } from '#server/db/schema'
 import { createAuditLog } from '#server/utils/audit'
 import { getClerkUser } from '#server/utils/auth'
 import { requirePermission } from '#server/utils/permissions'
@@ -53,13 +53,13 @@ export default defineEventHandler(async (event) => {
     for (const roomName of seedLocation.rooms) {
       const [existingRoom] = await db
         .select()
-        .from(rooms)
-        .where(and(eq(rooms.locationId, location!.id), eq(rooms.name, roomName)))
+        .from(locationRooms)
+        .where(and(eq(locationRooms.locationId, location!.id), eq(locationRooms.name, roomName)))
         .limit(1)
 
       if (!existingRoom) {
         await db
-          .insert(rooms)
+          .insert(locationRooms)
           .values({
             locationId: location!.id,
             name: roomName,

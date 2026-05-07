@@ -26,6 +26,7 @@ export function useRole() {
   const canCreateBookings = computed(() => isAdmin.value)
   const canManageLocations = computed(() => isAdmin.value)
   const canManageRooms = computed(() => isAdmin.value)
+  const canManageTeams = computed(() => isAdmin.value)
   const canManageMembers = computed(() => isAdmin.value)
   const canSyncUsers = computed(() => isAdmin.value)
 
@@ -40,6 +41,7 @@ export function useRole() {
     canCreateBookings,
     canManageLocations,
     canManageRooms,
+    canManageTeams,
     canManageMembers,
     canSyncUsers,
   }

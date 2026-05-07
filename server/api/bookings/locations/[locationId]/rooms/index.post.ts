@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { rooms } from '#server/db/schema'
+import { locationRooms } from '#server/db/schema'
 import { getClerkUser } from '#server/utils/auth'
 import { requirePermission } from '#server/utils/permissions'
 import { createAuditLog } from '#server/utils/audit'
@@ -28,9 +28,17 @@ export default defineEventHandler(async (event) => {
   }
 
   const db = useDrizzle()
-  const [room] = await db.insert(rooms).values({ locationId, name: result.data.name }).returning()
+  const [room] = await db
+    .insert(locationRooms)
+    .values({ locationId, name: result.data.name })
+    .returning()
 
-  await createAuditLog(userId, 'create', { table: 'rooms', id: room?.id, locationId }, event)
+  await createAuditLog(
+    userId,
+    'create',
+    { table: 'location_rooms', id: room?.id, locationId },
+    event,
+  )
 
   return room
 })

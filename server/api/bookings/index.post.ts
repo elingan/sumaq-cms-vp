@@ -1,7 +1,7 @@
 import { differenceInMinutes, getDay, parseISO } from 'date-fns'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { bookings, rooms } from '#server/db/schema'
+import { bookings, locationRooms } from '#server/db/schema'
 import { createAuditLog } from '#server/utils/audit'
 import { requireUserSession } from '#server/utils/auth'
 import { checkAvailability } from '#server/utils/bookings'
@@ -76,7 +76,11 @@ export default defineEventHandler(async (event) => {
 
   const db = useDrizzle()
 
-  const [room] = await db.select().from(rooms).where(eq(rooms.id, data.roomId)).limit(1)
+  const [room] = await db
+    .select()
+    .from(locationRooms)
+    .where(eq(locationRooms.id, data.roomId))
+    .limit(1)
 
   if (!room) {
     throw createError({ statusCode: 404, message: 'Room not found' })

@@ -13,6 +13,7 @@ export const __toastAdd = vi.fn<(entry: ToastEntry) => void>()
 export const __role = {
   canManageLocations: ref(true),
   canManageRooms: ref(true),
+  canManageTeams: ref(true),
 }
 
 export function useToast() {
@@ -47,4 +48,5 @@ export function __resetNuxtMocks() {
   __toastAdd.mockClear()
   __role.canManageLocations.value = true
   __role.canManageRooms.value = true
+  __role.canManageTeams.value = true
 }

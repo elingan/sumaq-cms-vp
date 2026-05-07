@@ -16,6 +16,7 @@ export interface PermissionContext {
   siteId?: string
   locationId?: string
   roomId?: string
+  teamId?: string
   appointmentId?: string
   userId?: string // Target user ID (for user management actions)
   // Additional context
@@ -168,6 +169,7 @@ async function evaluateAdminPermission(
     'manage_bookings',
     'manage_locations',
     'manage_rooms',
+    'manage_teams',
     'sync_users',
     'view_github_status',
   ]
