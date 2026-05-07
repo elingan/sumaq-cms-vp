@@ -18,11 +18,6 @@
         :columns="tableColumns"
         :loading="loading"
         :empty="t('bookingCalendar.noLocations')"
-        :get-sub-rows="(row) => (row.kind === 'location' ? row.children : [])"
-        :expanded-options="{
-          getRowCanExpand: (row) =>
-            row.original.kind === 'location' ? row.original.children.length > 0 : false,
-        }"
         :ui="{ th: 'whitespace-nowrap' }"
       >
         <template #loading>
@@ -35,21 +30,17 @@
         </template>
 
         <template #locationName-cell="{ row }">
-          <div
-            class="flex items-center gap-2 min-w-0"
-            :style="{
-              paddingLeft: row.original.kind === 'location' ? `${row.depth}rem` : undefined,
-            }"
-          >
+          <div class="flex items-center gap-2 min-w-0">
             <UButton
+              v-if="row.original.kind === 'location'"
               size="xs"
               color="neutral"
               variant="outline"
-              :icon="row.getIsExpanded() ? 'i-lucide-minus' : 'i-lucide-plus'"
-              :disabled="!row.getCanExpand()"
-              :class="row.getCanExpand() ? 'p-0 rounded-sm' : 'invisible p-0 rounded-sm'"
+              :icon="row.original.expanded ? 'i-lucide-minus' : 'i-lucide-plus'"
+              :disabled="!row.original.canExpand"
+              :class="row.original.canExpand ? 'rounded-sm' : 'invisible rounded-sm'"
               :ui="{ leadingIcon: 'size-4' }"
-              @click.stop="row.toggleExpanded()"
+              @click.stop="toggleLocationExpanded(row.original.location.id)"
             />
             <UIcon
               name="i-lucide-map-pin"
@@ -69,21 +60,21 @@
         </template>
 
         <template #roomName-cell="{ row }">
+          <p v-if="row.original.kind === 'location'">
+            {{ roomsCountLabel(row.original.roomsCount) }}
+          </p>
           <div
-            class="flex items-center gap-2 min-w-0"
-            :style="{ paddingLeft: row.original.kind === 'room' ? `${row.depth}rem` : undefined }"
+            v-else
+            class="flex items-center gap-2"
+            :style="{ paddingLeft: `${row.original.depth}rem` }"
           >
             <UIcon
               name="i-lucide-door-open"
-              class="text-muted size-3.5 shrink-0"
+              class="text-muted size-4 shrink-0"
               :class="row.original.kind === 'room' ? '' : 'invisible'"
             />
             <span class="text-sm text-foreground truncate">
-              {{
-                row.original.kind === 'location'
-                  ? roomsCountLabel(row.original.children.length)
-                  : row.original.roomName
-              }}
+              {{ row.original.roomName }}
             </span>
           </div>
         </template>
@@ -110,11 +101,6 @@
     <UModal
       v-model:open="deleteLocationModalOpen"
       :title="t('bookingCalendar.deleteLocationTitle')"
-      :description="
-        locationPendingDelete
-          ? t('bookingCalendar.deleteLocationConfirm', { name: locationPendingDelete.name })
-          : undefined
-      "
     >
       <template #body>
         <p class="text-sm text-default">
@@ -144,15 +130,7 @@
       </template>
     </UModal>
 
-    <UModal
-      v-model:open="deleteRoomModalOpen"
-      :title="t('bookingCalendar.deleteRoomTitle')"
-      :description="
-        roomPendingDelete
-          ? t('bookingCalendar.deleteRoomConfirm', { name: roomPendingDelete.room.name })
-          : undefined
-      "
-    >
+    <UModal v-model:open="deleteRoomModalOpen" :title="t('bookingCalendar.deleteRoomTitle')">
       <template #body>
         <p class="text-sm text-default">
           {{
@@ -208,7 +186,10 @@ type LocationRow = {
   roomName: string
   address: string | null
   location: Location
-  children: RoomRow[]
+  roomsCount: number
+  canExpand: boolean
+  expanded: boolean
+  depth: number
 }
 
 type RoomRow = {
@@ -219,6 +200,7 @@ type RoomRow = {
   address: null
   locationId: string
   room: Room
+  depth: number
 }
 
 type TableRow = LocationRow | RoomRow
@@ -283,23 +265,51 @@ const pagedLocations = computed(() => {
 })
 
 const tableRows = computed<TableRow[]>(() => {
-  return pagedLocations.value.map((location) => ({
-    kind: 'location',
-    id: location.id,
-    locationName: location.name,
-    roomName: '',
-    address: location.address,
-    location,
-    children: location.rooms.map((room) => ({
-      kind: 'room',
-      id: `${location.id}:${room.id}`,
-      locationName: '',
-      roomName: room.name,
-      address: null,
-      locationId: location.id,
-      room,
-    })),
-  }))
+  const expandedMap = expandedLocations.value
+  const rows: TableRow[] = []
+
+  for (const location of pagedLocations.value) {
+    const rooms = (location.rooms ?? []).filter(
+      (room) =>
+        !!room &&
+        typeof (room as any).id === 'string' &&
+        (room as any).id &&
+        typeof (room as any).name === 'string' &&
+        (room as any).name,
+    ) as Room[]
+
+    const expanded = !!expandedMap[location.id]
+
+    rows.push({
+      kind: 'location',
+      id: location.id,
+      locationName: location.name,
+      roomName: '',
+      address: location.address,
+      location,
+      roomsCount: rooms.length,
+      canExpand: rooms.length > 0,
+      expanded,
+      depth: 0,
+    })
+
+    if (expanded) {
+      for (const room of rooms) {
+        rows.push({
+          kind: 'room',
+          id: `${location.id}:${room.id}`,
+          locationName: '',
+          roomName: room.name,
+          address: null,
+          locationId: location.id,
+          room,
+          depth: 1,
+        })
+      }
+    }
+  }
+
+  return rows
 })
 
 watch(
@@ -327,10 +337,19 @@ const filteredCountLabel = computed(() => {
   })
 })
 
+const expandedLocations = ref<Record<string, boolean>>({})
+
+function toggleLocationExpanded(locationId: string) {
+  expandedLocations.value = {
+    ...expandedLocations.value,
+    [locationId]: !expandedLocations.value[locationId],
+  }
+}
+
 const tableColumns = computed<TableColumn<TableRow>[]>(() => [
   { accessorKey: 'locationName', header: t('bookingCalendar.nameLabel') },
-  { accessorKey: 'roomName', header: t('bookingCalendar.roomNameLabel') },
   { accessorKey: 'address', header: t('bookingCalendar.addressLabel') },
+  { accessorKey: 'roomName', header: t('bookingCalendar.roomNameLabel') },
   { id: 'actions', header: '', meta: { class: { th: 'w-20', td: 'w-20' } } },
 ])
 
@@ -389,14 +408,14 @@ function actionItems(row: TableRow) {
     return [
       [
         {
-          label: t('actions.edit'),
-          icon: 'i-lucide-pencil',
-          onSelect: () => handleEditLocation(row.location),
-        },
-        {
           label: t('bookingCalendar.newRoomButton'),
           icon: 'i-lucide-plus',
           onSelect: () => handleCreateRoom(row.location.id),
+        },
+        {
+          label: t('actions.edit'),
+          icon: 'i-lucide-pencil',
+          onSelect: () => handleEditLocation(row.location),
         },
       ],
       [

@@ -1,13 +1,6 @@
 <template>
   <div class="space-y-3">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-      <UButton
-        icon="i-lucide-plus"
-        color="primary"
-        :label="t('bookingCalendar.teamsNewButton')"
-        @click="openCreateTeam"
-      />
-
       <UInput
         v-if="showSearch"
         v-model="search"
@@ -27,11 +20,6 @@
         :columns="tableColumns"
         :loading="loading"
         :empty="t('bookingCalendar.teamsEmpty')"
-        :get-sub-rows="(row) => (row.kind === 'team' ? row.children : [])"
-        :expanded-options="{
-          getRowCanExpand: (row) =>
-            row.original.kind === 'team' && row.original.children.length > 0,
-        }"
         :ui="{ th: 'whitespace-nowrap' }"
       >
         <template #loading>
@@ -44,19 +32,17 @@
         </template>
 
         <template #teamName-cell="{ row }">
-          <div
-            class="flex items-center gap-2 min-w-0"
-            :style="{ paddingLeft: row.original.kind === 'team' ? `${row.depth}rem` : undefined }"
-          >
+          <div class="flex items-center gap-2 min-w-0">
             <UButton
+              v-if="row.original.kind === 'team'"
               size="xs"
               color="neutral"
               variant="outline"
-              :icon="row.getIsExpanded() ? 'i-lucide-minus' : 'i-lucide-plus'"
-              :disabled="!row.getCanExpand()"
-              :class="row.getCanExpand() ? 'p-0 rounded-sm' : 'invisible p-0 rounded-sm'"
+              :icon="row.original.expanded ? 'i-lucide-minus' : 'i-lucide-plus'"
+              :disabled="!row.original.canExpand"
+              :class="row.original.canExpand ? 'p-0 rounded-sm' : 'invisible p-0 rounded-sm'"
               :ui="{ leadingIcon: 'size-4' }"
-              @click.stop="row.toggleExpanded()"
+              @click.stop="toggleTeamExpanded(row.original.team.id)"
             />
             <UIcon
               name="i-lucide-users"
@@ -72,7 +58,9 @@
         <template #memberLabel-cell="{ row }">
           <div
             class="flex items-center gap-2 min-w-0"
-            :style="{ paddingLeft: row.original.kind === 'member' ? `${row.depth}rem` : undefined }"
+            :style="{
+              paddingLeft: row.original.kind === 'member' ? `${row.original.depth}rem` : undefined,
+            }"
           >
             <UIcon
               name="i-lucide-user-round"
@@ -82,7 +70,7 @@
             <span class="text-sm text-foreground truncate">
               {{
                 row.original.kind === 'team'
-                  ? membersCountLabel(row.original.children.length)
+                  ? membersCountLabel(row.original.membersCount)
                   : row.original.memberLabel
               }}
             </span>
@@ -306,7 +294,10 @@ type TeamRow = {
   teamName: string
   memberLabel: string
   team: Team
-  children: MemberRow[]
+  membersCount: number
+  canExpand: boolean
+  expanded: boolean
+  depth: number
 }
 
 type MemberRow = {
@@ -316,6 +307,7 @@ type MemberRow = {
   memberLabel: string
   teamId: string
   member: TeamMember
+  depth: number
 }
 
 type TableRow = TeamRow | MemberRow
@@ -377,23 +369,46 @@ const pagedTeams = computed(() => {
 })
 
 const tableRows = computed<TableRow[]>(() => {
-  return pagedTeams.value.map((team) => ({
-    kind: 'team',
-    id: team.id,
-    teamName: team.name,
-    memberLabel: '',
-    team,
-    children: team.members.map((member) => ({
-      kind: 'member',
-      id: `${team.id}:${member.id}`,
-      teamName: '',
-      memberLabel: member.user.name
-        ? `${member.user.name} (${member.user.email})`
-        : member.user.email,
-      teamId: team.id,
-      member,
-    })),
-  }))
+  const expandedMap = expandedTeams.value
+  const rows: TableRow[] = []
+
+  for (const team of pagedTeams.value) {
+    const members = (team.members ?? []).filter(
+      (member) => !!member && typeof (member as any).id === 'string' && (member as any).id,
+    ) as TeamMember[]
+
+    const expanded = !!expandedMap[team.id]
+
+    rows.push({
+      kind: 'team',
+      id: team.id,
+      teamName: team.name,
+      memberLabel: '',
+      team,
+      membersCount: members.length,
+      canExpand: members.length > 0,
+      expanded,
+      depth: 0,
+    })
+
+    if (expanded) {
+      for (const member of members) {
+        rows.push({
+          kind: 'member',
+          id: `${team.id}:${member.id}`,
+          teamName: '',
+          memberLabel: member.user.name
+            ? `${member.user.name} (${member.user.email})`
+            : member.user.email,
+          teamId: team.id,
+          member,
+          depth: 1,
+        })
+      }
+    }
+  }
+
+  return rows
 })
 
 watch(
@@ -418,6 +433,15 @@ const filteredCountLabel = computed(() => {
     total: teams.value.length,
   })
 })
+
+const expandedTeams = ref<Record<string, boolean>>({})
+
+function toggleTeamExpanded(teamId: string) {
+  expandedTeams.value = {
+    ...expandedTeams.value,
+    [teamId]: !expandedTeams.value[teamId],
+  }
+}
 
 const tableColumns = computed<TableColumn<TableRow>[]>(() => [
   { accessorKey: 'teamName', header: t('bookingCalendar.teamNameLabel') },
@@ -473,6 +497,8 @@ function openCreateTeam() {
   teamFormError.value = null
   teamFormModalOpen.value = true
 }
+
+defineExpose({ openCreateTeam })
 
 function openEditTeam(team: Team) {
   if (!assertPermission(canManageTeams.value)) return

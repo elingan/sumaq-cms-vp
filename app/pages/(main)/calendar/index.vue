@@ -41,10 +41,21 @@
                 <h3 class="text-lg font-medium">
                   {{ $t('bookingCalendar.teamTitle') }}
                 </h3>
+                <UButton
+                  icon="i-lucide-plus"
+                  :label="$t('bookingCalendar.teamsNewButton')"
+                  color="primary"
+                  :disabled="!canManageTeams"
+                  @click="openCreateTeam"
+                />
               </div>
             </template>
 
-            <BookingCalendarTeamManagerTable v-model:teams="teamsModel" :loading="teamsPending" />
+            <BookingCalendarTeamManagerTable
+              ref="teamManagerTableRef"
+              v-model:teams="teamsModel"
+              :loading="teamsPending"
+            />
           </UCard>
         </div>
       </UPageBody>
@@ -144,6 +155,12 @@ const teamsModel = computed<Team[]>({
     teams.value = value
   },
 })
+
+const teamManagerTableRef = ref<{ openCreateTeam: () => void } | null>(null)
+
+function openCreateTeam() {
+  teamManagerTableRef.value?.openCreateTeam()
+}
 
 // Location modal state
 const locationFormOpen = ref(false)
