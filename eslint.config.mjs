@@ -24,5 +24,6 @@ export default withNuxt({
     ],
     // Stylistic rules - disable conflicting indent rule
     '@stylistic/comma-dangle': 'off',
+    'vue/comma-dangle': 'off',
   },
 })
