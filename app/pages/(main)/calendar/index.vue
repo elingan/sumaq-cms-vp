@@ -9,42 +9,31 @@
       </UPageHeader>
 
       <UPageBody>
-        <div v-if="pending" class="flex justify-center py-12">
-          <UIcon name="i-lucide-loader-circle" class="size-6 animate-spin text-muted" />
-        </div>
+        <div class="space-y-8">
+          <UCard :ui="{ body: 'p-0 sm:p-0' }">
+            <template #header>
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-medium">
+                  {{ $t('bookingCalendar.locationManagerTitle') }}
+                </h3>
+                <UButton
+                  icon="i-lucide-plus"
+                  :label="$t('bookingCalendar.newLocationButton')"
+                  color="primary"
+                  :disabled="!canManageLocations"
+                  @click="openCreateLocation"
+                />
+              </div>
+            </template>
 
-        <div v-else class="space-y-8">
-          <section class="space-y-4">
-            <div class="flex items-center justify-between">
-              <h3 class="text-lg font-medium mb-2">
-                {{ $t('bookingCalendar.locationManagerTitle') }}
-              </h3>
-              <UButton
-                icon="i-lucide-plus"
-                :label="$t('bookingCalendar.newLocationButton')"
-                color="primary"
-                @click="openCreateLocation"
-              />
-            </div>
-
-            <div v-if="!locations?.length" class="py-12 text-center text-muted">
-              <UIcon name="i-lucide-map-pin-off" class="size-8 mb-3 mx-auto" />
-              <p class="text-sm">
-                {{ $t('bookingCalendar.noLocations') }}
-              </p>
-            </div>
-
-            <BookingCalendarLocationManagerCard
-              v-for="location in locations"
-              :key="location.id"
-              :location="location"
-              @edit-location="openEditLocation(location)"
-              @delete-location="deleteLocation(location)"
-              @add-room="openCreateRoom(location.id)"
-              @edit-room="(room) => openEditRoom(location.id, room)"
-              @delete-room="(room) => deleteRoom(location.id, room)"
+            <BookingCalendarLocationManagerTable
+              v-model:locations="locationsModel"
+              :loading="pending"
+              @edit-location="openEditLocation"
+              @create-room="openCreateRoom"
+              @edit-room="({ locationId, room }) => openEditRoom(locationId, room)"
             />
-          </section>
+          </UCard>
         </div>
       </UPageBody>
     </UPage>
@@ -79,6 +68,7 @@ interface Location {
 
 useI18n()
 const toast = useToast()
+const { canManageLocations, canManageRooms } = useRole()
 
 const {
   data: locations,
@@ -86,37 +76,45 @@ const {
   refresh,
 } = await useFetch<Location[]>('/api/bookings/locations', { query: { add: 'rooms' } })
 
+const locationsModel = computed<Location[]>({
+  get() {
+    return locations.value ?? []
+  },
+  set(value) {
+    locations.value = value
+  },
+})
+
 // Location modal state
 const locationFormOpen = ref(false)
 const editingLocation = ref<Location | null>(null)
 
 function openCreateLocation() {
+  if (!canManageLocations.value) {
+    toast.add({
+      title: $t('actions.noPermissionTitle'),
+      description: $t('actions.noPermissionDescription'),
+      color: 'warning',
+      icon: 'i-lucide-shield-alert',
+    })
+    return
+  }
   editingLocation.value = null
   locationFormOpen.value = true
 }
 
 function openEditLocation(location: Location) {
+  if (!canManageLocations.value) {
+    toast.add({
+      title: $t('actions.noPermissionTitle'),
+      description: $t('actions.noPermissionDescription'),
+      color: 'warning',
+      icon: 'i-lucide-shield-alert',
+    })
+    return
+  }
   editingLocation.value = location
   locationFormOpen.value = true
-}
-
-async function deleteLocation(location: Location) {
-  if (!confirm($t('bookingCalendar.deleteLocationConfirm', { name: location.name }))) return
-  try {
-    await $fetch(`/api/bookings/locations/${location.id}`, { method: 'DELETE' })
-    await refresh()
-    toast.add({
-      title: $t('bookingCalendar.locationDeletedToast'),
-      color: 'success',
-      icon: 'i-lucide-check-circle',
-    })
-  } catch {
-    toast.add({
-      title: $t('bookingCalendar.locationDeleteErrorToast'),
-      color: 'error',
-      icon: 'i-lucide-alert-circle',
-    })
-  }
 }
 
 // Room modal state
@@ -125,35 +123,32 @@ const targetLocationId = ref('')
 const editingRoom = ref<Room | null>(null)
 
 function openCreateRoom(locationId: string) {
+  if (!canManageRooms.value) {
+    toast.add({
+      title: $t('actions.noPermissionTitle'),
+      description: $t('actions.noPermissionDescription'),
+      color: 'warning',
+      icon: 'i-lucide-shield-alert',
+    })
+    return
+  }
   targetLocationId.value = locationId
   editingRoom.value = null
   roomFormOpen.value = true
 }
 
 function openEditRoom(locationId: string, room: Room) {
+  if (!canManageRooms.value) {
+    toast.add({
+      title: $t('actions.noPermissionTitle'),
+      description: $t('actions.noPermissionDescription'),
+      color: 'warning',
+      icon: 'i-lucide-shield-alert',
+    })
+    return
+  }
   targetLocationId.value = locationId
   editingRoom.value = room
   roomFormOpen.value = true
-}
-
-async function deleteRoom(locationId: string, room: Room) {
-  if (!confirm($t('bookingCalendar.deleteRoomConfirm', { name: room.name }))) return
-  try {
-    await $fetch(`/api/bookings/locations/${locationId}/rooms/${room.id}`, {
-      method: 'DELETE',
-    })
-    await refresh()
-    toast.add({
-      title: $t('bookingCalendar.roomDeletedToast'),
-      color: 'success',
-      icon: 'i-lucide-check-circle',
-    })
-  } catch {
-    toast.add({
-      title: $t('bookingCalendar.roomDeleteErrorToast'),
-      color: 'error',
-      icon: 'i-lucide-alert-circle',
-    })
-  }
 }
 </script>

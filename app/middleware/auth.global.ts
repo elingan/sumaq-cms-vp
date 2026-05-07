@@ -1,13 +1,8 @@
 import { useAuth, useUser } from '#imports'
 
-export default defineNuxtRouteMiddleware((to) => {
+export default defineNuxtRouteMiddleware(async (to) => {
   const { isSignedIn, isLoaded } = useAuth()
   const { user, isLoaded: isUserLoaded } = useUser()
-
-  // Wait for Clerk to load before checking auth state
-  if (!isLoaded.value || !isUserLoaded.value) {
-    return
-  }
 
   const protectedPrefixes = [
     '/dashboard',
@@ -23,16 +18,44 @@ export default defineNuxtRouteMiddleware((to) => {
   ]
   const isProtected = protectedPrefixes.some((prefix) => to.path.startsWith(prefix))
 
-  if (isProtected && !isSignedIn.value) {
+  if (!isProtected) return
+
+  const clerkReady = await new Promise<boolean>((resolve) => {
+    if (isLoaded.value && isUserLoaded.value) {
+      resolve(true)
+      return
+    }
+
+    let resolved = false
+    const stop = watch([isLoaded, isUserLoaded], ([authLoaded, userLoaded]) => {
+      if (resolved) return
+      if (authLoaded && userLoaded) {
+        resolved = true
+        stop()
+        resolve(true)
+      }
+    })
+
+    setTimeout(() => {
+      if (resolved) return
+      resolved = true
+      stop()
+      resolve(false)
+    }, 1500)
+  })
+
+  if (!clerkReady) {
     return navigateTo('/login')
   }
 
-  if (isProtected && isSignedIn.value) {
-    const role = user.value?.publicMetadata?.role as string | undefined
-    const isAdmin = role === 'admin'
+  if (!isSignedIn.value) {
+    return navigateTo('/login')
+  }
 
-    if (!isAdmin && !to.path.startsWith('/dashboard')) {
-      return navigateTo('/dashboard')
-    }
+  const role = user.value?.publicMetadata?.role as string | undefined
+  const isAdmin = role === 'admin'
+
+  if (!isAdmin && !to.path.startsWith('/dashboard')) {
+    return navigateTo('/dashboard')
   }
 })
