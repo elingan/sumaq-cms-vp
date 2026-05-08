@@ -9,8 +9,17 @@
         class="w-full sm:max-w-sm"
       />
 
-      <div v-if="showSearch" class="text-sm text-muted sm:ml-auto">
-        {{ filteredCountLabel }}
+      <div class="flex flex-col gap-3 sm:ml-auto sm:flex-row sm:items-center">
+        <div v-if="showSearch" class="text-sm text-muted">
+          {{ filteredCountLabel }}
+        </div>
+
+        <UButton
+          icon="i-lucide-plus"
+          color="primary"
+          :label="t('bookingCalendar.teamsNewButton')"
+          @click="openCreateTeam"
+        />
       </div>
     </div>
 
@@ -373,9 +382,9 @@ const tableRows = computed<TableRow[]>(() => {
   const rows: TableRow[] = []
 
   for (const team of pagedTeams.value) {
-    const members = (team.members ?? []).filter(
-      (member) => !!member && typeof (member as any).id === 'string' && (member as any).id,
-    ) as TeamMember[]
+    const members = (team.members ?? []).filter((member): member is TeamMember =>
+      Boolean(member && typeof member.id === 'string' && member.id),
+    )
 
     const expanded = !!expandedMap[team.id]
 

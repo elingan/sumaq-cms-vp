@@ -6,7 +6,7 @@
       :links="[
         {
           label: $t('landing.getStarted'),
-          to: isSignedIn ? '/dashboard' : '/login',
+          to: isSignedIn ? '/dashboard' : '/auth/login',
           trailingIcon: 'i-lucide-arrow-right',
           size: 'xl',
         },

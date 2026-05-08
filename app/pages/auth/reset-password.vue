@@ -1,7 +1,9 @@
 <template>
   <div class="flex flex-col items-center justify-center min-h-screen px-4">
     <UPageCard class="w-full max-w-md">
-      <template #title>{{ t('auth.resetPasswordTitle') }}</template>
+      <template #title>
+        {{ t('auth.resetPasswordTitle') }}
+      </template>
 
       <template #description> Password reset is managed by Clerk </template>
 
@@ -13,7 +15,9 @@
           description="Password resets are handled automatically by Clerk. You will receive an email with instructions if you request a password reset from the login page."
         />
 
-        <UButton block to="/login" color="primary">{{ t('auth.backToLogin') }}</UButton>
+        <UButton block to="/auth/login" color="primary">
+          {{ t('auth.backToLogin') }}
+        </UButton>
       </div>
     </UPageCard>
   </div>

@@ -91,8 +91,20 @@
     "noRooms": "Sin salas",
     "multipleRooms": "{count} salas",
     "appointmentBooking": "Reserva de cita",
-    "bookingCalendar": "Calendario de reservas",
-    "sites": "Sitios"
+    "bookingCalendar": "Calendario de reservas"
+  },
+  "calendar": {
+    "bookings": "Reservas",
+    "locations": "Ubicaciones",
+    "teams": "Equipos",
+    "bookingsTitle": "Reservas",
+    "bookingsDescription": "Gestiona reservas por sede.",
+    "locationsTitle": "Ubicaciones",
+    "locationsDescription": "Gestiona sedes y salas del calendario de reservas.",
+    "teamsTitle": "Equipos",
+    "teamsDescription": "Administra equipos y sus miembros.",
+    "openBookingsButton": "Abrir reservas",
+    "bookingsHint": "Selecciona una sede para gestionar sus reservas."
   },
   "appointments": {
     "pageTitle": "Citas",

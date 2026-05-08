@@ -1,7 +1,9 @@
 <template>
   <div class="flex flex-col items-center justify-center min-h-screen px-4">
     <UPageCard class="w-full max-w-md">
-      <template #title>{{ t('auth.forgotPasswordTitle') }}</template>
+      <template #title>
+        {{ t('auth.forgotPasswordTitle') }}
+      </template>
 
       <template #description>
         {{ t('auth.forgotPasswordDescription') }}
@@ -15,7 +17,9 @@
           description="You can reset your password by clicking 'Forgot password' on the login page."
         />
 
-        <UButton block to="/login" color="primary">{{ t('auth.backToLogin') }}</UButton>
+        <UButton block to="/auth/login" color="primary">
+          {{ t('auth.backToLogin') }}
+        </UButton>
       </div>
     </UPageCard>
   </div>

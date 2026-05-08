@@ -1,29 +1,29 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Route Protection and Middleware', () => {
-  test('should redirect to /login when accessing /admin/users without auth', async ({ page }) => {
+  test('should redirect to /auth/login when accessing /admin/users without auth', async ({ page }) => {
     await page.goto('/admin/users', { waitUntil: 'networkidle' })
-    await page.waitForURL('**/login', { timeout: 5000 })
+    await page.waitForURL('**/auth/login', { timeout: 5000 })
   })
 
-  test('should redirect to /login when accessing /admin/sites without auth', async ({ page }) => {
+  test('should redirect to /auth/login when accessing /admin/sites without auth', async ({ page }) => {
     await page.goto('/admin/sites', { waitUntil: 'networkidle' })
-    await page.waitForURL('**/login', { timeout: 5000 })
+    await page.waitForURL('**/auth/login', { timeout: 5000 })
   })
 
-  test('should redirect to /login when accessing /dashboard without auth', async ({ page }) => {
+  test('should redirect to /auth/login when accessing /dashboard without auth', async ({ page }) => {
     await page.goto('/dashboard', { waitUntil: 'networkidle' })
-    await page.waitForURL('**/login', { timeout: 5000 })
+    await page.waitForURL('**/auth/login', { timeout: 5000 })
   })
 
-  test('should redirect to /login when accessing /settings without auth', async ({ page }) => {
+  test('should redirect to /auth/login when accessing /settings without auth', async ({ page }) => {
     await page.goto('/settings', { waitUntil: 'networkidle' })
-    await page.waitForURL('**/login', { timeout: 5000 })
+    await page.waitForURL('**/auth/login', { timeout: 5000 })
   })
 
-  test('should redirect to /login when accessing /profile without auth', async ({ page }) => {
+  test('should redirect to /auth/login when accessing /profile without auth', async ({ page }) => {
     await page.goto('/profile', { waitUntil: 'networkidle' })
-    await page.waitForURL('**/login', { timeout: 5000 })
+    await page.waitForURL('**/auth/login', { timeout: 5000 })
   })
 
   test('should allow access to public pages without auth', async ({ page }) => {

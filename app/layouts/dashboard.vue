@@ -6,7 +6,7 @@ const { t } = useI18n()
 const { user } = useUser()
 const route = useRoute()
 const localePath = useLocalePath()
-const { signOut } = useClerk()
+const clerk = useClerk()
 
 const baseItems = computed<NavigationMenuItem[]>(() => [
   { label: t('nav.dashboard'), icon: 'i-lucide-house', to: localePath('/dashboard') },
@@ -37,8 +37,8 @@ const navItems = computed<NavigationMenuItem[]>(() => [...baseItems.value, ...ad
 const pageTitle = computed(() => route.meta.title as string | undefined)
 
 async function logout() {
-  await signOut()
-  await navigateTo('/login')
+  await clerk.value?.signOut()
+  await navigateTo('/auth/login')
 }
 
 const availableLocales = [

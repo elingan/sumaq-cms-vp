@@ -20,36 +20,42 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (!isProtected) return
 
-  const clerkReady = await new Promise<boolean>((resolve) => {
-    if (isLoaded.value && isUserLoaded.value) {
-      resolve(true)
-      return
-    }
+  if (import.meta.server) {
+    return
+  }
 
-    let resolved = false
-    const stop = watch([isLoaded, isUserLoaded], ([authLoaded, userLoaded]) => {
-      if (resolved) return
-      if (authLoaded && userLoaded) {
+  if (!isLoaded.value || !isUserLoaded.value) {
+    await new Promise<void>((resolve) => {
+      if (isLoaded.value && isUserLoaded.value) {
+        resolve()
+        return
+      }
+
+      let resolved = false
+      const stop = watch([isLoaded, isUserLoaded], ([authLoaded, userLoaded]) => {
+        if (resolved) return
+        if (authLoaded && userLoaded) {
+          resolved = true
+          stop()
+          resolve()
+        }
+      })
+
+      setTimeout(() => {
+        if (resolved) return
         resolved = true
         stop()
-        resolve(true)
-      }
+        resolve()
+      }, 8000)
     })
+  }
 
-    setTimeout(() => {
-      if (resolved) return
-      resolved = true
-      stop()
-      resolve(false)
-    }, 1500)
-  })
-
-  if (!clerkReady) {
-    return navigateTo('/login')
+  if (!isLoaded.value || !isUserLoaded.value) {
+    return
   }
 
   if (!isSignedIn.value) {
-    return navigateTo('/login')
+    return navigateTo('/auth/login')
   }
 
   const role = user.value?.publicMetadata?.role as string | undefined

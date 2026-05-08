@@ -91,8 +91,20 @@
     "noRooms": "Keine Zimmer",
     "multipleRooms": "{count} Zimmer",
     "appointmentBooking": "Terminbuchung",
-    "bookingCalendar": "Buchungskalender",
-    "sites": "Websites"
+    "bookingCalendar": "Buchungskalender"
+  },
+  "calendar": {
+    "bookings": "Buchungen",
+    "locations": "Standorte",
+    "teams": "Teams",
+    "bookingsTitle": "Buchungen",
+    "bookingsDescription": "Buchungen nach Standort verwalten.",
+    "locationsTitle": "Standorte",
+    "locationsDescription": "Standorte und Räume für den Buchungskalender verwalten.",
+    "teamsTitle": "Teams",
+    "teamsDescription": "Teams und deren Mitglieder verwalten.",
+    "openBookingsButton": "Buchungen öffnen",
+    "bookingsHint": "Wähle einen Standort aus, um dessen Buchungen zu verwalten."
   },
   "appointments": {
     "pageTitle": "Termine",

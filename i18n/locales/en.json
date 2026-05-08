@@ -91,13 +91,24 @@
     "noRooms": "No rooms",
     "multipleRooms": "{count} rooms",
     "appointmentBooking": "Appoiment Booking",
-    "bookingCalendar": "Booking Calendar",
-    "sites": "Sites"
+    "bookingCalendar": "Booking Calendar"
+  },
+  "calendar": {
+    "bookings": "Bookings",
+    "locations": "Locations",
+    "teams": "Teams",
+    "bookingsTitle": "Bookings",
+    "bookingsDescription": "Manage bookings by location.",
+    "locationsTitle": "Locations",
+    "locationsDescription": "Manage locations and rooms for the booking calendar.",
+    "teamsTitle": "Teams",
+    "teamsDescription": "Manage teams and their members.",
+    "openBookingsButton": "Open bookings",
+    "bookingsHint": "Select a location to manage its bookings."
   },
   "appointments": {
     "pageTitle": "Appointments",
     "pageDescription": "Create and manage appointment bookings.",
-    "emptyTitle": "No appointments yet",
     "emptyDescription": "Create the first appointment to get started.",
     "createModalTitle": "Create appointment",
     "createModalDescription": "Fill in the details to create a new appointment.",

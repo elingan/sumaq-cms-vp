@@ -53,7 +53,7 @@ const siteCards = computed(() => {
 })
 
 function navigateToCalendar() {
-  router.push('/calendar')
+  router.push('/calendar/bookings')
 }
 
 function navigateToAppointment() {

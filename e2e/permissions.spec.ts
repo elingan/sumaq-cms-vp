@@ -53,34 +53,34 @@ test.describe('Authentication Required - All Protected Routes', () => {
   test.describe('Admin Routes', () => {
     test('/admin/users redirects to login', async ({ page }) => {
       await page.goto('/admin/users', { waitUntil: 'networkidle' })
-      await page.waitForURL('**/login', { timeout: 5000 })
+      await page.waitForURL('**/auth/login', { timeout: 5000 })
     })
 
     test('/admin/sites redirects to login', async ({ page }) => {
       await page.goto('/admin/sites', { waitUntil: 'networkidle' })
-      await page.waitForURL('**/login', { timeout: 5000 })
+      await page.waitForURL('**/auth/login', { timeout: 5000 })
     })
   })
 
   test.describe('User Routes', () => {
     test('/dashboard redirects to login', async ({ page }) => {
       await page.goto('/dashboard', { waitUntil: 'networkidle' })
-      await page.waitForURL('**/login', { timeout: 5000 })
+      await page.waitForURL('**/auth/login', { timeout: 5000 })
     })
 
     test('/profile redirects to login', async ({ page }) => {
       await page.goto('/profile', { waitUntil: 'networkidle' })
-      await page.waitForURL('**/login', { timeout: 5000 })
+      await page.waitForURL('**/auth/login', { timeout: 5000 })
     })
 
     test('/settings redirects to login', async ({ page }) => {
       await page.goto('/settings', { waitUntil: 'networkidle' })
-      await page.waitForURL('**/login', { timeout: 5000 })
+      await page.waitForURL('**/auth/login', { timeout: 5000 })
     })
 
     test('/billing redirects to login', async ({ page }) => {
       await page.goto('/billing', { waitUntil: 'networkidle' })
-      await page.waitForURL('**/login', { timeout: 5000 })
+      await page.waitForURL('**/auth/login', { timeout: 5000 })
     })
   })
 })
@@ -96,14 +96,14 @@ test.describe('Public Routes - No Auth Required', () => {
     expect(page.url()).toContain('/terms')
   })
 
-  test('/login should be accessible', async ({ page }) => {
-    await page.goto('/login')
-    expect(page.url()).toContain('/login')
+  test('/auth/login should be accessible', async ({ page }) => {
+    await page.goto('/auth/login')
+    expect(page.url()).toContain('/auth/login')
   })
 
-  test('/signup should be accessible', async ({ page }) => {
-    await page.goto('/signup')
-    expect(page.url()).toContain('/signup')
+  test('/auth/signup should be accessible', async ({ page }) => {
+    await page.goto('/auth/signup')
+    expect(page.url()).toContain('/auth/signup')
   })
 })
 
